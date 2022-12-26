@@ -142,7 +142,7 @@ export class BlogsRepository {
     pageSize: number,
     searchNameTerm: string,
     sortBy: string,
-    sortDirection: SortOrder,
+    sortDirection: any,
     userId: string,
     login: string,
   ) {

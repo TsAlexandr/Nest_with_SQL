@@ -7,6 +7,6 @@ export class GetCommentsCommand {
     public readonly pageSize: number,
     public readonly userId: string,
     public readonly sortBy: string,
-    public readonly sortDirection: SortOrder,
+    public readonly sortDirection: any,
   ) {}
 }

@@ -47,7 +47,7 @@ export class BlogsService {
     pageSize: number,
     searchNameTerm: string,
     sortBy: string,
-    sortDirection: SortOrder,
+    sortDirection: any,
   ) {
     return this.bloggersRepository.getBlogsWithOwnerInfo(
       page,
@@ -63,7 +63,7 @@ export class BlogsService {
     pageSize: number,
     searchNameTerm: string,
     sortBy: string,
-    sortDirection: SortOrder,
+    sortDirection: any,
     userId: string,
     login: string,
   ) {

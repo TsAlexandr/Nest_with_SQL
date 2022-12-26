@@ -100,7 +100,6 @@ export class AuthService {
       iat,
     );
     if (!session) return null;
-    await this.usersRepository.addToken(payload.userId, refreshToken);
     const tokens = await this.createTokens(
       payload.userId,
       payload.userLogin,
@@ -125,7 +124,6 @@ export class AuthService {
   async removeSession(token: string) {
     const payload: any = this._extractPayload(token);
     if (!payload) return null;
-    await this.usersRepository.addToken(payload.userId, token);
     await this.deviceRepository.removeSession(payload.userId, payload.deviceId);
   }
 

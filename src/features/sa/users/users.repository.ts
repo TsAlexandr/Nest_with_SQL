@@ -7,12 +7,12 @@ import {
   UserMongo,
 } from '../../../common/types/schemas/schemas.model';
 import { BanUserDto } from './dto/banUser.dto';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class UsersRepository {
-  constructor(
-    @InjectModel(UserMongo.name) private usersModel: Model<UserDocument>,
-  ) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async getUsers(
     page: number,
@@ -20,43 +20,44 @@ export class UsersRepository {
     searchLoginTerm: string,
     searchEmailTerm: string,
     sortBy: string,
-    sortDirection: SortOrder,
+    sortDirection: any,
   ) {
-    const user = await this.usersModel
-      .find(
-        {
-          $or: [
-            { login: { $regex: searchLoginTerm, $options: 'i' } },
-            { email: { $regex: searchEmailTerm, $options: 'i' } },
-          ],
-        },
-        {
-          passwordHash: false,
-          emailConfirmation: false,
-          recoveryData: false,
-        },
-      )
-      .skip((page - 1) * pageSize)
-      .limit(pageSize)
-      .sort({ [sortBy]: sortDirection });
-    const total = await this.usersModel.count({
-      $or: [
-        { login: { $regex: searchLoginTerm, $options: 'i' } },
-        { email: { $regex: searchEmailTerm, $options: 'i' } },
+    const users = await this.dataSource.query(
+      `
+    SELECT u.*, b.* FROM public.users u
+    LEFT JOIN public."banInfo" b
+    ON u.id = b."bannedId"
+    WHERE login LIKE $1 OR email LIKE $2
+    ORDER BY "${sortBy}" ${sortDirection}
+    OFFSET $3 ROWS FETCH NEXT $4 ROWS ONLY
+    `,
+      [
+        '%' + searchLoginTerm + '%',
+        '%' + searchEmailTerm + '%',
+        (page - 1) * pageSize,
+        pageSize,
       ],
-    });
-    const pages = Math.ceil(total / pageSize);
+    );
 
-    const mappedUser = user.map((obj) => {
+    const total = await this.dataSource.query(
+      `
+    SELECT COUNT(*) FROM public.users
+    WHERE login LIKE $1 OR email LIKE $2
+    `,
+      ['%' + searchLoginTerm + '%', '%' + searchEmailTerm + '%'],
+    );
+    const pages = Math.ceil(total[0].count / pageSize);
+
+    const mappedUser = users.map((obj) => {
       return {
         id: obj.id,
         login: obj.login,
         createdAt: obj.createdAt,
         email: obj.email,
         banInfo: {
-          banDate: obj.banInfo.banDate,
-          banReason: obj.banInfo.banReason,
-          isBanned: obj.banInfo.isBanned,
+          banDate: obj.banDate,
+          banReason: obj.banReason,
+          isBanned: obj.isBanned,
         },
       };
     });
@@ -64,80 +65,106 @@ export class UsersRepository {
       pagesCount: pages,
       page: page,
       pageSize: pageSize,
-      totalCount: total,
+      totalCount: +total[0].count,
       items: mappedUser,
     };
   }
 
-  async createUser(newUser: UserMongo): Promise<UserMongo> {
-    await this.usersModel.create(newUser);
-    return this.usersModel.findOne(
-      {
-        id: newUser.id,
-      },
-      { 'banInfo._id': 0 },
+  async createUser(newUser: UserMongo) {
+    const query = await this.dataSource.query(
+      `
+    INSERT INTO public.users (id, login, email, "createdAt", "passwordHash")
+    VALUES ($1, $2, $3, $4, $5) 
+    RETURNING "id", "login", "email", "createdAt" 
+    `,
+      [
+        newUser.id,
+        newUser.login,
+        newUser.email,
+        newUser.createdAt,
+        newUser.passwordHash,
+      ],
     );
+    const ban = await this.dataSource.query(
+      `
+      INSERT INTO public."banInfo" ("bannedId", "banDate", "banReason", "bannedType", "isBanned")
+    VALUES ($1, NULL, NULL, $2, false) 
+    RETURNING "banDate", "banReason", "isBanned"
+    `,
+      [newUser.id, 'user'],
+    );
+
+    return { q: query[0], b: ban[0] };
   }
 
   async findByLogin(login: string) {
-    return this.usersModel
-      .findOne({
-        login,
-      })
-      .lean();
+    const query = await this.dataSource.query(
+      `
+    SELECT * FROM public.users
+    WHERE login = $1`,
+      [login],
+    );
+    return query[0];
   }
 
   async findById(id: string) {
-    return this.usersModel.findOne({ id }).lean();
+    const query = await this.dataSource.query(
+      `
+    SELECT * FROM public.users
+    WHERE id = $1`,
+      [id],
+    );
+    return query[0];
   }
 
   async delUser(id: string) {
-    const result = await this.usersModel.deleteOne({
-      id,
-    });
-    return result.deletedCount === 1;
+    return this.dataSource.query(
+      `
+    DELETE FROM public.users
+    WHERE id = $1`,
+      [id],
+    );
   }
 
   async findByEmail(email: string): Promise<UserMongo> {
-    return this.usersModel.findOne({
-      email,
-    });
+    const query = await this.dataSource.query(
+      `
+    SELECT * FROM public.users
+    WHERE email = $1`,
+      [email],
+    );
+    return query[0];
   }
 
   async findByConfirmCode(code: string) {
-    return this.usersModel.findOne({
-      'emailConfirmation.confirmationCode': code,
-    });
+    const query = await this.dataSource.query(
+      `
+    SELECT * FROM public."emailConfirm"
+    WHERE code = $1`,
+      [code],
+    );
+    return query[0];
   }
 
   async updateConfirm(id: string) {
-    const result = await this.usersModel.updateOne(
-      { id },
-      { $set: { 'emailConfirmation.isConfirmed': true } },
+    const query = await this.dataSource.query(
+      `
+    UPDATE public."emailConfirm"
+    SET "isConfirmed" = true
+    WHERE "userId" = $1`,
+      [id],
     );
-    return result.modifiedCount === 1;
+    return query[0];
   }
-
   async updateConfirmationCode(id: string) {
-    return this.usersModel.findOneAndUpdate(
-      { id },
-      {
-        $set: {
-          'emailConfirmation.confirmationCode': v4(),
-        },
-      },
-      { returnDocument: 'after' },
+    const query = await this.dataSource.query(
+      `
+    UPDATE public."emailConfirm"
+    SET "confirmationCode" = $1
+    WHERE "userId" = $2`,
+      [v4(), id],
     );
-  }
-
-  async addToken(id: string, token: string) {
-    return this.usersModel.findOneAndUpdate(
-      { id },
-      {
-        $push: { unused: token.toString() },
-      },
-      { returnDocument: 'after' },
-    );
+    return query[0];
   }
 
   async updateUserWithRecoveryData(
@@ -148,58 +175,59 @@ export class UsersRepository {
       expirationDate: any;
     },
   ) {
-    await this.usersModel.updateOne(
-      { id },
-      { $set: { recoveryData: recoveryData } },
+    const query = await this.dataSource.query(
+      `
+    UPDATE public."recoveryData"
+    SET "recoveryCode" = $1, "isConfirmed" = $2, "expirationDate" = $3
+    WHERE "userId" = $4
+    RETURNING "userId"`,
+      [
+        recoveryData.recoveryCode,
+        recoveryData.isConfirmed,
+        recoveryData.expirationDate,
+        id,
+      ],
     );
-    return this.usersModel.findOne({ id });
+    return query[0];
   }
 
   async findUserByCode(recoveryCode: string) {
-    return this.usersModel.findOne({
-      'recoveryData.recoveryCode': recoveryCode,
-    });
+    const query = await this.dataSource.query(
+      `
+    SELECT * FROM public."recoveryData"
+    WHERE "recoveryCode" = $1`,
+      [recoveryCode],
+    );
+    return query[0];
   }
 
   async confirmPassword(id: string, generatePassword: string) {
-    await this.usersModel.updateOne(
-      { id },
-      {
-        $set: {
-          'recoveryData.isConfirmed': true,
-          passwordHash: generatePassword,
-        },
-      },
+    return this.dataSource.query(
+      `
+    UPDATE public.users u, public."recoveryData" r
+    SET r."isConfirmed" = true, 
+        u."passwordHash" = $1
+    WHERE r."userId" = $2
+    AND u.id = $2, (
+    SELECT * FROM public.users
+    WHERE id = $2)`,
+      [generatePassword, id],
     );
-    return this.usersModel.findOne({ id });
   }
-
-  findUserByToken(refreshToken: string) {
-    return this.usersModel.findOne({ unused: refreshToken });
-  }
-
   banUser(userId: string, banInfo: BanUserDto) {
     if (banInfo.isBanned == true) {
-      return this.usersModel.updateOne(
-        { id: userId },
-        {
-          $set: {
-            'banInfo.isBanned': banInfo.isBanned,
-            'banInfo.banReason': banInfo.banReason,
-            'banInfo.banDate': new Date(),
-          },
-        },
+      return this.dataSource.query(
+        `
+      INSERT INTO public."banInfo" ("bannedType", "banReason", "banDate")
+      VALUES ($1, $2, $3)`,
+        ['user', banInfo.banReason, new Date()],
       );
     } else {
-      return this.usersModel.updateOne(
-        { id: userId },
-        {
-          $set: {
-            'banInfo.isBanned': banInfo.isBanned,
-            'banInfo.banReason': null,
-            'banInfo.banDate': null,
-          },
-        },
+      return this.dataSource.query(
+        `
+      DELETE FROM public."banInfo" 
+      WHERE "bannedId" = $1 AND "bannedType" = $2`,
+        [userId, 'user'],
       );
     }
   }

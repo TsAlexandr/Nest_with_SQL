@@ -72,6 +72,7 @@ import { BanUserForBlogHandler } from './features/usecases/handlers/banUserForBl
 import { BanBlogByIdHandler } from './features/usecases/handlers/banBlogById.handler';
 import { GetAllBloggerCommentsHandler } from './features/usecases/queryHandlers/getAllBloggerComments.handler';
 import { BloggerUsersController } from './features/blogger/blogger-users.controller';
+import { CreateUserCommandHandler } from './features/usecases/handlers/createUserCommand.handler';
 
 export const CommandHandlers = [
   GetAllBlogsHandler,
@@ -86,6 +87,7 @@ export const CommandHandlers = [
   BanUserHandler,
   BanUserForBlogHandler,
   BanBlogByIdHandler,
+  CreateUserCommandHandler,
 ];
 
 @Module({
@@ -100,7 +102,6 @@ export const CommandHandlers = [
       { name: Posts.name, schema: PostsSchema },
       { name: BloggersMongo.name, schema: BloggerSchema },
       { name: Comments.name, schema: CommentsSchema },
-      { name: UserMongo.name, schema: UserSchema },
       { name: Device.name, schema: DeviceSchema },
     ]),
     // TypeOrmModule.forRoot({
@@ -116,22 +117,16 @@ export const CommandHandlers = [
     //   synchronize: true,
     //   ssl: { rejectUnauthorized: false },
     // }),
-    // TypeOrmModule.forRoot({
-    //   type: 'postgres',
-    //   host: 'localhost',
-    //   port: 5432,
-    //   username: 'postgres',
-    //   password: 'root',
-    //   database: 'postgres',
-    //   entities: [
-    //     UserEntity,
-    //     PostEntity,
-    //     CommentEntity,
-    //     BloggersEntity,
-    //     TotalActionsEntity,
-    //   ],
-    //   synchronize: true,
-    // }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: 'root',
+      database: 'blogs-incubator',
+      autoLoadEntities: true,
+      synchronize: true,
+    }),
     CqrsModule,
   ],
   controllers: [

@@ -19,6 +19,7 @@ import { Pagination } from '../../../common/types/classes/pagination';
 import { BanUserDto } from './dto/banUser.dto';
 import { CommandBus } from '@nestjs/cqrs';
 import { BanUserCommand } from '../../usecases/commands/banUser.command';
+import { CreateUserCommand } from '../../usecases/commands/createUser.command';
 
 @UseGuards(BasicGuards)
 @Controller('sa/users')
@@ -50,14 +51,7 @@ export class UsersController {
 
   @Post()
   async create(@Body() createUser: CreateUserDto) {
-    const user = await this.usersService.createUser(createUser);
-    return {
-      id: user.id,
-      login: user.login,
-      email: user.email,
-      createdAt: user.createdAt,
-      banInfo: user.banInfo,
-    };
+    return this.commandBus.execute(new CreateUserCommand(createUser));
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)

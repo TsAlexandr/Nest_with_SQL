@@ -5,7 +5,7 @@ export class GetAllBloggerCommentsCommand {
     public readonly page: number,
     public readonly pageSize: number,
     public readonly sortBy: string,
-    public readonly sortDirection: SortOrder,
+    public readonly sortDirection: any,
     public readonly ownerId: string,
   ) {}
 }

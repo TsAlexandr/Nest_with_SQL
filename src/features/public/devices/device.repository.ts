@@ -1,48 +1,64 @@
-import { InjectModel } from '@nestjs/mongoose';
-import {
-  Device,
-  DeviceDocument,
-} from '../../../common/types/schemas/schemas.model';
-import { Model } from 'mongoose';
+import { Device } from '../../../common/types/schemas/schemas.model';
 import { Injectable } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class DeviceRepository {
-  constructor(
-    @InjectModel(Device.name) private deviceModel: Model<DeviceDocument>,
-  ) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async findAllDevice(userId: string) {
-    return this.deviceModel
-      .find({ userId: userId }, { _id: 0, userId: 0, expiredDate: 0 })
-      .lean();
+    const query = await this.dataSource.query(
+      `
+    SELECT * FROM public.devices
+    WHERE "userId" = $1`,
+      [userId],
+    );
+    return query[0];
   }
 
   async addDevices(newDevice: Device) {
-    await this.deviceModel.create(newDevice);
-    const currentDevice = await this.deviceModel.findOne({
-      deviceId: newDevice.deviceId,
-    });
+    const query = await this.dataSource.query(
+      `
+    INSERT INTO public.devices 
+    ("userId", "deviceId", ip, title, "lastActiveDate", "expiredAt")
+    VALUES 
+    ($1, $2, $3, $4, $5, $6)
+    RETURNING ip, title, "lastActiveDate", "deviceId"`,
+      [
+        newDevice.userId,
+        newDevice.deviceId,
+        newDevice.ip,
+        newDevice.title,
+        newDevice.lastActiveDate,
+        newDevice.expiredDate,
+      ],
+    );
     return {
-      ip: currentDevice.ip,
-      title: currentDevice.title,
-      lastActiveDate: currentDevice.lastActiveDate,
-      deviceId: currentDevice.deviceId,
+      ip: query.ip,
+      title: query.title,
+      lastActiveDate: query.lastActiveDate,
+      deviceId: query.deviceId,
     };
   }
 
   async deleteAllDevice(userId: string, deviceId: string) {
-    const remove = await this.deviceModel.deleteMany({
-      userId: userId,
-      deviceId: { $ne: deviceId },
-    });
-    return remove.deletedCount === 1;
+    return this.dataSource.query(
+      `
+    DELETE FROM public.devices
+    WHERE "userId" = $1 AND "deviceId" != $2`,
+      [userId, deviceId],
+    );
   }
 
   async findDeviceById(userId: string, deviceId: string, date: Date) {
-    return this.deviceModel
-      .find({ userId: userId, deviceId: deviceId, lastActiveDate: date })
-      .lean();
+    const query = await this.dataSource.query(
+      `
+    SELECT * FROM public.devices
+    WHERE "userId" = $1 AND "deviceId" = $2 AND "lastActiveDate" = $3`,
+      [userId, deviceId, date],
+    );
+    return query[0];
   }
 
   async updateDevices(
@@ -51,33 +67,32 @@ export class DeviceRepository {
     expDate: Date,
     lastActive: Date,
   ) {
-    const result = await this.deviceModel.updateOne(
-      { userId: userId, deviceId: deviceId },
-      { $set: { expiredDate: expDate, lastActiveDate: lastActive } },
+    return this.dataSource.query(
+      `
+    UPDATE public.devices
+    SET "expiredAt" = $1, "lastActiveDate" = $2
+    WHERE "userId" = $3 AND "deviceId" = $4`,
+      [expDate, lastActive, userId, deviceId],
     );
-    return result.matchedCount === 1;
   }
 
   async removeSession(userId: string, deviceId: string) {
-    const result = await this.deviceModel.deleteOne({
-      userId: userId,
-      deviceId: deviceId,
-    });
-    return result.deletedCount === 1;
-  }
-
-  async getDeviceById(deviceId: string) {
-    return this.deviceModel.findOne(
-      { deviceId: deviceId },
-      { projection: { _id: 0 } },
+    return this.dataSource.query(
+      `
+    DELETE FROM public.devices
+    WHERE "userId" = $1 AND "deviceId" = $2
+    `,
+      [userId, deviceId],
     );
   }
 
-  async deleteById(userId: string, deviceId: string) {
-    const result = await this.deviceModel.deleteOne({
-      userId: userId,
-      deviceId: deviceId,
-    });
-    return result.deletedCount === 1;
+  async getDeviceById(deviceId: string) {
+    const query = await this.dataSource.query(
+      `
+    SELECT * FROM public.devices
+    WHERE "deviceId" = $1`,
+      [deviceId],
+    );
+    return query[0];
   }
 }

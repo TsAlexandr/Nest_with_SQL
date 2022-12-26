@@ -16,7 +16,7 @@ export class PostsService {
     blogId: string | null,
     searchNameTerm: string,
     sortBy: string,
-    sortDirection: SortOrder,
+    sortDirection: any,
   ) {
     return await this.postsRepository.getPosts(
       page,

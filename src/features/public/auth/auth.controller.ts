@@ -25,6 +25,8 @@ import { NewPasswordDto } from './dto/newPassword.dto';
 import { Request, Response } from 'express';
 import { EmailInputDto } from './dto/emailInput.dto';
 import { AuthGuard } from './guards/auth.guard';
+import { CreateUserCommand } from '../../usecases/commands/createUser.command';
+import { CommandBus } from '@nestjs/cqrs';
 
 @Controller('auth')
 export class AuthController {
@@ -32,13 +34,14 @@ export class AuthController {
     private userService: UsersService,
     private authService: AuthService,
     private emailService: EmailService,
+    private commandBus: CommandBus,
   ) {}
 
   @UseGuards(ThrottlerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('/registration')
   async registration(@Body() registr: RegistrationDto) {
-    const user = await this.userService.createUser(registr);
+    const user = await this.commandBus.execute(new CreateUserCommand(registr));
     if (!user)
       throw new HttpException(
         { message: [{ message: 'invalid value', field: 'code' }] },
@@ -107,15 +110,6 @@ export class AuthController {
         HttpStatus.UNAUTHORIZED,
       );
     }
-    const revokedToken = await this.userService.findUserByToken(
-      req.cookies.refreshToken,
-    );
-    if (revokedToken) {
-      throw new HttpException(
-        { message: [{ message: 'invalid value', field: 'refreshToken' }] },
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
     const tokens = await this.authService.updateDevice(
       req.cookies.refreshToken,
     );
@@ -136,14 +130,6 @@ export class AuthController {
         HttpStatus.UNAUTHORIZED,
       );
     }
-    const tokens = await this.authService._extractPayload(
-      req.cookies.refreshToken,
-    );
-    if (!tokens) throw new UnauthorizedException();
-    const token = await this.userService.findUserByToken(
-      req.cookies.refreshToken,
-    );
-    if (token) throw new UnauthorizedException();
     await this.authService.removeSession(req.cookies.refreshToken);
     res.clearCookie('refreshToken');
   }

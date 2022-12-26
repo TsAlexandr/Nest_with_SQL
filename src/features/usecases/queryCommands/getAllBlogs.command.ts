@@ -6,6 +6,6 @@ export class GetAllBlogsCommand {
     public readonly pageSize: number,
     public readonly searchNameTerm: string,
     public readonly sortBy: string,
-    public readonly sortDirection: SortOrder,
+    public readonly sortDirection: any,
   ) {}
 }

@@ -46,7 +46,7 @@ export class DeviceService {
         { message: [{ message: 'invalid value', field: 'refreshToken' }] },
         HttpStatus.FORBIDDEN,
       );
-    return this.deviceRepository.deleteById(payload.userId, deviceId);
+    return this.deviceRepository.removeSession(payload.userId, deviceId);
   }
 
   _extractPayload(refreshToken: string) {

@@ -14,7 +14,7 @@ export class PostsRepository {
     blogId: string | null,
     searchNameTerm: string,
     sortBy: string,
-    sortDirection: SortOrder,
+    sortDirection: any,
   ): Promise<Paginator<PostsCon[]>> {
     const filter = blogId
       ? { title: { $regex: searchNameTerm ? searchNameTerm : '' }, blogId }
