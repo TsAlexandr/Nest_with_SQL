@@ -18,6 +18,7 @@ export class UsersRepository {
     sortDirection: any,
     banStatus: any,
   ) {
+    console.log(banStatus);
     let bannedStatus = `AND b."isBanned" IN (${banStatus})`;
     if (banStatus == [true, false]) {
       bannedStatus = '';

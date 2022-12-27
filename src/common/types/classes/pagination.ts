@@ -31,11 +31,11 @@ export class Pagination {
     const sortBy =
       typeof query.sortBy === 'string' ? query.sortBy : 'createdAt';
     const banStatus =
-      query.banStatus === 'all'
-        ? [true, false]
-        : query.banStatus === 'banned'
+      query.banStatus === 'banned'
         ? [true]
-        : [false];
+        : query.banStatus === 'notBanned'
+        ? [false]
+        : [true, false];
     const sortDirection = query.sortDirection === 'asc' ? 'ASC' : 'DESC';
     return {
       page,
