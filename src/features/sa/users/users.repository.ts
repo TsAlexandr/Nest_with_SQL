@@ -18,13 +18,17 @@ export class UsersRepository {
     sortDirection: any,
     banStatus: any,
   ) {
+    let bannedStatus = `AND b."isBanned" IN (${banStatus})`;
+    if (banStatus == [true, false]) {
+      bannedStatus = '';
+    }
     const users = await this.dataSource.query(
       `
     SELECT u.*, b.* FROM public.users u
     LEFT JOIN public."banInfo" b
         ON u.id = b."bannedId"
-    WHERE (u.login ilike $1 OR u.email ilike $2) 
-    AND (b."isBanned" = ${banStatus})
+    WHERE (u.login ilike $1 OR u.email ilike $2)  ${bannedStatus}
+   
     ORDER BY "${sortBy}" ${sortDirection}
     OFFSET $3 ROWS FETCH NEXT $4 ROWS ONLY
     `,
@@ -41,7 +45,7 @@ export class UsersRepository {
     LEFT JOIN public."banInfo" b
         ON u.id = b."bannedId"
     WHERE (u.login ilike $1 OR u.email ilike $2) 
-    AND (b."isBanned" = ${banStatus})
+    ${bannedStatus}
     `,
       ['%' + searchLoginTerm + '%', '%' + searchEmailTerm + '%'],
     );
