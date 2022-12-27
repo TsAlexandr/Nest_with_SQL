@@ -38,7 +38,8 @@ export class UsersRepository {
     const total = await this.dataSource.query(
       `
     SELECT COUNT(*) FROM public.users
-    WHERE login LIKE $1 OR email LIKE $2
+    WHERE (u.login ilike $1 OR u.email ilike $2) 
+    AND (b."isBanned" = ${banStatus})
     `,
       ['%' + searchLoginTerm + '%', '%' + searchEmailTerm + '%'],
     );
