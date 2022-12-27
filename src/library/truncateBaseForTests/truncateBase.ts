@@ -12,9 +12,6 @@ export class TestRepo {
   async removeAllData() {
     console.log('here');
     await this.usersRepository.deleteAll();
-    await this.dataSource.query(`DELETE FROM public.users`);
-    await this.dataSource.query(`DELETE FROM public.blogs`);
-    await this.dataSource.query(`DELETE FROM public.devices`);
   }
 }
 

@@ -258,6 +258,12 @@ export class UsersRepository {
   }
 
   async deleteAll() {
-    return this.dataSource.query(`DELETE FROM public."banInfo"`);
+    return this.dataSource.query(
+      `DELETE FROM public."banInfo";
+             DELETE FROM public.users;
+             DELETE FROM public.blogs;
+             DELETE FROM public.devices;
+             DELETE FROM public."emailConfirm";`,
+    );
   }
 }
