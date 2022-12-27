@@ -225,9 +225,10 @@ export class UsersRepository {
     } else {
       return this.dataSource.query(
         `
-      DELETE FROM public."banInfo" 
-      WHERE "bannedId" = $1 AND "bannedType" = $2`,
-        [userId, 'user'],
+      UPDATE public."banInfo" 
+      SET "isBanned" = $1, "banReason" = NULL, "banDate" = NULL 
+      WHERE "bannedId" = $2 AND "bannedType" = $3`,
+        [banInfo.isBanned, userId, 'user'],
       );
     }
   }

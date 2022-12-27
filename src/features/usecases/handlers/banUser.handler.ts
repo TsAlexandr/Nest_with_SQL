@@ -12,7 +12,6 @@ export class BanUserHandler implements ICommandHandler<BanUserCommand> {
 
   async execute(command: BanUserCommand): Promise<any> {
     const { userId, banUserInfo } = command;
-    console.log(userId, banUserInfo);
     await this.usersRepository.banUser(userId, banUserInfo);
     // await this.commentsRepository.updateCommentWithBanInfo(
     //   userId,
