@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import {
   TruncateBase,
   TestRepo,
@@ -104,29 +104,36 @@ export const CommandHandlers = [
       { name: Comments.name, schema: CommentsSchema },
       { name: Device.name, schema: DeviceSchema },
     ]),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        return {
+          type: 'postgres',
+          host: configService.get('DB_HOST'),
+          port: configService.get('DB_PORT'),
+          username: configService.get('DB_USER'),
+          password: configService.get('DB_PASS'),
+          database: configService.get('DB_NAME'),
+          synchronize: true,
+          poolSize: 5,
+          extra: {
+            connectionLimit: 5,
+            max: 5,
+            connectionTimeoutMillis: 1000,
+          },
+        };
+      },
+    }),
     // TypeOrmModule.forRoot({
     //   type: 'postgres',
-    //   host: 'ec2-3-208-79-113.compute-1.amazonaws.com',
+    //   host: 'localhost',
     //   port: 5432,
-    //   url: process.env.DATABASE_URL,
-    //   entities: [UserEntity,
-    //         PostEntity,
-    //         CommentEntity,
-    //         BloggersEntity,
-    //         TotalActionsEntity,],
+    //   username: 'postgres',
+    //   password: 'root',
+    //   database: 'blogs-incubator',
+    //   autoLoadEntities: true,
     //   synchronize: true,
-    //   ssl: { rejectUnauthorized: false },
     // }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'root',
-      database: 'blogs-incubator',
-      autoLoadEntities: true,
-      synchronize: true,
-    }),
     CqrsModule,
   ],
   controllers: [

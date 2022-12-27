@@ -19,7 +19,7 @@ export class AuthService {
     const user: any = await this.usersRepository.findByLogin(
       loginBody.loginOrEmail,
     );
-    if (!user || user.banInfo.isBanned === true) {
+    if (!user || user.isBanned === true) {
       throw new HttpException(
         { message: [{ message: 'invalid value', field: 'login' }] },
         HttpStatus.UNAUTHORIZED,
