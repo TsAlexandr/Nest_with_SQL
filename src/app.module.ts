@@ -97,13 +97,13 @@ export const CommandHandlers = [
       ttl: 10,
       limit: 5,
     }),
-    MongooseModule.forRoot(process.env.MONGO_URI),
-    MongooseModule.forFeature([
-      { name: Posts.name, schema: PostsSchema },
-      { name: BloggersMongo.name, schema: BloggerSchema },
-      { name: Comments.name, schema: CommentsSchema },
-      { name: Device.name, schema: DeviceSchema },
-    ]),
+    // MongooseModule.forRoot(process.env.MONGO_URI),
+    // MongooseModule.forFeature([
+    //   { name: Posts.name, schema: PostsSchema },
+    //   { name: BloggersMongo.name, schema: BloggerSchema },
+    //   { name: Comments.name, schema: CommentsSchema },
+    //   { name: Device.name, schema: DeviceSchema },
+    // ]),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
