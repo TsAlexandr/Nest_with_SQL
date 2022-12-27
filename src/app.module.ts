@@ -84,7 +84,7 @@ export const CommandHandlers = [
   //GetAllBloggerCommentsHandler,
   //CreateCommentHandler,
   //SaveFilesHandler,
-  //BanUserHandler,
+  BanUserHandler,
   //BanUserForBlogHandler,
   //BanBlogByIdHandler,
   CreateUserCommandHandler,

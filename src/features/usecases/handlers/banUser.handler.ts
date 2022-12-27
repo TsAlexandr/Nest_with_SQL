@@ -7,22 +7,20 @@ import { PostsRepository } from '../../public/posts/posts.repository';
 @CommandHandler(BanUserCommand)
 export class BanUserHandler implements ICommandHandler<BanUserCommand> {
   constructor(
-    private usersRepository: UsersRepository,
-    private commentsRepository: CommentsRepository,
-    private postsRepository: PostsRepository,
+    private usersRepository: UsersRepository, //private commentsRepository: CommentsRepository, //private postsRepository: PostsRepository,
   ) {}
 
   async execute(command: BanUserCommand): Promise<any> {
     const { userId, banUserInfo } = command;
 
     await this.usersRepository.banUser(userId, banUserInfo);
-    await this.commentsRepository.updateCommentWithBanInfo(
-      userId,
-      banUserInfo.isBanned,
-    );
-    await this.postsRepository.updatePostWithBanInfo(
-      userId,
-      banUserInfo.isBanned,
-    );
+    // await this.commentsRepository.updateCommentWithBanInfo(
+    //   userId,
+    //   banUserInfo.isBanned,
+    // );
+    // await this.postsRepository.updatePostWithBanInfo(
+    //   userId,
+    //   banUserInfo.isBanned,
+    // );
   }
 }
