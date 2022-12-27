@@ -218,9 +218,9 @@ export class UsersRepository {
     if (banInfo.isBanned == true) {
       return this.dataSource.query(
         `
-      INSERT INTO public."banInfo" ("bannedType", "banReason", "banDate")
-      VALUES ($1, $2, $3)`,
-        ['user', banInfo.banReason, new Date()],
+      INSERT INTO public."banInfo" ("bannedId", "bannedType", "banReason", "banDate")
+      VALUES ($1, $2, $3, $4)`,
+        [userId, 'user', banInfo.banReason, new Date()],
       );
     } else {
       return this.dataSource.query(
