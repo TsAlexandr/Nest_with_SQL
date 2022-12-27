@@ -47,7 +47,7 @@ export class EmailService {
     if (user.isConfirmed) return null;
     const updUser = await this.usersRepository.updateConfirmationCode(user.id);
     if (updUser) {
-      const message = this.getConfirmMessage(updUser.code);
+      const message = this.getConfirmMessage(updUser[0].code);
       await this.sendEmail(email, 'Confirm your email', message);
       return true;
     }

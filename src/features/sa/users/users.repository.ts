@@ -183,8 +183,9 @@ export class UsersRepository {
     const query = await this.dataSource.query(
       `
     UPDATE public."emailConfirm"
-    SET "confirmationCode" = $1
-    WHERE "userId" = $2`,
+    SET code = $1
+    WHERE "userId" = $2
+    RETURNING code`,
       [v4(), id],
     );
     return query[0];
