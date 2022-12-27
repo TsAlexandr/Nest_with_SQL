@@ -37,7 +37,9 @@ export class UsersRepository {
     );
     const total = await this.dataSource.query(
       `
-    SELECT COUNT(*) FROM public.users
+    SELECT COUNT(*) FROM public.users u
+    LEFT JOIN public."banInfo" b
+        ON u.id = b."bannedId"
     WHERE (u.login ilike $1 OR u.email ilike $2) 
     AND (b."isBanned" = ${banStatus})
     `,
