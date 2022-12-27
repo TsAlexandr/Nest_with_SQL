@@ -10,7 +10,6 @@ export class TestRepo {
   ) {}
 
   async removeAllData() {
-    console.log('here');
     await this.usersRepository.deleteAll();
   }
 }

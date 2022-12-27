@@ -3,6 +3,7 @@ import { BanUserCommand } from '../commands/banUser.command';
 import { UsersRepository } from '../../sa/users/users.repository';
 import { CommentsRepository } from '../../public/comments/comments.repository';
 import { PostsRepository } from '../../public/posts/posts.repository';
+import { authUserLogin } from '../../../../test/tests.data';
 
 @CommandHandler(BanUserCommand)
 export class BanUserHandler implements ICommandHandler<BanUserCommand> {
@@ -12,6 +13,7 @@ export class BanUserHandler implements ICommandHandler<BanUserCommand> {
 
   async execute(command: BanUserCommand): Promise<any> {
     const { userId, banUserInfo } = command;
+    console.log(command);
     await this.usersRepository.banUser(userId, banUserInfo);
     // await this.commentsRepository.updateCommentWithBanInfo(
     //   userId,

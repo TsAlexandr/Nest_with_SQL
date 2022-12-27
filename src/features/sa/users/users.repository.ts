@@ -239,6 +239,7 @@ export class UsersRepository {
   }
   banUser(userId: string, banInfo: BanUserDto) {
     if (banInfo.isBanned == true) {
+      console.log('isbanned true');
       return this.dataSource.query(
         `
       UPDATE public."banInfo" 
@@ -247,6 +248,7 @@ export class UsersRepository {
         [banInfo.isBanned, banInfo.banReason, new Date(), userId, 'user'],
       );
     } else {
+      console.log('isbanned false');
       return this.dataSource.query(
         `
       UPDATE public."banInfo" 
