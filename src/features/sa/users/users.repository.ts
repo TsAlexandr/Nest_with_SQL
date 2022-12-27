@@ -1,11 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, SortOrder } from 'mongoose';
-import {
-  UserDocument,
-  UserMongo,
-} from '../../../common/types/schemas/schemas.model';
+import { UserMongo } from '../../../common/types/schemas/schemas.model';
 import { BanUserDto } from './dto/banUser.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
@@ -21,13 +16,15 @@ export class UsersRepository {
     searchEmailTerm: string,
     sortBy: string,
     sortDirection: any,
+    banStatus: any,
   ) {
     const users = await this.dataSource.query(
       `
     SELECT u.*, b.* FROM public.users u
     LEFT JOIN public."banInfo" b
-    ON u.id = b."bannedId"
-    WHERE login LIKE $1 OR email LIKE $2
+        ON u.id = b."bannedId"
+    WHERE (u.login ilike $1 OR u.email ilike $2) 
+    AND (b."isBanned" = ${banStatus})
     ORDER BY "${sortBy}" ${sortDirection}
     OFFSET $3 ROWS FETCH NEXT $4 ROWS ONLY
     `,
@@ -38,7 +35,6 @@ export class UsersRepository {
         pageSize,
       ],
     );
-
     const total = await this.dataSource.query(
       `
     SELECT COUNT(*) FROM public.users

@@ -30,6 +30,12 @@ export class Pagination {
       typeof query.searchEmailTerm === 'string' ? query.searchEmailTerm : '';
     const sortBy =
       typeof query.sortBy === 'string' ? query.sortBy : 'createdAt';
+    const banStatus =
+      query.banStatus === 'all'
+        ? [true, false]
+        : query.banStatus === 'banned'
+        ? [true]
+        : [false];
     const sortDirection = query.sortDirection === 'asc' ? 'ASC' : 'DESC';
     return {
       page,
@@ -38,6 +44,7 @@ export class Pagination {
       searchEmailTerm,
       sortBy,
       sortDirection,
+      banStatus,
     };
   }
 }

@@ -23,6 +23,7 @@ export class UsersService {
     searchEmailTerm: string,
     sortBy: string,
     sortDirection: any,
+    banStatus: any,
   ) {
     return await this.usersRepository.getUsers(
       page,
@@ -31,6 +32,7 @@ export class UsersService {
       searchEmailTerm,
       sortBy,
       sortDirection,
+      banStatus,
     );
   }
 

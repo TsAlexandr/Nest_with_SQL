@@ -38,6 +38,7 @@ export class UsersController {
       searchEmailTerm,
       sortBy,
       sortDirection,
+      banStatus,
     } = Pagination.getPaginationDataForUser(query);
     return await this.usersService.getAllUsers(
       page,
@@ -46,6 +47,7 @@ export class UsersController {
       searchEmailTerm,
       sortBy,
       sortDirection,
+      banStatus,
     );
   }
 

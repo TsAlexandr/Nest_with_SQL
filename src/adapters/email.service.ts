@@ -36,7 +36,7 @@ export class EmailService {
       );
     const dbConfirmCode = user.code;
     if (dbConfirmCode === code) {
-      return this.usersRepository.updateConfirm(user.id);
+      return this.usersRepository.updateConfirm(user.userId);
     }
     return false;
   }
