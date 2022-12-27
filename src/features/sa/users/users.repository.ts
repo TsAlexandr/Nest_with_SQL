@@ -265,7 +265,7 @@ export class UsersRepository {
   async deleteAll() {
     return this.dataSource.query(
       `DELETE FROM public."banInfo";
-             DELETE FROM public.users;
+             DELETE FROM public.users CASCADE;
              DELETE FROM public.blogs;
              DELETE FROM public.devices;
              DELETE FROM public."emailConfirm";`,
