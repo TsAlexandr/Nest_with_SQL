@@ -147,10 +147,12 @@ export class UsersRepository {
     );
   }
 
-  async findByEmail(email: string): Promise<UserMongo> {
+  async findByEmail(email: string) {
     const query = await this.dataSource.query(
       `
-    SELECT * FROM public.users
+    SELECT u.*, b.* FROM public.users u
+    LEFT JOIN public."emailConfirm" b
+    ON u.id = b."userId"
     WHERE email = $1`,
       [email],
     );
