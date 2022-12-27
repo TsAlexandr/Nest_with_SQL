@@ -18,6 +18,8 @@ export class UsersRepository {
     sortDirection: any,
     banStatus: any,
   ) {
+    const orderBy =
+      sortBy != 'createdAt' ? `"${sortBy}" COLLATE "C"` : `"${sortBy}"`;
     const users = await this.dataSource.query(
       `
     SELECT u.*, b.* FROM public.users u
@@ -25,7 +27,7 @@ export class UsersRepository {
         ON u.id = b."bannedId"
     WHERE (u.login ilike $1 OR u.email ilike $2) 
     AND (b."isBanned" = ${banStatus})
-    ORDER BY "${sortBy}" ${sortDirection}
+    ORDER BY ${orderBy} ${sortDirection}
     OFFSET $3 ROWS FETCH NEXT $4 ROWS ONLY
     `,
       [
