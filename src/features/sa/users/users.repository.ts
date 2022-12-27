@@ -87,11 +87,30 @@ export class UsersRepository {
     );
     const ban = await this.dataSource.query(
       `
-      INSERT INTO public."banInfo" ("bannedId", "banDate", "banReason", "bannedType", "isBanned")
-    VALUES ($1, NULL, NULL, $2, false) 
-    RETURNING "banDate", "banReason", "isBanned"
+      INSERT INTO public."banInfo" 
+      ("bannedId", "banDate", "banReason", "bannedType", "isBanned")
+      VALUES ($1, NULL, NULL, $2, false) 
+      RETURNING "banDate", "banReason", "isBanned"
     `,
       [newUser.id, 'user'],
+    );
+    await this.dataSource.query(
+      `
+    INSERT INTO public."emailConfirm" 
+    ("userId", "isConfirmed", code)
+    VALUES ($1, false, $2)`,
+      [newUser.id, newUser.emailConfirmation.confirmationCode],
+    );
+    await this.dataSource.query(
+      `
+    INSERT INTO public."recoveryData" 
+    ("userId", "recoveryCode", "isConfirmed", "expirationDate")
+    VALUES ($1, $2, false, $3)`,
+      [
+        newUser.id,
+        newUser.recoveryData.recoveryCode,
+        newUser.recoveryData.expirationDate,
+      ],
     );
 
     return { q: query[0], b: ban[0] };
@@ -100,7 +119,9 @@ export class UsersRepository {
   async findByLogin(login: string) {
     const query = await this.dataSource.query(
       `
-    SELECT * FROM public.users
+    SELECT u.*, b.* FROM public.users u
+    LEFT JOIN public."banInfo" b
+    ON u.id = b."bannedId"
     WHERE login = $1`,
       [login],
     );
@@ -218,9 +239,10 @@ export class UsersRepository {
     if (banInfo.isBanned == true) {
       return this.dataSource.query(
         `
-      INSERT INTO public."banInfo" ("bannedId", "bannedType", "banReason", "banDate")
-      VALUES ($1, $2, $3, $4)`,
-        [userId, 'user', banInfo.banReason, new Date()],
+      UPDATE public."banInfo" 
+      SET "isBanned" = $1, "banReason" = $2, "banDate" = $3 
+      WHERE "bannedId" = $4 AND "bannedType" = $5`,
+        [banInfo.isBanned, banInfo.banReason, new Date(), userId, 'user'],
       );
     } else {
       return this.dataSource.query(

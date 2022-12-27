@@ -28,6 +28,7 @@ export class EmailService {
 
   async confirmEmail(code: string) {
     const user = await this.usersRepository.findByConfirmCode(code);
+    console.log(user);
     if (!user) return false;
     if (user.emailConfirmation.isConfirmed)
       throw new HttpException(

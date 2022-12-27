@@ -9,6 +9,7 @@ export class TestRepo {
     await this.dataSource.query(`DELETE FROM public.users`);
     await this.dataSource.query(`DELETE FROM public."banInfo"`);
     await this.dataSource.query(`DELETE FROM public.blogs`);
+    await this.dataSource.query(`DELETE FROM public.devices`);
   }
 }
 
