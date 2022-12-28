@@ -18,18 +18,21 @@ export class UsersRepository {
     sortDirection: any,
     banStatus: any,
   ) {
-    console.log(banStatus);
-    let bannedStatus = `AND b."isBanned" IN (${banStatus})`;
-    if (banStatus == [true, false]) {
-      bannedStatus = '';
-    }
     const users = await this.dataSource.query(
       `
-    SELECT u.*, b.* FROM public.users u
+    SELECT 
+    u.*, b.* FROM public.users u
     LEFT JOIN public."banInfo" b
-        ON u.id = b."bannedId"
-    WHERE (u.login ilike $1 OR u.email ilike $2)  ${bannedStatus}
-   
+        ON u.id = b."bannedId" 
+    WHERE (u.login ilike $1 OR u.email ilike $2) 
+    AND 
+    CASE
+        WHEN '${banStatus}' = 'notBanned' 
+            THEN b."isBanned" = false
+        WHEN '${banStatus}' = 'banned' 
+            THEN b."isBanned" = true
+    ELSE b."isBanned" IN (true, false)
+        END
     ORDER BY "${sortBy}" ${sortDirection}
     OFFSET $3 ROWS FETCH NEXT $4 ROWS ONLY
     `,
@@ -40,14 +43,21 @@ export class UsersRepository {
         pageSize,
       ],
     );
-    console.log(users);
     const total = await this.dataSource.query(
       `
     SELECT COUNT(*) FROM public.users u
     LEFT JOIN public."banInfo" b
         ON u.id = b."bannedId"
     WHERE (u.login ilike $1 OR u.email ilike $2) 
-    ${bannedStatus}
+    AND 
+    CASE
+        WHEN '${banStatus}' = 'notBanned' 
+            THEN b."isBanned" = false
+        WHEN '${banStatus}' = 'banned' 
+            THEN b."isBanned" = true
+    ELSE b."isBanned" IN (true, false)
+        END
+    
     `,
       ['%' + searchLoginTerm + '%', '%' + searchEmailTerm + '%'],
     );
@@ -80,7 +90,7 @@ export class UsersRepository {
       `
     INSERT INTO public.users (id, login, email, "createdAt", "passwordHash")
     VALUES ($1, $2, $3, $4, $5) 
-    RETURNING "id", "login", "email", "createdAt" 
+    RETURNING id, login, email, "createdAt" 
     `,
       [
         newUser.id,

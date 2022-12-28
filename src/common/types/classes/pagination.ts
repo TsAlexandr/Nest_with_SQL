@@ -32,9 +32,9 @@ export class Pagination {
       typeof query.sortBy === 'string' ? query.sortBy : 'createdAt';
     const banStatus =
       query.banStatus === 'banned'
-        ? [true]
+        ? 'banned'
         : query.banStatus === 'notBanned'
-        ? [false]
+        ? 'notBanned'
         : [true, false];
     const sortDirection = query.sortDirection === 'asc' ? 'ASC' : 'DESC';
     return {
