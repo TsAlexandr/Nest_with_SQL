@@ -11,10 +11,11 @@ export class DeviceRepository {
     const query = await this.dataSource.query(
       `
     SELECT * FROM public.devices
-    WHERE "userId" = $1`,
+    WHERE "userId" = $1
+    RETURNING "deviceId", ip, "lastActiveDate", title`,
       [userId],
     );
-    return query[0];
+    return query;
   }
 
   async addDevices(newDevice: Device) {
@@ -34,12 +35,7 @@ export class DeviceRepository {
         newDevice.expiredDate,
       ],
     );
-    return {
-      ip: query.ip,
-      title: query.title,
-      lastActiveDate: query.lastActiveDate,
-      deviceId: query.deviceId,
-    };
+    return query;
   }
 
   async deleteAllDevice(userId: string, deviceId: string) {

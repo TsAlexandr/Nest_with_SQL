@@ -269,7 +269,8 @@ export class UsersRepository {
              DELETE FROM public.users CASCADE;
              DELETE FROM public.blogs;
              DELETE FROM public.devices;
-             DELETE FROM public."emailConfirm";`,
+             DELETE FROM public."emailConfirm";
+             DELETE FROM public."recoveryData";`,
     );
   }
 }
