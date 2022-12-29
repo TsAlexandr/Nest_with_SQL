@@ -134,8 +134,8 @@ export class AuthController {
         HttpStatus.UNAUTHORIZED,
       );
     }
-    const newRefreshToken = await this.authService.removeSession(refreshToken);
-    if (!newRefreshToken) throw new UnauthorizedException();
+    const logout = await this.authService.removeSession(refreshToken);
+    if (!logout) throw new UnauthorizedException();
     res.clearCookie('refreshToken');
   }
 

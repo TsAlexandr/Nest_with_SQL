@@ -131,7 +131,11 @@ export class AuthService {
       iat,
     );
     if (!validDevice) return null;
-    await this.deviceRepository.removeSession(payload.userId, payload.deviceId);
+    const result = await this.deviceRepository.removeSession(
+      payload.userId,
+      payload.deviceId,
+    );
+    return result;
   }
 
   _extractPayload(refreshToken: string) {

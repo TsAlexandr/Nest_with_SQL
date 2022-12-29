@@ -11,11 +11,18 @@ export class DeviceRepository {
     const query = await this.dataSource.query(
       `
     SELECT * FROM public.devices
-    WHERE "userId" = $1
-    RETURNING "deviceId", ip, "lastActiveDate", title`,
+    WHERE "userId" = $1`,
       [userId],
     );
-    return query;
+    const result = query.map((el) => {
+      return {
+        ip: el.ip,
+        title: el.title,
+        lastActiveDate: el.lastActiveDate,
+        deviceId: el.deviceId,
+      };
+    });
+    return result;
   }
 
   async addDevices(newDevice: Device) {
