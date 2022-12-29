@@ -21,7 +21,7 @@ export class UsersRepository {
     const users = await this.dataSource.query(
       `
     SELECT 
-    u.*, b.* FROM public.users u
+        u.*, b.* FROM public.users u
     LEFT JOIN public."banInfo" b
         ON u.id = b."bannedId" 
     WHERE (u.login ilike $1 OR u.email ilike $2) 
@@ -102,10 +102,10 @@ export class UsersRepository {
     );
     const ban = await this.dataSource.query(
       `
-      INSERT INTO public."banInfo" 
-      ("bannedId", "banDate", "banReason", "bannedType", "isBanned")
-      VALUES ($1, NULL, NULL, $2, false) 
-      RETURNING "banDate", "banReason", "isBanned"
+    INSERT INTO public."banInfo" 
+    ("bannedId", "banDate", "banReason", "bannedType", "isBanned")
+    VALUES ($1, NULL, NULL, $2, false) 
+    RETURNING "banDate", "banReason", "isBanned"
     `,
       [newUser.id, 'user'],
     );
@@ -257,17 +257,17 @@ export class UsersRepository {
     if (banInfo.isBanned == true) {
       return this.dataSource.query(
         `
-      UPDATE public."banInfo" 
-      SET "isBanned" = $1, "banReason" = $2, "banDate" = $3 
-      WHERE "bannedId" = $4 AND "bannedType" = $5`,
+    UPDATE public."banInfo" 
+    SET "isBanned" = $1, "banReason" = $2, "banDate" = $3 
+    WHERE "bannedId" = $4 AND "bannedType" = $5`,
         [banInfo.isBanned, banInfo.banReason, new Date(), userId, 'user'],
       );
     } else {
       return this.dataSource.query(
         `
-      UPDATE public."banInfo" 
-      SET "isBanned" = $1, "banReason" = NULL, "banDate" = NULL 
-      WHERE "bannedId" = $2 AND "bannedType" = $3`,
+    UPDATE public."banInfo" 
+    SET "isBanned" = $1, "banReason" = NULL, "banDate" = NULL 
+    WHERE "bannedId" = $2 AND "bannedType" = $3`,
         [banInfo.isBanned, userId, 'user'],
       );
     }
@@ -275,12 +275,13 @@ export class UsersRepository {
 
   async deleteAll() {
     return this.dataSource.query(
-      `DELETE FROM public."banInfo";
-             DELETE FROM public.users CASCADE;
-             DELETE FROM public.blogs;
-             DELETE FROM public.devices;
-             DELETE FROM public."emailConfirm";
-             DELETE FROM public."recoveryData";`,
+      `
+    DELETE FROM public."banInfo";
+    DELETE FROM public.users CASCADE;
+    DELETE FROM public.blogs;
+    DELETE FROM public.devices;
+    DELETE FROM public."emailConfirm";
+    DELETE FROM public."recoveryData";`,
     );
   }
 }
