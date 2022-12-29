@@ -124,6 +124,12 @@ export class AuthService {
   async removeSession(token: string) {
     const payload: any = this._extractPayload(token);
     if (!payload) return null;
+    const validDevice = await this.deviceRepository.findDeviceById(
+      payload.userId,
+      payload.deviceId,
+      payload.iat,
+    );
+    if (!validDevice) return null;
     await this.deviceRepository.removeSession(payload.userId, payload.deviceId);
   }
 

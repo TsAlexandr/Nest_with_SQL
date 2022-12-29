@@ -15,7 +15,10 @@ import {
 } from '@nestjs/common';
 import { UsersService } from '../../sa/users/users.service';
 import { AuthService } from './auth.service';
-import { CurrentUserId } from '../../../common/custom-decorator/current.user.decorator';
+import {
+  Cookies,
+  CurrentUserId,
+} from '../../../common/custom-decorator/current.user.decorator';
 import { JwtAuthGuards } from './guards/jwt-auth.guards';
 import { EmailService } from '../../../adapters/email.service';
 import { RegistrationDto } from './dto/registration.dto';
@@ -123,14 +126,18 @@ export class AuthController {
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('/logout')
-  async logout(@Res({ passthrough: true }) res: Response, @Req() req: Request) {
-    if (!req.cookies.refreshToken) {
+  async logout(
+    @Res({ passthrough: true }) res: Response,
+    @Cookies() refreshToken: string,
+  ) {
+    if (!refreshToken) {
       throw new HttpException(
         { message: [{ message: 'invalid value', field: 'refreshToken' }] },
         HttpStatus.UNAUTHORIZED,
       );
     }
-    await this.authService.removeSession(req.cookies.refreshToken);
+    const newRefreshToken = await this.authService.removeSession(refreshToken);
+    if (!newRefreshToken) throw new UnauthorizedException();
     res.clearCookie('refreshToken');
   }
 
