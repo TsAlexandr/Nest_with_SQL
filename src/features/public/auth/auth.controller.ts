@@ -104,18 +104,16 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('/refresh-token')
   async refresh(
-    @Req() req: Request,
+    @Cookies() refreshToken: string,
     @Res({ passthrough: true }) res: Response,
   ) {
-    if (!req.cookies.refreshToken) {
+    if (!refreshToken) {
       throw new HttpException(
         { message: [{ message: 'invalid value', field: 'refreshToken' }] },
         HttpStatus.UNAUTHORIZED,
       );
     }
-    const tokens = await this.authService.updateDevice(
-      req.cookies.refreshToken,
-    );
+    const tokens = await this.authService.updateDevice(refreshToken);
     if (!tokens) throw new UnauthorizedException();
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
