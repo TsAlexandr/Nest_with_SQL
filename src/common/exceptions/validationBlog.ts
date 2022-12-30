@@ -15,7 +15,7 @@ export class BlogIdValidation implements ValidatorConstraintInterface {
     value: any,
     validationArguments?: ValidationArguments,
   ): Promise<boolean> {
-    const blogId = await this.blogsRepository.getBloggersById(value);
+    const blogId = await this.blogsRepository.getBlogForValidation(value);
     if (!blogId) return false;
     return true;
   }

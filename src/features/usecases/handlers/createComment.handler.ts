@@ -15,26 +15,18 @@ export class CreateCommentHandler
   ) {}
 
   async execute(command: CreateCommentCommand) {
-    const { postId, content, userId, userLogin, blogId } = command;
+    const { postId, content, userId, blogId } = command;
     const isBannedUser = await this.blogsRepository.findBannedUser(
       blogId,
       userId,
     );
-    console.log(isBannedUser);
     if (isBannedUser) throw new ForbiddenException();
     const newComment = {
       id: v4(),
       postId,
       content,
       userId,
-      userLogin,
       createdAt: new Date(),
-      likesInfo: {
-        dislikesCount: 0,
-        likesCount: 0,
-        myStatus: 'None',
-      },
-      totalActions: [],
     };
     return this.commentsRepository.createComment(newComment);
   }

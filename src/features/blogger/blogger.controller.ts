@@ -36,7 +36,6 @@ export class BloggerController {
     private bloggersService: BlogsService,
     private postsService: PostsService,
     private usersService: UsersService,
-
     private queryBus: QueryBus,
   ) {}
 
@@ -47,8 +46,6 @@ export class BloggerController {
   ): Promise<Paginator<Blogger[]>> {
     const { page, pageSize, searchNameTerm, sortBy, sortDirection } =
       Pagination.getPaginationData(query);
-    const user = await this.usersService.findUserById(userId);
-    const login = user.login;
     const bloggers = await this.bloggersService.getBlogsByBlogger(
       page,
       pageSize,
@@ -56,7 +53,6 @@ export class BloggerController {
       sortBy,
       sortDirection,
       userId,
-      login,
     );
     if (!bloggers) {
       throw new NotFoundException();
@@ -86,8 +82,7 @@ export class BloggerController {
     @Body() bloggersDto: BloggersDto,
     @CurrentUserId() userId: string,
   ): Promise<Blogger> {
-    const user = await this.usersService.findUserById(userId);
-    return this.bloggersService.createBlogger(bloggersDto, user.id, user.login);
+    return this.bloggersService.createBlogger(bloggersDto, userId);
   }
 
   @Post(':blogId/posts')

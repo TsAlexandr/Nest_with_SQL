@@ -9,25 +9,16 @@ export class BlogsService {
   constructor(private bloggersRepository: BlogsRepository) {}
 
   async getBloggerById(id: string) {
-    return await this.bloggersRepository.getBloggersById(id);
+    return await this.bloggersRepository.getBlogsById(id);
   }
 
-  async createBlogger(bloggersDto: BloggersDto, id: any, login: any) {
+  async createBlogger(bloggersDto: BloggersDto, id: string) {
     const newBlogger = {
       id: uuidv4(),
       ...bloggersDto,
-      createdAt: new Date().toISOString(),
-      blogOwnerInfo: {
-        userId: id,
-        userLogin: login,
-      },
-      banInfo: {
-        isBanned: false,
-        banDate: null,
-      },
-      blackList: [],
+      createdAt: new Date(),
     };
-    return await this.bloggersRepository.createBlogger(newBlogger);
+    return await this.bloggersRepository.createBlogger(newBlogger, id);
   }
 
   async updateBlogger(id: string, update: BloggersDto) {
@@ -36,10 +27,6 @@ export class BlogsService {
 
   async deleteBlogger(id: string): Promise<boolean> {
     return await this.bloggersRepository.deleteBloggerById(id);
-  }
-
-  bindWithUser(blogId: string, userId: string) {
-    return this.bloggersRepository.bindWithUser(blogId, userId);
   }
 
   async getBlogsWithOwnerInfo(
@@ -65,7 +52,6 @@ export class BlogsService {
     sortBy: string,
     sortDirection: any,
     userId: string,
-    login: string,
   ) {
     return this.bloggersRepository.getBlogsByBlogger(
       page,
@@ -74,7 +60,6 @@ export class BlogsService {
       sortBy,
       sortDirection,
       userId,
-      login,
     );
   }
 }

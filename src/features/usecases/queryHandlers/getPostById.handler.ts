@@ -16,7 +16,7 @@ export class GetPostByIdHandler implements IQueryHandler<GetPostByIdCommand> {
     const { id, userId } = command;
     const post = await this.postsRepository.findPostById(id);
     const blogs = await this.blogsRepository.getBlogsById(post.blogId);
-    if (blogs?.banInfo.isBanned === true) throw new NotFoundException();
+    if (!blogs) throw new NotFoundException();
     if (!post) throw new NotFoundException();
     return postMapper(userId, post);
   }

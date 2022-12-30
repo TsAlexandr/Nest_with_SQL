@@ -8,7 +8,6 @@ import { DataSource } from 'typeorm';
 @Injectable()
 export class UsersRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
-
   async getUsers(
     page: number,
     pageSize: number,

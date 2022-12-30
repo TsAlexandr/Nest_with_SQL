@@ -3,8 +3,7 @@ export class Blogger {
   public readonly name: string;
   public readonly websiteUrl: string;
   public readonly description: string;
-  public readonly createdAt: string;
-  public readonly blogOwnerInfo: any;
+  public readonly createdAt: Date;
 }
 
 export class PostsCon {

@@ -83,7 +83,7 @@ export class CommentsRepository {
     };
   }
 
-  async createComment(newComment: Comments) {
+  async createComment(newComment: any) {
     await this.commentsModel.create(newComment);
     return this.findCommentForPost(newComment.id);
   }

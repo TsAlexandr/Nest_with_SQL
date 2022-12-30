@@ -1,23 +1,14 @@
-import { Model, SortOrder } from 'mongoose';
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import {
-  BloggersDocument,
-  BloggersMongo,
-  Posts,
-  PostsDocument,
-} from '../../../common/types/schemas/schemas.model';
-import { Paginator } from '../../../common/types/classes/classes';
+import { BloggersMongo } from '../../../common/types/schemas/schemas.model';
+import { Blogger, Paginator } from '../../../common/types/classes/classes';
 import { BloggersDto } from './dto/bloggers.dto';
 import { BanBlogDto } from '../../blogger/dto/banBlog.dto';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class BlogsRepository {
-  constructor(
-    @InjectModel(BloggersMongo.name)
-    private bloggersModel: Model<BloggersDocument>,
-    @InjectModel(Posts.name) private postsModel: Model<PostsDocument>,
-  ) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async getBloggers(
     page: number,
@@ -26,82 +17,88 @@ export class BlogsRepository {
     sortBy: string,
     sortDirection: any,
   ): Promise<Paginator<BloggersMongo[]>> {
-    const bloggers = await this.bloggersModel
-      .find(
-        {
-          $and: [
-            { name: { $regex: searchNameTerm, $options: 'i' } },
-            { 'banInfo.isBanned': false },
-          ],
-        },
-        { _id: 0, __v: 0, blogOwnerInfo: 0, blackList: 0 },
-      )
-      .skip((page - 1) * pageSize)
-      .limit(pageSize)
-      .sort({ [sortBy]: sortDirection })
-      .lean();
+    const bloggers = await this.dataSource.query(
+      `
+    SELECT id, name, description, "websiteUrl", "createdAt"
+    FROM public.blogs
+    WHERE name ILIKE $1
+    ORDER BY "${sortBy}" ${sortDirection}
+    OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY`,
+      ['%' + searchNameTerm + '%', (page - 1) * pageSize, pageSize],
+    );
 
-    const count = await this.bloggersModel.countDocuments({
-      $and: [
-        { name: { $regex: searchNameTerm, $options: 'i' } },
-        { 'banInfo.isBanned': false },
-      ],
-    });
-    const total = Math.ceil(count / pageSize);
+    const count = await this.dataSource.query(
+      `
+    SELECT * FROM public.blogs
+    WHERE name ILIKE $1`,
+      ['%' + searchNameTerm + '%'],
+    );
+    const total = Math.ceil(count[0].count / pageSize);
 
     return {
       pagesCount: total,
       page: page,
       pageSize: pageSize,
-      totalCount: count,
+      totalCount: +count[0].count,
       items: bloggers,
     };
   }
 
-  async getBloggersById(id: string): Promise<BloggersMongo> {
-    return this.bloggersModel.findOne({ id }, { _id: 0, __v: 0 }).lean();
-  }
-
-  async getBlogsById(id: string): Promise<BloggersMongo> {
-    return this.bloggersModel
-      .findOne({ id }, { _id: 0, __v: 0, blogOwnerInfo: 0, blackList: 0 })
-      .lean();
-  }
-
-  async deleteBloggerById(id: string): Promise<boolean> {
-    const delBlog = await this.bloggersModel.deleteOne({ id });
-    return delBlog.deletedCount === 1;
-  }
-
-  async updateBloggerById(id: string, update: BloggersDto): Promise<boolean> {
-    const updBlog = await this.bloggersModel.updateOne(
-      { id },
-      {
-        $set: {
-          name: update.name,
-          websiteUrl: update.websiteUrl,
-          description: update.description,
-        },
-      },
+  async getBlogsById(id: string) {
+    const query = await this.dataSource.query(
+      `
+    SELECT b.*, ban.* FROM public.blogs b
+    LEFT JOIN public."banInfo" ban
+    ON id = b."userId"
+    WHERE id = $1 AND ban."isBanned" = false`,
+      [id],
     );
-    await this.postsModel.updateMany(
-      { blogsId: id },
-      { $set: { bloggerName: update.name } },
-    );
-    return updBlog.modifiedCount === 1;
+    return query[0];
   }
 
-  async createBlogger(newBlogger: BloggersMongo): Promise<BloggersMongo> {
-    await this.bloggersModel.create(newBlogger);
-    return this.getBlogsById(newBlogger.id);
+  async deleteBloggerById(id: string) {
+    return this.dataSource.query(
+      `
+    DELETE FROM public.blogs
+    WHERE id = $1`,
+      [id],
+    );
   }
 
-  async bindWithUser(id: string, userId: string) {
-    await this.bloggersModel.findByIdAndUpdate(
-      { id },
-      { $set: { 'blogOwnerInfo.userId': userId } },
+  async updateBloggerById(id: string, update: BloggersDto) {
+    return this.dataSource.query(
+      `
+    UPDATE public.blogs 
+    SET name = $1, 
+        "websiteUrl" = $2, 
+        description = $3
+    WHERE id = $4`,
+      [update.name, update.websiteUrl, update.description, id],
     );
-    return;
+  }
+
+  async createBlogger(newBlogger: Blogger, id: string) {
+    const query = this.dataSource.query(
+      `
+    INSERT INTO public.blogs 
+    VALUES ($1, $2, $3, $4, $5, $6)
+    RETURNING id, name, "websiteUrl", description, "createdAt"`,
+      [
+        newBlogger.id,
+        newBlogger.name,
+        newBlogger.websiteUrl,
+        newBlogger.description,
+        newBlogger.createdAt,
+        id,
+      ],
+    );
+    await this.dataSource.query(
+      `
+    INSERT INTO public."banInfo"
+    VALUES ($1, NULL, NULL, 'blog', false)`,
+      [newBlogger.id],
+    );
+    return query;
   }
 
   async getBlogsWithOwnerInfo(
@@ -109,30 +106,58 @@ export class BlogsRepository {
     pageSize: number,
     searchNameTerm: string,
     sortBy: string,
-    sortDirection: SortOrder,
+    sortDirection: any,
   ): Promise<Paginator<BloggersMongo[]>> {
-    const blogsWithUser = await this.bloggersModel
-      .find(
-        {
-          name: { $regex: searchNameTerm, $options: 'i' },
-        },
-        { _id: 0, __v: 0, blackList: 0 },
-      )
-      .skip((page - 1) * pageSize)
-      .limit(pageSize)
-      .sort({ [sortBy]: sortDirection })
-      .lean();
+    const query = await this.dataSource.query(
+      `
+    SELECT b.*, u.login, ban.* 
+    FROM public.blogs b
+    LEFT JOIN public.users u
+    ON b."userId" = u.id
+    LEFT JOIN public."banInfo" ban
+    ON b.id = ban."bannedId" 
+    WHERE name ILIKE $1 AND ban."bannedType" = 'blog'
+    ORDER BY "${sortBy}" ${sortDirection}
+    OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY`,
+      ['%' + searchNameTerm + '%', (page - 1) * pageSize, pageSize],
+    );
 
-    const count = await this.bloggersModel.countDocuments({
-      name: { $regex: searchNameTerm, $options: 'i' },
+    const count = await this.dataSource.query(
+      `
+    SELECT b.*, u.login, ban.* 
+    FROM public.blogs b
+    LEFT JOIN public.users u
+    ON b."userId" = u.id
+    LEFT JOIN public."banInfo" ban
+    ON b.id = ban."bannedId" 
+    WHERE name ILIKE $1 AND ban."bannedType" = 'blog'`,
+      ['%' + searchNameTerm + '%'],
+    );
+    const total = Math.ceil(count[0].count / pageSize);
+
+    const blogsWithUser = query.map((el) => {
+      return {
+        id: el.id,
+        name: el.name,
+        description: el.description,
+        websiteUrl: el.websiteUrl,
+        createdAt: el.createdAt,
+        blogOwnerInfo: {
+          userId: el.userId,
+          userLogin: el.login,
+        },
+        banInfo: {
+          isBanned: el.isBanned ? el.isBanned : false,
+          banDate: null ? null : el.banDate,
+        },
+      };
     });
-    const total = Math.ceil(count / pageSize);
 
     return {
       pagesCount: total,
       page: page,
       pageSize: pageSize,
-      totalCount: count,
+      totalCount: +count[0].count,
       items: blogsWithUser,
     };
   }
@@ -144,40 +169,33 @@ export class BlogsRepository {
     sortBy: string,
     sortDirection: any,
     userId: string,
-    login: string,
   ) {
-    console.log(userId, login);
-    const blogsByBlogger = await this.bloggersModel
-      .find(
-        {
-          $and: [
-            { name: { $regex: searchNameTerm, $options: 'i' } },
-            { 'blogOwnerInfo.userId': { $regex: userId, $options: 'i' } },
-            { 'blogOwnerInfo.userLogin': { $regex: login, $options: 'i' } },
-          ],
-        },
-        { _id: 0, __v: 0, blogOwnerInfo: 0 },
-      )
-      .skip((page - 1) * pageSize)
-      .limit(pageSize)
-      .sort({ [sortBy]: sortDirection })
-      .lean();
+    const query = await this.dataSource.query(
+      `
+    SELECT id, name, "websiteUrl", description, "createdAt" 
+    FROM public.blogs
+    WHERE "userId" = $1
+    ORDER BY "${sortBy}" ${sortDirection}
+    OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY
+    `,
+      [userId, (page - 1) * pageSize, pageSize],
+    );
 
-    const count = await this.bloggersModel.countDocuments({
-      $and: [
-        { name: { $regex: searchNameTerm, $options: 'i' } },
-        { 'blogOwnerInfo.userId': { $regex: userId, $options: 'i' } },
-        { 'blogOwnerInfo.userLogin': { $regex: login, $options: 'i' } },
-      ],
-    });
-    const total = Math.ceil(count / pageSize);
+    const count = await this.dataSource.query(
+      `
+    SELECT COUNT(*) FROM public.blogs
+    WHERE "userId" = $1
+    `,
+      [userId],
+    );
+    const total = Math.ceil(count[0].count / pageSize);
 
     return {
       pagesCount: total,
       page: page,
       pageSize: pageSize,
-      totalCount: count,
-      items: blogsByBlogger,
+      totalCount: +count[0].count,
+      items: query,
     };
   }
 
@@ -188,104 +206,110 @@ export class BlogsRepository {
     sortDirection: any,
     searchLoginTerm: string,
     id: string,
-    ownerId: string,
   ) {
-    const newSortBy = 'blackList' + '.' + sortBy;
-    const bannedUsers = await this.bloggersModel.aggregate([
-      {
-        $match: {
-          id,
-        },
-      },
-      { $unwind: '$blackList' },
-      {
-        $match: {
-          'blackList.login': { $regex: searchLoginTerm, $options: 'i' },
-        },
-      },
-      { $sort: { [newSortBy]: sortDirection } },
-      { $skip: (page - 1) * pageSize },
-      { $limit: pageSize },
-      {
-        $project: {
-          _id: 0,
-          id: 0,
-          name: 0,
-          websiteUrl: 0,
-          description: 0,
-          createdAt: 0,
-          banInfo: 0,
-          blogOwnerInfo: 0,
-        },
-      },
-    ]);
+    const query = await this.dataSource.query(
+      `
+    SELECT ub.*, u.* FROM public."userBlackList" ub
+    LEFT JOIN public.users u
+    ON u.id = ub."userId"
+    WHERE ub."blogId" = $1
+    ORDER BY "${sortBy}" ${sortDirection}
+    OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY`,
+      [id, (page - 1) * pageSize, pageSize],
+    );
+    const total = await this.dataSource.query(
+      `
+    SELECT COUNT(*) FROM public."userBlackList"
+    WHERE "blogId" = $1`,
+      [id],
+    );
+    const pages = Math.ceil(total[0].count / pageSize);
 
-    const count = await this.bloggersModel.aggregate([
-      {
-        $match: {
-          id,
+    const mappedUser = query.map((obj) => {
+      return {
+        id: obj.id,
+        login: obj.login,
+        createdAt: obj.createdAt,
+        email: obj.email,
+        banInfo: {
+          banDate: obj.banDate,
+          banReason: obj.banReason,
+          isBanned: true,
         },
-      },
-      { $unwind: '$blackList' },
-      {
-        $match: {
-          'blackList.login': { $regex: searchLoginTerm, $options: 'i' },
-        },
-      },
-      { $count: 'blackList' },
-    ]);
-
-    return { bannedUsers, count };
+      };
+    });
+    return {
+      pagesCount: pages,
+      page: page,
+      pageSize: pageSize,
+      totalCount: +total[0].count,
+      items: mappedUser,
+    };
   }
 
-  async banUserForBlog(banBlogDto: BanBlogDto, id: string, login: string) {
+  async banUserForBlog(banBlogDto: BanBlogDto, id: string) {
     if (banBlogDto.isBanned === true) {
-      return this.bloggersModel.updateOne(
-        { id: banBlogDto.blogId },
-        {
-          $push: {
-            blackList: {
-              id: id,
-              login: login,
-              isBanned: banBlogDto.isBanned,
-              banDate: new Date().toISOString(),
-              banReason: banBlogDto.banReason,
-            },
-          },
-        },
+      const banDate = new Date();
+      return this.dataSource.query(
+        `
+      INSERT INTO public."userBlackList"
+      VALUES ($1, $2, $3, $4)`,
+        [banBlogDto.blogId, id, banBlogDto.banReason, banDate],
       );
     } else {
-      return this.bloggersModel.updateOne(
-        { id: banBlogDto.blogId },
-        {
-          $pull: {
-            blackList: { id: id },
-          },
-        },
+      return this.dataSource.query(
+        `
+      DELETE FROM public."userBlackList"
+      WHERE "userId" = $1`,
+        [id],
       );
     }
   }
 
   async getOwnerBlogId(ownerId: string, blogId: string) {
-    return this.bloggersModel.findOne({
-      'blogOwnerInfo.userId': ownerId,
-      id: blogId,
-    });
+    const query = await this.dataSource.query(
+      `
+    SELECT * FROM public.blogs
+    WHERE id = $1 AND "userId" = $2`,
+      [blogId, ownerId],
+    );
+    return query[0];
   }
 
   async banBlogById(id: string, isBanned: boolean) {
-    await this.bloggersModel.updateOne(
-      { id },
-      {
-        $set: {
-          'banInfo.isBanned': isBanned,
-          'banInfo.banDate': new Date().toISOString(),
-        },
-      },
+    if (isBanned === true) {
+      const banDate = new Date();
+      await this.dataSource.query(
+        `
+    INSERT INTO public."banInfo"
+    VALUES ($1, $2, $3, $4, $5)`,
+        [id, banDate, null, 'blog', true],
+      );
+    }
+    await this.dataSource.query(
+      `
+    DELETE FROM public."banInfo" 
+    WHERE "bannedId" = $1 AND "bannedType" = 'blog'`,
+      [id],
     );
   }
 
-  findBannedUser(blogId: string, userId: string) {
-    return this.bloggersModel.findOne({ id: blogId, 'blackList.id': userId });
+  async findBannedUser(blogId: string, userId: string) {
+    const query = await this.dataSource.query(
+      `
+    SELECT * FROM public."userBlackList"
+    WHERE "blogId" = $1, "userId" = $2`,
+      [blogId, userId],
+    );
+    return query[0];
+  }
+  async getBlogForValidation(id: string) {
+    const query = await this.dataSource.query(
+      `
+    SELECT * FROM public.blogs
+    WHERE id = $1`,
+      [id],
+    );
+    return query[0];
   }
 }

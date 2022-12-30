@@ -18,8 +18,6 @@ export class GetBannedUserForBloggerHandler
       blogId,
       ownerId,
     } = query;
-    let mappedBanUsers = [];
-    let superMegaTotalCount = 0;
     const owner = await this.blogsRepository.getOwnerBlogId(ownerId, blogId);
     const users = await this.blogsRepository.getBannedUsers(
       page,
@@ -28,29 +26,8 @@ export class GetBannedUserForBloggerHandler
       sortDirection,
       searchLoginTerm,
       blogId,
-      ownerId,
     );
     if (!owner) throw new ForbiddenException();
-    if (users.bannedUsers.length) {
-      superMegaTotalCount = users.count[0].blackList;
-      mappedBanUsers = users.bannedUsers.map((obj) => {
-        return {
-          id: obj.blackList.id,
-          login: obj.blackList.login,
-          banInfo: {
-            isBanned: obj.blackList.isBanned,
-            banDate: obj.blackList.banDate,
-            banReason: obj.blackList.banReason,
-          },
-        };
-      });
-    }
-    return {
-      pagesCount: Math.ceil(superMegaTotalCount / pageSize),
-      page: page,
-      pageSize: pageSize,
-      totalCount: superMegaTotalCount,
-      items: mappedBanUsers,
-    };
+    return users;
   }
 }

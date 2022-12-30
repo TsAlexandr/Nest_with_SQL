@@ -9,7 +9,13 @@ export class GetBlogsByIdHandler implements IQueryHandler<GetBlogsByIdCommand> {
   async execute(query: GetBlogsByIdCommand) {
     const { id } = query;
     const blog = await this.blogsRepository.getBlogsById(id);
-    if (blog.banInfo.isBanned === true) throw new NotFoundException();
-    return blog;
+    if (!blog) throw new NotFoundException();
+    return {
+      id: blog.id,
+      name: blog.name,
+      description: blog.description,
+      websiteUrl: blog.websiteUrl,
+      createdAt: blog.createdAt,
+    };
   }
 }

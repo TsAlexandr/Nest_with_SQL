@@ -43,14 +43,6 @@ export class SuperBlogsController {
     return bloggers;
   }
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Put(':id/bind-with-user/:userId')
-  async bindBlogWithUser(
-    @Param('id') blogId: string,
-    @Param('userId') userId: string,
-  ) {
-    return this.bloggersService.bindWithUser(blogId, userId);
-  }
-  @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':id/ban')
   async banBlog(@Param('id') id: string, @Body('isBanned') isBanned: boolean) {
     return this.commandBus.execute(new BanBlogByIdCommand(id, isBanned));
