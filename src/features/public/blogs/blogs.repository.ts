@@ -52,7 +52,7 @@ export class BlogsRepository {
       `
     SELECT b.*, ban.* FROM public.blogs b
     LEFT JOIN public."banInfo" ban
-    ON id = b."userId"
+    ON id = ban."bannedId"
     WHERE id = $1 AND ban."isBanned" = false`,
       [id],
     );
