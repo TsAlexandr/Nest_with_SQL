@@ -38,7 +38,6 @@ export class BlogsRepository {
       ['%' + searchNameTerm + '%'],
     );
     const total = Math.ceil(count[0].count / pageSize);
-
     return {
       pagesCount: total,
       page: page,
@@ -281,18 +280,20 @@ export class BlogsRepository {
   async banBlogById(id: string, isBanned: boolean) {
     if (isBanned === true) {
       const banDate = new Date();
-      await this.dataSource.query(
+      return this.dataSource.query(
         `
-    INSERT INTO public."banInfo"
-    VALUES ($1, $2, $3, $4, $5)`,
-        [id, banDate, null, 'blog', true],
+    UPDATE public."banInfo" 
+    SET "isBanned" = $1, "banDate" = $2 
+    WHERE "bannedId" = $3 AND "bannedType" = $4`,
+        [true, banDate, id, 'blog'],
       );
     } else {
-      await this.dataSource.query(
+      return this.dataSource.query(
         `
-    DELETE FROM public."banInfo" 
-    WHERE "bannedId" = $1 AND "bannedType" = 'blog'`,
-        [id],
+    UPDATE public."banInfo" 
+    SET "isBanned" = $1, "banDate" = $2 
+    WHERE "bannedId" = $3 AND "bannedType" = $4`,
+        [false, null, id, 'blog'],
       );
     }
   }
