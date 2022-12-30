@@ -8,7 +8,7 @@ export class GetBlogsByIdHandler implements IQueryHandler<GetBlogsByIdCommand> {
   constructor(private blogsRepository: BlogsRepository) {}
   async execute(query: GetBlogsByIdCommand) {
     const { id } = query;
-    const blog = await this.blogsRepository.getBlogsById(id);
+    const blog = await this.blogsRepository.getBlogForValidation(id);
     if (!blog) throw new NotFoundException();
     return {
       id: blog.id,

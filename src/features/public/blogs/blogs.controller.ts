@@ -43,7 +43,7 @@ export class BlogsController {
   }
 
   @Get(':id')
-  async getBlogger(@Param('id') id: string): Promise<Blogger> {
+  async getBlogs(@Param('id') id: string): Promise<Blogger> {
     const blogger = await this.queryBus.execute(new GetBlogsByIdCommand(id));
     if (!blogger) {
       throw new NotFoundException();
