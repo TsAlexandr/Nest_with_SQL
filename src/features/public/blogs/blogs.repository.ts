@@ -78,7 +78,7 @@ export class BlogsRepository {
   }
 
   async createBlogger(newBlogger: Blogger, id: string) {
-    const query = this.dataSource.query(
+    const query = await this.dataSource.query(
       `
     INSERT INTO public.blogs 
     VALUES ($1, $2, $3, $4, $5, $6)
@@ -98,7 +98,7 @@ export class BlogsRepository {
     VALUES ($1, NULL, NULL, 'blog', false)`,
       [newBlogger.id],
     );
-    return query;
+    return query[0];
   }
 
   async getBlogsWithOwnerInfo(
