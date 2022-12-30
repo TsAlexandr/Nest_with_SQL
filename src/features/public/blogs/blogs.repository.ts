@@ -305,8 +305,10 @@ export class BlogsRepository {
   async getBlogForValidation(id: string) {
     const query = await this.dataSource.query(
       `
-    SELECT * FROM public.blogs
-    WHERE id = $1`,
+    SELECT b.* FROM public.blogs b
+    LEFT JOIN public."bannedInfo" ban
+    ON b.id = ban."bannedId"
+    WHERE b.id = $1 AND ban."isBanned" = false`,
       [id],
     );
     return query[0];
