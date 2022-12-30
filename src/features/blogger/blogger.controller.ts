@@ -85,13 +85,14 @@ export class BloggerController {
     return this.bloggersService.createBlogger(bloggersDto, userId);
   }
 
-  /* @Post(':blogId/posts')
+  @Post(':blogId/posts')
   async createNewPostForBlogger(
     @Param('blogId') blogId: string,
     @Body() newPost: NewPost,
     @CurrentUserId() userId: string,
-  ): Promise<PostsCon> {
-    const blogger = await this.bloggersService.getBloggerById(blogId);
+  ) {
+    return;
+    /*const blogger = await this.bloggersService.getBloggerById(blogId);
     if (!blogger) throw new NotFoundException();
     if (blogger.blogOwnerInfo.userId !== userId) throw new ForbiddenException();
     return this.postsService.create(
@@ -100,8 +101,8 @@ export class BloggerController {
         blogId,
       },
       blogger.name,
-    );
-  }*/
+    );*/
+  }
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':id')
@@ -110,13 +111,13 @@ export class BloggerController {
     @Body() bloggersDto: BloggersDto,
     @CurrentUserId() userId: string,
   ): Promise<boolean> {
-    const blog = await this.bloggersService.getBloggerById(id);
+    const blog = await this.bloggersService.validateBlogId(id);
     if (!blog) throw new NotFoundException();
-    if (blog.blogOwnerInfo.userId !== userId) throw new ForbiddenException();
+    if (blog.userId !== userId) throw new ForbiddenException();
     return this.bloggersService.updateBlogger(id, { ...bloggersDto });
   }
 
-  /* @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':blogId/posts/:postId')
   async updatePostById(
     @Param('blogId') blogId: string,
@@ -124,13 +125,14 @@ export class BloggerController {
     @Body() posts: NewPost,
     @CurrentUserId() userId: string,
   ) {
-    const blog = await this.bloggersService.getBloggerById(blogId);
+    return;
+    /*const blog = await this.bloggersService.getBloggerById(blogId);
     if (!blog) throw new NotFoundException();
     const post = await this.postsService.findOne(postId, null);
     if (!post) throw new NotFoundException();
     if (blog.blogOwnerInfo.userId !== userId) throw new ForbiddenException();
-    return this.postsService.update({ postId, ...posts });
-  }*/
+    return this.postsService.update({ postId, ...posts });*/
+  }
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
@@ -138,26 +140,25 @@ export class BloggerController {
     @Param('id') id: string,
     @CurrentUserId() userId: string,
   ): Promise<boolean> {
-    const blogger = await this.bloggersService.getBloggerById(id);
+    const blogger = await this.bloggersService.validateBlogId(id);
     if (!blogger) throw new NotFoundException();
-    if (blogger.blogOwnerInfo.userId !== userId) throw new ForbiddenException();
-    const removeBlogger = await this.bloggersService.deleteBlogger(id);
-    if (!removeBlogger) throw new NotFoundException();
-    return removeBlogger;
+    if (blogger.userId !== userId) throw new ForbiddenException();
+    return this.bloggersService.deleteBlogger(id);
   }
 
-  /*@HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':blogId/posts/:postId')
   async deletePostForExistingBlogger(
     @Param('blogId') blogId: string,
     @Param('postId') postId: string,
     @CurrentUserId() userId: string,
-  ): Promise<boolean> {
-    const blogger = await this.bloggersService.getBloggerById(blogId);
+  ) {
+    return;
+    /*const blogger = await this.bloggersService.getBloggerById(blogId);
     if (!blogger) throw new NotFoundException();
     if (blogger.blogOwnerInfo.userId !== userId) throw new ForbiddenException();
     const post = await this.postsService.findOne(postId, null);
     if (!post) throw new NotFoundException();
-    return this.postsService.remove(postId);
-  }*/
+    return this.postsService.remove(postId);*/
+  }
 }

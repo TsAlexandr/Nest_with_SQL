@@ -174,19 +174,19 @@ export class BlogsRepository {
       `
     SELECT id, name, "websiteUrl", description, "createdAt" 
     FROM public.blogs
-    WHERE "userId" = $1
+    WHERE "userId" = $1 AND name ILIKE $2
     ORDER BY "${sortBy}" ${sortDirection}
-    OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY
+    OFFSET $3 ROWS FETCH NEXT $4 ROWS ONLY
     `,
-      [userId, (page - 1) * pageSize, pageSize],
+      [userId, '%' + searchNameTerm + '%', (page - 1) * pageSize, pageSize],
     );
 
     const count = await this.dataSource.query(
       `
     SELECT COUNT(*) FROM public.blogs
-    WHERE "userId" = $1
+    WHERE "userId" = $1 AND name ILIKE $2
     `,
-      [userId],
+      [userId, '%' + searchNameTerm + '%'],
     );
     const total = Math.ceil(count[0].count / pageSize);
 
@@ -212,16 +212,18 @@ export class BlogsRepository {
     SELECT ub.*, u.* FROM public."userBlackList" ub
     LEFT JOIN public.users u
     ON u.id = ub."userId"
-    WHERE ub."blogId" = $1
+    WHERE ub."blogId" = $1 AND u.login ILIKE $2
     ORDER BY "${sortBy}" ${sortDirection}
-    OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY`,
-      [id, (page - 1) * pageSize, pageSize],
+    OFFSET $3 ROWS FETCH NEXT $4 ROWS ONLY`,
+      [id, '%' + searchLoginTerm + '%', (page - 1) * pageSize, pageSize],
     );
     const total = await this.dataSource.query(
       `
-    SELECT COUNT(*) FROM public."userBlackList"
-    WHERE "blogId" = $1`,
-      [id],
+    SELECT COUNT(*) FROM public."userBlackList" ub
+    LEFT JOIN public.users u
+    ON u.id = ub."userId"
+    WHERE ub."blogId" = $1 AND u.login ILIKE $2`,
+      [id, '%' + searchLoginTerm + '%'],
     );
     const pages = Math.ceil(total[0].count / pageSize);
 

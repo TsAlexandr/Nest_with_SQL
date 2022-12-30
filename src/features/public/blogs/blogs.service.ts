@@ -62,4 +62,8 @@ export class BlogsService {
       userId,
     );
   }
+
+  async validateBlogId(id: string) {
+    return this.bloggersRepository.getBlogForValidation(id);
+  }
 }
