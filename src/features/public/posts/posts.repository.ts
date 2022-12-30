@@ -1,6 +1,7 @@
 import { Paginator, PostsCon } from '../../../common/types/classes/classes';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { authUserLogin } from '../../../../test/tests.data';
 
 export class PostsRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
@@ -45,7 +46,8 @@ export class PostsRepository {
     const query = await this.dataSource.query(
       `
     INSERT INTO public.posts
-    VALUES ($1, $2, $3, $4, $5, $6)`,
+    VALUES ($1, $2, $3, $4, $5, $6)
+    RETURNING id, title, "shortDescription", content, "createdAt", "blogId"`,
       [
         createPost.id,
         createPost.title,
@@ -56,11 +58,11 @@ export class PostsRepository {
       ],
     );
     return {
-      createdAt: query[0].createdAt,
       id: query[0].id,
       title: query[0].title,
       shortDescription: query[0].shortDescription,
       content: query[0].content,
+      createdAt: query[0].createdAt,
       blogId: query[0].blogId,
       blogName: createPost.blogName,
     };

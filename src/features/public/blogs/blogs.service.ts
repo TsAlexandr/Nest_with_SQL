@@ -9,16 +9,16 @@ export class BlogsService {
   constructor(private bloggersRepository: BlogsRepository) {}
 
   async getBloggerById(id: string) {
-    return await this.bloggersRepository.getBlogsById(id);
+    return await this.bloggersRepository.getBlogForValidation(id);
   }
 
-  async createBlogger(bloggersDto: BloggersDto, id: string) {
+  async createBlogger(bloggersDto: BloggersDto, userId: string) {
     const newBlogger = {
       id: uuidv4(),
       ...bloggersDto,
       createdAt: new Date(),
     };
-    return await this.bloggersRepository.createBlogger(newBlogger, id);
+    return await this.bloggersRepository.createBlogger(newBlogger, userId);
   }
 
   async updateBlogger(id: string, update: BloggersDto) {

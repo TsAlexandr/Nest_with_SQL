@@ -35,13 +35,13 @@ export class PostsService {
 
   async create(newPost: any, blogName: string): Promise<PostsCon> {
     const createPost = {
-      createdAt: new Date(),
       id: v4(),
       title: newPost.title,
       shortDescription: newPost.shortDescription,
       content: newPost.content,
       blogId: newPost.blogId,
       blogName: blogName,
+      createdAt: new Date(),
     };
     return await this.postsRepository.createPosts(createPost);
   }

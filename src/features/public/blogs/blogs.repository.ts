@@ -77,10 +77,11 @@ export class BlogsRepository {
     );
   }
 
-  async createBlogger(newBlogger: Blogger, id: string) {
+  async createBlogger(newBlogger: Blogger, userId: string) {
     const query = await this.dataSource.query(
       `
     INSERT INTO public.blogs 
+    (id, name, "websiteUrl", description, "createdAt", "userId")
     VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING id, name, "websiteUrl", description, "createdAt"`,
       [
@@ -89,7 +90,7 @@ export class BlogsRepository {
         newBlogger.websiteUrl,
         newBlogger.description,
         newBlogger.createdAt,
-        id,
+        userId,
       ],
     );
     await this.dataSource.query(
