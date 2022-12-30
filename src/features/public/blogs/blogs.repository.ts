@@ -20,8 +20,10 @@ export class BlogsRepository {
     const bloggers = await this.dataSource.query(
       `
     SELECT id, name, description, "websiteUrl", "createdAt"
-    FROM public.blogs
-    WHERE name ILIKE $1
+    FROM public.blogs b
+    LEFT JOIN public."banInfo" ban
+    ON b.id = ban."bannedId"
+    WHERE b.name ILIKE $1 AND ban."isBanned" = false
     ORDER BY "${sortBy}" ${sortDirection}
     OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY`,
       ['%' + searchNameTerm + '%', (page - 1) * pageSize, pageSize],
@@ -29,8 +31,10 @@ export class BlogsRepository {
 
     const count = await this.dataSource.query(
       `
-    SELECT * FROM public.blogs
-    WHERE name ILIKE $1`,
+    SELECT * FROM public.blogs b
+    LEFT JOIN public."banInfo" ban
+    ON b.id = ban."bannedId"
+    WHERE b.name ILIKE $1 AND ban."isBanned" = false`,
       ['%' + searchNameTerm + '%'],
     );
     const total = Math.ceil(count[0].count / pageSize);
