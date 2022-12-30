@@ -122,15 +122,15 @@ export class BlogsRepository {
     OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY`,
       ['%' + searchNameTerm + '%', (page - 1) * pageSize, pageSize],
     );
-
     const count = await this.dataSource.query(
       `
-    SELECT COUNT(*) 
-    FROM public.blogs 
-    WHERE name ILIKE $1 `,
+    SELECT COUNT(b.*)
+    FROM public.blogs b
+    LEFT JOIN public."banInfo" ban
+    ON b.id = ban."bannedId"
+    WHERE name ILIKE $1 AND ban."bannedType" = 'blog'`,
       ['%' + searchNameTerm + '%'],
     );
-    console.log(count);
     const total = Math.ceil(count[0].count / pageSize);
 
     const blogsWithUser = query.map((el) => {
@@ -283,13 +283,14 @@ export class BlogsRepository {
     VALUES ($1, $2, $3, $4, $5)`,
         [id, banDate, null, 'blog', true],
       );
-    }
-    await this.dataSource.query(
-      `
+    } else {
+      await this.dataSource.query(
+        `
     DELETE FROM public."banInfo" 
     WHERE "bannedId" = $1 AND "bannedType" = 'blog'`,
-      [id],
-    );
+        [id],
+      );
+    }
   }
 
   async findBannedUser(blogId: string, userId: string) {
