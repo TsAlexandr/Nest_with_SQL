@@ -34,9 +34,9 @@ export class PostsRepository {
     const query = await this.dataSource.query(
       `
     SELECT p.*, b.name FROM public.posts p
-    LEFT JOIN public.blogs
+    LEFT JOIN public.blogs b
     ON p."blogId" = b.id
-    WHERE id = $1`,
+    WHERE p.id = $1`,
       [id],
     );
     return query[0];
@@ -65,6 +65,12 @@ export class PostsRepository {
       createdAt: query[0].createdAt,
       blogId: query[0].blogId,
       blogName: createPost.blogName,
+      extendedLikesInfo: {
+        dislikesCount: 0,
+        likesCount: 0,
+        myStatus: 'None',
+        newestLikes: [],
+      },
     };
   }
 
@@ -127,9 +133,9 @@ export class PostsRepository {
     const query = await this.dataSource.query(
       `
     SELECT p.*, b.name FROM public.posts p
-    LEFT JOIN public.blogs
+    LEFT JOIN public.blogs b
     ON p."blogId" = b.id
-    WHERE id = $1`,
+    WHERE p.id = $1`,
       [id],
     );
     return query[0];

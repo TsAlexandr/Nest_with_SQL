@@ -25,6 +25,7 @@ import { GetPostByIdCommand } from '../../usecases/queryCommands/getPostById.com
 import { JwtExtract } from '../auth/guards/jwt.extract';
 import { GetCommentsCommand } from '../../usecases/queryCommands/getComments.command';
 import { CreateCommentCommand } from '../../usecases/commands/createComment.command';
+import { CurrentUserId } from '../../../common/custom-decorator/current.user.decorator';
 
 @Controller('posts')
 export class PostsController {
@@ -37,10 +38,9 @@ export class PostsController {
 
   @UseGuards(JwtExtract)
   @Get()
-  async getAll(@Query() query, @Req() req) {
+  async getAll(@Query() query, @CurrentUserId() userId: string) {
     const { page, pageSize, searchNameTerm, sortBy, sortDirection } =
       Pagination.getPaginationData(query);
-    const userId = req.user.userId || null;
     return this.postsService.findAll(
       page,
       pageSize,

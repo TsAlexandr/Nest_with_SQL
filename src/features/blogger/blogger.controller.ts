@@ -152,7 +152,6 @@ export class BloggerController {
     @Param('postId') postId: string,
     @CurrentUserId() userId: string,
   ) {
-    return;
     const blogger = await this.bloggersService.getBloggerById(blogId);
     if (!blogger) throw new NotFoundException();
     if (blogger.userId !== userId) throw new ForbiddenException();

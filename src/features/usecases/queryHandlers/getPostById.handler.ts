@@ -15,9 +15,23 @@ export class GetPostByIdHandler implements IQueryHandler<GetPostByIdCommand> {
   async execute(command: GetPostByIdCommand) {
     const { id, userId } = command;
     const post = await this.postsRepository.findPostById(id);
-    const blogs = await this.blogsRepository.getBlogsById(post.blogId);
+    const blogs = await this.blogsRepository.getBlogForValidation(post.blogId);
     if (!blogs) throw new NotFoundException();
     if (!post) throw new NotFoundException();
-    return postMapper(userId, post);
+    return {
+      id: post.id,
+      title: post.title,
+      shortDescription: post.shortDescription,
+      content: post.content,
+      createdAt: post.createdAt,
+      blogId: post.blogId,
+      blogName: post.blogName,
+      extendedLikesInfo: {
+        likesCount: 0,
+        dislikesCount: 0,
+        myStatus: 'None',
+        newestLikes: [],
+      },
+    };
   }
 }
