@@ -42,13 +42,6 @@ export class PostsService {
       content: newPost.content,
       blogId: newPost.blogId,
       blogName: blogName,
-      extendedLikesInfo: {
-        dislikesCount: 0,
-        likesCount: 0,
-        myStatus: 'None',
-        newestLikes: [],
-      },
-      totalActions: [],
     };
     return await this.postsRepository.createPosts(createPost);
   }
@@ -61,7 +54,7 @@ export class PostsService {
     return await this.postsRepository.deletePost(id);
   }
 
-  async updateActions(
+  /*async updateActions(
     postId: string,
     likeStatus: string,
     userId: string,
@@ -73,5 +66,5 @@ export class PostsService {
       userId,
       login,
     );
-  }
+  }*/
 }

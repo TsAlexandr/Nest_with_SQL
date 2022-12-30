@@ -34,7 +34,7 @@ import { NewPost } from '../public/posts/dto/create-post.dto';
 export class BloggerController {
   constructor(
     private bloggersService: BlogsService,
-    /*private postsService: PostsService,*/
+    private postsService: PostsService,
     private usersService: UsersService,
     private queryBus: QueryBus,
   ) {}
@@ -92,16 +92,16 @@ export class BloggerController {
     @CurrentUserId() userId: string,
   ) {
     return;
-    /*const blogger = await this.bloggersService.getBloggerById(blogId);
+    const blogger = await this.bloggersService.getBloggerById(blogId);
     if (!blogger) throw new NotFoundException();
-    if (blogger.blogOwnerInfo.userId !== userId) throw new ForbiddenException();
+    if (blogger.userId !== userId) throw new ForbiddenException();
     return this.postsService.create(
       {
         ...newPost,
         blogId,
       },
       blogger.name,
-    );*/
+    );
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -126,12 +126,12 @@ export class BloggerController {
     @CurrentUserId() userId: string,
   ) {
     return;
-    /*const blog = await this.bloggersService.getBloggerById(blogId);
+    const blog = await this.bloggersService.getBloggerById(blogId);
     if (!blog) throw new NotFoundException();
     const post = await this.postsService.findOne(postId, null);
     if (!post) throw new NotFoundException();
-    if (blog.blogOwnerInfo.userId !== userId) throw new ForbiddenException();
-    return this.postsService.update({ postId, ...posts });*/
+    if (blog.userId !== userId) throw new ForbiddenException();
+    return this.postsService.update({ postId, ...posts });
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -154,11 +154,11 @@ export class BloggerController {
     @CurrentUserId() userId: string,
   ) {
     return;
-    /*const blogger = await this.bloggersService.getBloggerById(blogId);
+    const blogger = await this.bloggersService.getBloggerById(blogId);
     if (!blogger) throw new NotFoundException();
-    if (blogger.blogOwnerInfo.userId !== userId) throw new ForbiddenException();
+    if (blogger.userId !== userId) throw new ForbiddenException();
     const post = await this.postsService.findOne(postId, null);
     if (!post) throw new NotFoundException();
-    return this.postsService.remove(postId);*/
+    return this.postsService.remove(postId);
   }
 }

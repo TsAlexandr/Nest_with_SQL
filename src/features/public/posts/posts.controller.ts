@@ -106,7 +106,7 @@ export class PostsController {
     );
   }
 
-  @UseGuards(JwtAuthGuards, ExistingPostGuard)
+  /*@UseGuards(JwtAuthGuards, ExistingPostGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':postId/like-status')
   async updateActions(
@@ -130,5 +130,5 @@ export class PostsController {
       { message: [{ message: 'invalid value', field: 'likeStatus' }] },
       HttpStatus.BAD_REQUEST,
     );
-  }
+  }*/
 }
