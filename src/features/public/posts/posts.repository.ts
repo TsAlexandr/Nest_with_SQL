@@ -132,10 +132,12 @@ export class PostsRepository {
   async findPostById(id: string) {
     const query = await this.dataSource.query(
       `
-    SELECT p.*, b.name FROM public.posts p
+    SELECT p.*, b.name, ban.* FROM public.posts p
     LEFT JOIN public.blogs b
     ON p."blogId" = b.id
-    WHERE p.id = $1`,
+    LEFT JOIN public."banInfo" ban
+    ON p."blogId" = ban."bannedId"
+    WHERE p.id = $1 AND ban."isBanned" = false`,
       [id],
     );
     return query[0];

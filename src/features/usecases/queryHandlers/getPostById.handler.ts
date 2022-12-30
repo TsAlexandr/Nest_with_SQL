@@ -15,8 +15,6 @@ export class GetPostByIdHandler implements IQueryHandler<GetPostByIdCommand> {
   async execute(command: GetPostByIdCommand) {
     const { id, userId } = command;
     const post = await this.postsRepository.findPostById(id);
-    const blogs = await this.blogsRepository.getBlogForValidation(post.blogId);
-    if (!blogs) throw new NotFoundException();
     if (!post) throw new NotFoundException();
     return {
       id: post.id,
@@ -25,7 +23,7 @@ export class GetPostByIdHandler implements IQueryHandler<GetPostByIdCommand> {
       content: post.content,
       createdAt: post.createdAt,
       blogId: post.blogId,
-      blogName: blogs.name,
+      blogName: post.name,
       extendedLikesInfo: {
         likesCount: 0,
         dislikesCount: 0,

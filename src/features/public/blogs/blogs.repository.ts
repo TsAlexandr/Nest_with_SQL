@@ -125,15 +125,12 @@ export class BlogsRepository {
 
     const count = await this.dataSource.query(
       `
-    SELECT b.*, u.login, ban.* 
-    FROM public.blogs b
-    LEFT JOIN public.users u
-    ON b."userId" = u.id
-    LEFT JOIN public."banInfo" ban
-    ON b.id = ban."bannedId" 
-    WHERE name ILIKE $1 AND ban."bannedType" = 'blog'`,
+    SELECT COUNT(*) 
+    FROM public.blogs 
+    WHERE name ILIKE $1 `,
       ['%' + searchNameTerm + '%'],
     );
+    console.log(count);
     const total = Math.ceil(count[0].count / pageSize);
 
     const blogsWithUser = query.map((el) => {
