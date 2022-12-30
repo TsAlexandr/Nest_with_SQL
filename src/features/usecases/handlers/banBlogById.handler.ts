@@ -8,7 +8,7 @@ export class BanBlogByIdHandler implements ICommandHandler<BanBlogByIdCommand> {
   constructor(private blogsRepository: BlogsRepository) {}
   async execute(command: BanBlogByIdCommand): Promise<any> {
     const { id, isBanned } = command;
-    const blog = await this.blogsRepository.getBlogsById(id);
+    const blog = await this.blogsRepository.getBlogForValidation(id);
     if (!blog) throw new NotFoundException();
     await this.blogsRepository.banBlogById(id, isBanned);
   }

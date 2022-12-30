@@ -232,8 +232,6 @@ export class BlogsRepository {
       return {
         id: obj.id,
         login: obj.login,
-        createdAt: obj.createdAt,
-        email: obj.email,
         banInfo: {
           banDate: obj.banDate,
           banReason: obj.banReason,

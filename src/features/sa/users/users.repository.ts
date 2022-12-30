@@ -277,8 +277,8 @@ export class UsersRepository {
       `
     DELETE FROM public."banInfo";
     DELETE FROM public.users CASCADE;
-    DELETE FROM public.blogs;
-    DELETE FROM public.devices;
+    DELETE FROM public.blogs CASCADE;
+    DELETE FROM public.devices CASCADE;
     DELETE FROM public."emailConfirm";
     DELETE FROM public."recoveryData";`,
     );

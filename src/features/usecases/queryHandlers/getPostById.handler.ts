@@ -25,7 +25,7 @@ export class GetPostByIdHandler implements IQueryHandler<GetPostByIdCommand> {
       content: post.content,
       createdAt: post.createdAt,
       blogId: post.blogId,
-      blogName: post.blogName,
+      blogName: blogs.name,
       extendedLikesInfo: {
         likesCount: 0,
         dislikesCount: 0,

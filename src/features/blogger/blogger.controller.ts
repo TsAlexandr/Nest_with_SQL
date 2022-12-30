@@ -124,7 +124,6 @@ export class BloggerController {
     @Body() posts: NewPost,
     @CurrentUserId() userId: string,
   ) {
-    return;
     const blog = await this.bloggersService.getBloggerById(blogId);
     if (!blog) throw new NotFoundException();
     const post = await this.postsService.findOne(postId, null);
