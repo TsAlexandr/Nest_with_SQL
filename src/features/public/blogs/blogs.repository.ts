@@ -31,7 +31,7 @@ export class BlogsRepository {
 
     const count = await this.dataSource.query(
       `
-    SELECT * FROM public.blogs b
+    SELECT COUNT(*) FROM public.blogs b
     LEFT JOIN public."banInfo" ban
     ON b.id = ban."bannedId"
     WHERE b.name ILIKE $1 AND ban."isBanned" = false`,
