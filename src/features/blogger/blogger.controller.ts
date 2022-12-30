@@ -34,7 +34,7 @@ import { NewPost } from '../public/posts/dto/create-post.dto';
 export class BloggerController {
   constructor(
     private bloggersService: BlogsService,
-    private postsService: PostsService,
+    /*private postsService: PostsService,*/
     private usersService: UsersService,
     private queryBus: QueryBus,
   ) {}
@@ -85,7 +85,7 @@ export class BloggerController {
     return this.bloggersService.createBlogger(bloggersDto, userId);
   }
 
-  @Post(':blogId/posts')
+  /* @Post(':blogId/posts')
   async createNewPostForBlogger(
     @Param('blogId') blogId: string,
     @Body() newPost: NewPost,
@@ -101,7 +101,7 @@ export class BloggerController {
       },
       blogger.name,
     );
-  }
+  }*/
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':id')
@@ -116,7 +116,7 @@ export class BloggerController {
     return this.bloggersService.updateBlogger(id, { ...bloggersDto });
   }
 
-  @HttpCode(HttpStatus.NO_CONTENT)
+  /* @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':blogId/posts/:postId')
   async updatePostById(
     @Param('blogId') blogId: string,
@@ -130,7 +130,7 @@ export class BloggerController {
     if (!post) throw new NotFoundException();
     if (blog.blogOwnerInfo.userId !== userId) throw new ForbiddenException();
     return this.postsService.update({ postId, ...posts });
-  }
+  }*/
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
@@ -146,7 +146,7 @@ export class BloggerController {
     return removeBlogger;
   }
 
-  @HttpCode(HttpStatus.NO_CONTENT)
+  /*@HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':blogId/posts/:postId')
   async deletePostForExistingBlogger(
     @Param('blogId') blogId: string,
@@ -159,5 +159,5 @@ export class BloggerController {
     const post = await this.postsService.findOne(postId, null);
     if (!post) throw new NotFoundException();
     return this.postsService.remove(postId);
-  }
+  }*/
 }

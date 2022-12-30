@@ -19,7 +19,9 @@ import { GetBlogsByIdCommand } from '../../usecases/queryCommands/getBlogsById.c
 
 @Controller('blogs')
 export class BlogsController {
-  constructor(private queryBus: QueryBus, private postsService: PostsService) {}
+  constructor(
+    private queryBus: QueryBus /*private postsService: PostsService*/,
+  ) {}
 
   @Get()
   async getAllBlogs(@Query() query): Promise<Paginator<Blogger[]>> {
@@ -49,7 +51,7 @@ export class BlogsController {
     return blogger;
   }
 
-  @Get(':blogId/posts')
+  /*@Get(':blogId/posts')
   async getPostForBlogger(
     @Param('blogId') blogId: string,
     @Query() query,
@@ -71,5 +73,5 @@ export class BlogsController {
       sortBy,
       sortDirection,
     );
-  }
+  }*/
 }

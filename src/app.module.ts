@@ -75,9 +75,9 @@ import { BloggerUsersController } from './features/blogger/blogger-users.control
 import { CreateUserCommandHandler } from './features/usecases/handlers/createUserCommand.handler';
 
 export const CommandHandlers = [
-  //GetAllBlogsHandler,
-  //GetBannedUserForBloggerHandler,
-  //GetBlogsByIdHandler,
+  GetAllBlogsHandler,
+  GetBannedUserForBloggerHandler,
+  GetBlogsByIdHandler,
   //GetCommentsHandler,
   //GetCommentByIdHandler,
   //GetPostByIdHandler,
@@ -85,8 +85,8 @@ export const CommandHandlers = [
   //CreateCommentHandler,
   //SaveFilesHandler,
   BanUserHandler,
-  //BanUserForBlogHandler,
-  //BanBlogByIdHandler,
+  BanUserForBlogHandler,
+  BanBlogByIdHandler,
   CreateUserCommandHandler,
 ];
 
@@ -97,13 +97,13 @@ export const CommandHandlers = [
       ttl: 10,
       limit: 5,
     }),
-    MongooseModule.forRoot(process.env.MONGO_URI),
-    MongooseModule.forFeature([
-      { name: Posts.name, schema: PostsSchema },
-      { name: BloggersMongo.name, schema: BloggerSchema },
-      { name: Comments.name, schema: CommentsSchema },
-      { name: Device.name, schema: DeviceSchema },
-    ]),
+    // MongooseModule.forRoot(process.env.MONGO_URI),
+    // MongooseModule.forFeature([
+    //   { name: Posts.name, schema: PostsSchema },
+    //   { name: BloggersMongo.name, schema: BloggerSchema },
+    //   { name: Comments.name, schema: CommentsSchema },
+    //   { name: Device.name, schema: DeviceSchema },
+    // ]),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
@@ -139,8 +139,8 @@ export const CommandHandlers = [
   controllers: [
     //TelegramController,
     AppController,
-    PostsController,
-    CommentsController,
+    //PostsController,
+    //CommentsController,
     UsersController,
     AuthController,
     TruncateBase,
@@ -158,11 +158,11 @@ export const CommandHandlers = [
     //   provide: 'IBlogsRepository',
     //   useClass: BlogsRepository,
     // },
-    PostsService,
-    CommentsService,
+    //PostsService,
+    //CommentsService,
     UsersService,
-    PostsRepository,
-    CommentsRepository,
+    //PostsRepository,
+    //CommentsRepository,
     UsersRepository,
     AuthService,
     EmailService,
@@ -171,7 +171,7 @@ export const CommandHandlers = [
     JwtAuthGuards,
     BasicGuards,
     TestRepo,
-    ExistingPostGuard,
+    //ExistingPostGuard,
     JwtExtract,
     DeviceService,
     DeviceRepository,
