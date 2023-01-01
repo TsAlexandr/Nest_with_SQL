@@ -4,11 +4,11 @@ import {
   CommentsDocument,
 } from '../../../common/types/schemas/schemas.model';
 import { Model, SortOrder } from 'mongoose';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 export class CommentsRepository {
-  constructor(
-    @InjectModel(Comments.name) private commentsModel: Model<CommentsDocument>,
-  ) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async findComment(commentId: string) {
     return this.commentsModel.findOne(
@@ -84,27 +84,45 @@ export class CommentsRepository {
   }
 
   async createComment(newComment: any) {
-    await this.commentsModel.create(newComment);
-    return this.findCommentForPost(newComment.id);
+    const query = await this.dataSource.query(
+      `
+    INSERT INTO public.comments
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING id, content, "createdAt", "postId", "userId"`,
+      [
+        newComment.id,
+        newComment.content,
+        newComment.createdAt,
+        newComment.postId,
+        newComment.userId,
+      ],
+    );
+    return query;
   }
 
   async updateComment(id: string, content: string) {
-    return this.commentsModel.findOneAndUpdate(
-      { id },
-      { $set: { content: content } },
+    return this.dataSource.query(
+      `
+    UPDATE public.comments
+    SET content = $1
+    WHERE id = $2`,
+      [content, id],
     );
   }
 
   async deleteComment(id: string) {
-    const deleteComment = await this.commentsModel.deleteOne({ id });
-    return deleteComment.deletedCount === 1;
+    return this.dataSource.query(
+      `
+    DELETE FROM public.comments
+    WHERE id = $1`,
+      [id],
+    );
   }
 
   async updateLikes(
     commentId: string,
     status: string,
     userId: string,
-    login: string,
     createdAt: Date,
   ) {
     if (status === 'Like' || status === 'Dislike' || status === 'None') {
@@ -129,15 +147,6 @@ export class CommentsRepository {
         },
       );
     }
-  }
-
-  async updateCommentWithBanInfo(userId: string, isBanned: boolean) {
-    await this.commentsModel.updateOne(
-      { 'totalActions.userId': userId },
-      {
-        $set: { 'totalActions.$.isBanned': isBanned },
-      },
-    );
   }
 
   async getBlogsWithPostsAndComments(

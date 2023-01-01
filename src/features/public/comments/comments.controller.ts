@@ -64,17 +64,10 @@ export class CommentsController {
   async updateActions(
     @Param('commentId') commentId: string,
     @Body('likeStatus') status: Actions,
-    @Req() req,
+    @CurrentUserId() userId: string,
   ) {
     if (Object.values(Actions).includes(status)) {
-      const userId = req.user.payload.userId;
-      const user = await this.usersService.findUserById(userId);
-      return await this.commentsService.updateLikes(
-        commentId,
-        status,
-        userId,
-        user.login,
-      );
+      return await this.commentsService.updateLikes(commentId, status, userId);
     }
     throw new HttpException(
       { message: [{ message: 'invalid value', field: 'likeStatus' }] },

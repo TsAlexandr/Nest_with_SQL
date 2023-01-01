@@ -106,29 +106,21 @@ export class PostsController {
     );
   }
 
-  /*@UseGuards(JwtAuthGuards, ExistingPostGuard)
+  @UseGuards(JwtAuthGuards, ExistingPostGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':postId/like-status')
   async updateActions(
     @Param('postId') postId: string,
     @Body('likeStatus') likeStatus: Actions,
-    @Req() req,
+    @CurrentUserId() userId: string,
   ) {
     if (Object.values(Actions).includes(likeStatus)) {
-      const userId = req.user.payload.userId;
-      const user = await this.usersService.findUserById(userId);
-
-      return await this.postsService.updateActions(
-        postId,
-        likeStatus,
-        userId,
-        user.login,
-      );
+      return await this.postsService.updateActions(postId, likeStatus, userId);
     }
 
     throw new HttpException(
       { message: [{ message: 'invalid value', field: 'likeStatus' }] },
       HttpStatus.BAD_REQUEST,
     );
-  }*/
+  }
 }

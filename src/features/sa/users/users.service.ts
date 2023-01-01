@@ -78,10 +78,6 @@ export class UsersService {
       user.id,
       recoveryData,
     );
-    console.log(
-      updateUser,
-      'user after update information about recovery data',
-    );
     if (updateUser) {
       await this.emailService.sendEmail(
         updateUser.email,
@@ -90,8 +86,5 @@ export class UsersService {
       );
       return;
     }
-  }
-  banUser(userId: string, banInfo: BanUserDto) {
-    return this.usersRepository.banUser(userId, banInfo);
   }
 }

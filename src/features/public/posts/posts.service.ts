@@ -54,17 +54,7 @@ export class PostsService {
     return await this.postsRepository.deletePost(id);
   }
 
-  /*async updateActions(
-    postId: string,
-    likeStatus: string,
-    userId: string,
-    login: string,
-  ) {
-    return await this.postsRepository.updateActions(
-      postId,
-      likeStatus,
-      userId,
-      login,
-    );
-  }*/
+  async updateActions(postId: string, likeStatus: string, userId: string) {
+    return await this.postsRepository.updateActions(postId, likeStatus, userId);
+  }
 }

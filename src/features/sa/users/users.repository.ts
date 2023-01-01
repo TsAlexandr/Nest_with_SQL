@@ -280,7 +280,9 @@ export class UsersRepository {
     DELETE FROM public.blogs CASCADE;
     DELETE FROM public.devices CASCADE;
     DELETE FROM public."emailConfirm";
-    DELETE FROM public."recoveryData";`,
+    DELETE FROM public."recoveryData";
+    DELETE FROM public.actions;
+    `,
     );
   }
 }

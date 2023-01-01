@@ -98,36 +98,9 @@ export class PostsRepository {
     );
   }
 
-  /*async updateActions(
-    postId: string,
-    likeStatus: string,
-    userId: string,
-    login: string,
-  ) {
-    if (likeStatus === 'Like' || 'Dislike' || 'None') {
-      await this.postsModel.findOneAndUpdate(
-        { id: postId },
-        { $pull: { totalActions: { userId: userId } } },
-      );
-    }
-    if (likeStatus === 'Like' || 'Dislike') {
-      await this.postsModel.findOneAndUpdate(
-        { id: postId },
-        {
-          $push: {
-            totalActions: {
-              addedAt: new Date(),
-              action: likeStatus,
-              userId: userId,
-              login: login,
-              isBanned: false,
-            },
-          },
-        },
-      );
-      return null;
-    }
-  }*/
+  async updateActions(postId: string, likeStatus: string, userId: string) {
+    return;
+  }
 
   async findPostById(id: string) {
     const query = await this.dataSource.query(
