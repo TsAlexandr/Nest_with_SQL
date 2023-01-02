@@ -77,7 +77,7 @@ export class CommentsRepository {
         newComment.userId,
       ],
     );
-    return query;
+    return query[0];
   }
 
   async updateComment(id: string, content: string) {

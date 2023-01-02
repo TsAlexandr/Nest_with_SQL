@@ -2,8 +2,6 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateCommentCommand } from '../commands/createComment.command';
 import { CommentsRepository } from '../../public/comments/comments.repository';
 import { v4 } from 'uuid';
-import { BlogsRepository } from '../../public/blogs/blogs.repository';
-import { ForbiddenException } from '@nestjs/common';
 
 @CommandHandler(CreateCommentCommand)
 export class CreateCommentHandler
