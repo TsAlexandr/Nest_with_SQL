@@ -28,6 +28,9 @@ import { CurrentUserId } from '../../common/custom-decorator/current.user.decora
 import { QueryBus } from '@nestjs/cqrs';
 import { GetAllBloggerCommentsCommand } from '../usecases/queryCommands/getAllBloggerComments.command';
 import { NewPost } from '../public/posts/dto/create-post.dto';
+import { ExistingPostGuard } from '../public/auth/guards/existingPostGuard';
+import { ExistingBlogGuard } from '../public/auth/guards/existingBlog.guard';
+import { GetAllBloggersBlogsCommand } from '../usecases/queryCommands/getAllBloggersBlogs.command';
 
 @UseGuards(JwtAuthGuards)
 @Controller('blogger/blogs')
@@ -35,7 +38,6 @@ export class BloggerController {
   constructor(
     private bloggersService: BlogsService,
     private postsService: PostsService,
-    private usersService: UsersService,
     private queryBus: QueryBus,
   ) {}
 
@@ -46,18 +48,16 @@ export class BloggerController {
   ): Promise<Paginator<Blogger[]>> {
     const { page, pageSize, searchNameTerm, sortBy, sortDirection } =
       Pagination.getPaginationData(query);
-    const bloggers = await this.bloggersService.getBlogsByBlogger(
-      page,
-      pageSize,
-      searchNameTerm,
-      sortBy,
-      sortDirection,
-      userId,
+    return this.queryBus.execute(
+      new GetAllBloggersBlogsCommand(
+        page,
+        pageSize,
+        searchNameTerm,
+        sortBy,
+        sortDirection,
+        userId,
+      ),
     );
-    if (!bloggers) {
-      throw new NotFoundException();
-    }
-    return bloggers;
   }
 
   @Get('comments')
@@ -85,77 +85,54 @@ export class BloggerController {
     return this.bloggersService.createBlogger(bloggersDto, userId);
   }
 
+  @UseGuards(ExistingBlogGuard)
   @Post(':blogId/posts')
   async createNewPostForBlogger(
     @Param('blogId') blogId: string,
     @Body() newPost: NewPost,
-    @CurrentUserId() userId: string,
   ) {
-    const blogger = await this.bloggersService.getBloggerById(blogId);
-    if (!blogger) throw new NotFoundException();
-    if (blogger.userId !== userId) throw new ForbiddenException();
-    return this.postsService.create(
-      {
-        ...newPost,
-        blogId,
-      },
-      blogger.name,
-    );
+    return this.postsService.create({
+      ...newPost,
+      blogId,
+    });
   }
 
+  @UseGuards(ExistingBlogGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Put(':id')
+  @Put(':blogId')
   async updateBlogger(
-    @Param('id') id: string,
+    @Param('blogId') id: string,
     @Body() bloggersDto: BloggersDto,
     @CurrentUserId() userId: string,
   ): Promise<boolean> {
-    const blog = await this.bloggersService.validateBlogId(id);
-    if (!blog) throw new NotFoundException();
-    if (blog.userId !== userId) throw new ForbiddenException();
     return this.bloggersService.updateBlogger(id, { ...bloggersDto });
   }
 
+  @UseGuards(ExistingPostGuard, ExistingBlogGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':blogId/posts/:postId')
   async updatePostById(
     @Param('blogId') blogId: string,
     @Param('postId') postId: string,
     @Body() posts: NewPost,
-    @CurrentUserId() userId: string,
   ) {
-    const blog = await this.bloggersService.getBloggerById(blogId);
-    if (!blog) throw new NotFoundException();
-    const post = await this.postsService.findOne(postId, null);
-    if (!post) throw new NotFoundException();
-    if (blog.userId !== userId) throw new ForbiddenException();
     return this.postsService.update({ postId, ...posts });
   }
 
+  @UseGuards(ExistingBlogGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete(':id')
-  async deleteBlogger(
-    @Param('id') id: string,
-    @CurrentUserId() userId: string,
-  ): Promise<boolean> {
-    const blogger = await this.bloggersService.validateBlogId(id);
-    if (!blogger) throw new NotFoundException();
-    if (blogger.userId !== userId) throw new ForbiddenException();
+  @Delete(':blogId')
+  async deleteBlogger(@Param('blogId') id: string): Promise<boolean> {
     return this.bloggersService.deleteBlogger(id);
   }
 
+  @UseGuards(ExistingPostGuard, ExistingBlogGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':blogId/posts/:postId')
   async deletePostForExistingBlogger(
     @Param('blogId') blogId: string,
     @Param('postId') postId: string,
-    @CurrentUserId() userId: string,
   ) {
-    const blogger = await this.bloggersService.getBloggerById(blogId);
-    if (!blogger) throw new NotFoundException();
-    if (blogger.userId !== userId) throw new ForbiddenException();
-    const post = await this.postsService.findOne(postId, null);
-    if (!post) throw new NotFoundException();
     return this.postsService.remove(postId);
   }
 }

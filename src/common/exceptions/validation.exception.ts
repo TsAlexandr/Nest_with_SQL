@@ -18,7 +18,6 @@ export class ValidationException implements ExceptionFilter {
       const errorsMessages = [];
 
       const resp: any = exception.getResponse();
-      console.log(resp);
 
       resp.message.forEach((item) => errorsMessages.push(item));
       response.status(status).json({ errorsMessages: errorsMessages });

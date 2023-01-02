@@ -26,6 +26,7 @@ import { JwtExtract } from '../auth/guards/jwt.extract';
 import { GetCommentsCommand } from '../../usecases/queryCommands/getComments.command';
 import { CreateCommentCommand } from '../../usecases/commands/createComment.command';
 import { CurrentUserId } from '../../../common/custom-decorator/current.user.decorator';
+import { GetAllPostsCommand } from '../../usecases/queryCommands/getAllPosts.command';
 
 @Controller('posts')
 export class PostsController {
@@ -39,16 +40,9 @@ export class PostsController {
   @UseGuards(JwtExtract)
   @Get()
   async getAll(@Query() query, @CurrentUserId() userId: string) {
-    const { page, pageSize, searchNameTerm, sortBy, sortDirection } =
-      Pagination.getPaginationData(query);
-    return this.postsService.findAll(
-      page,
-      pageSize,
-      userId,
-      null,
-      searchNameTerm,
-      sortBy,
-      sortDirection,
+    const { page, pageSize, sortBy, sortDirection } = Pagination.getData(query);
+    return this.queryBus.execute(
+      new GetAllPostsCommand(page, pageSize, sortBy, sortDirection, userId),
     );
   }
   @UseGuards(JwtExtract)
@@ -61,17 +55,14 @@ export class PostsController {
     return post;
   }
 
-  @UseGuards(JwtExtract)
+  @UseGuards(JwtExtract, ExistingPostGuard)
   @Get(':postId/comments')
   async getCommentsInPages(
     @Query() query,
     @Param('postId') postId: string,
-    @Req() req,
+    @CurrentUserId() userId: string,
   ) {
     const { page, pageSize, sortBy, sortDirection } = Pagination.getData(query);
-    const userId = req.user.userId || null;
-    const post = await this.postsService.findOne(postId, null);
-    if (!post) throw new NotFoundException();
     return await this.queryBus.execute(
       new GetCommentsCommand(
         postId,
@@ -84,25 +75,15 @@ export class PostsController {
     );
   }
 
-  @UseGuards(JwtAuthGuards)
+  @UseGuards(JwtAuthGuards, ExistingPostGuard)
   @Post(':postId/comments')
   async createCommentForPost(
     @Param('postId') postId: string,
     @Body() updateCommentDto: UpdateCommentDto,
-    @Req() req,
+    @CurrentUserId() userId: string,
   ) {
-    const userLogin = req.user.payload.userLogin;
-    const userId = req.user.payload.userId;
-    const isPost = await this.postsService.findOne(postId, null);
-    if (!isPost) throw new NotFoundException();
     return this.commandBus.execute(
-      new CreateCommentCommand(
-        postId,
-        updateCommentDto.content,
-        userId,
-        userLogin,
-        isPost.blogId,
-      ),
+      new CreateCommentCommand(postId, updateCommentDto.content, userId),
     );
   }
 

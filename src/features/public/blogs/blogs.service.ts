@@ -2,15 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { BloggersDto } from './dto/bloggers.dto';
 import { BlogsRepository } from './blogs.repository';
-import { SortOrder } from 'mongoose';
 
 @Injectable()
 export class BlogsService {
   constructor(private bloggersRepository: BlogsRepository) {}
-
-  async getBloggerById(id: string) {
-    return await this.bloggersRepository.getBlogForValidation(id);
-  }
 
   async createBlogger(bloggersDto: BloggersDto, userId: string) {
     const newBlogger = {

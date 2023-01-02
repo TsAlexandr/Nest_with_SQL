@@ -9,18 +9,10 @@ import { ForbiddenException } from '@nestjs/common';
 export class CreateCommentHandler
   implements ICommandHandler<CreateCommentCommand>
 {
-  constructor(
-    private commentsRepository: CommentsRepository,
-    private blogsRepository: BlogsRepository,
-  ) {}
+  constructor(private commentsRepository: CommentsRepository) {}
 
   async execute(command: CreateCommentCommand) {
-    const { postId, content, userId, blogId } = command;
-    const isBannedUser = await this.blogsRepository.findBannedUser(
-      blogId,
-      userId,
-    );
-    if (isBannedUser) throw new ForbiddenException();
+    const { postId, content, userId } = command;
     const newComment = {
       id: v4(),
       postId,

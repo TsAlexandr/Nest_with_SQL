@@ -73,6 +73,9 @@ import { BanBlogByIdHandler } from './features/usecases/handlers/banBlogById.han
 import { GetAllBloggerCommentsHandler } from './features/usecases/queryHandlers/getAllBloggerComments.handler';
 import { BloggerUsersController } from './features/blogger/blogger-users.controller';
 import { CreateUserCommandHandler } from './features/usecases/handlers/createUserCommand.handler';
+import { GetAllBloggersBlogsCommand } from './features/usecases/queryCommands/getAllBloggersBlogs.command';
+import { GetAllBloggersBlogsHandler } from './features/usecases/queryHandlers/getAllBloggersBlogs.handler';
+import { GetAllPostsHandler } from './features/usecases/queryHandlers/getAllPosts.handler';
 
 export const CommandHandlers = [
   GetAllBlogsHandler,
@@ -82,6 +85,8 @@ export const CommandHandlers = [
   GetCommentByIdHandler,
   GetPostByIdHandler,
   GetAllBloggerCommentsHandler,
+  GetAllBloggersBlogsHandler,
+  GetAllPostsHandler,
   CreateCommentHandler,
   SaveFilesHandler,
   BanUserHandler,

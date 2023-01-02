@@ -9,38 +9,17 @@ import { SortOrder } from 'mongoose';
 export class PostsService {
   constructor(private postsRepository: PostsRepository) {}
 
-  async findAll(
-    page: number,
-    pageSize: number,
-    userId: string,
-    blogId: string | null,
-    searchNameTerm: string,
-    sortBy: string,
-    sortDirection: any,
-  ) {
-    return await this.postsRepository.getPosts(
-      page,
-      pageSize,
-      userId,
-      blogId,
-      searchNameTerm,
-      sortBy,
-      sortDirection,
-    );
-  }
-
   async findOne(id: string, userId: string) {
     return this.postsRepository.getPostById(id, userId);
   }
 
-  async create(newPost: any, blogName: string): Promise<PostsCon> {
+  async create(newPost: any): Promise<PostsCon> {
     const createPost = {
       id: v4(),
       title: newPost.title,
       shortDescription: newPost.shortDescription,
       content: newPost.content,
       blogId: newPost.blogId,
-      blogName: blogName,
       createdAt: new Date(),
     };
     return await this.postsRepository.createPosts(createPost);

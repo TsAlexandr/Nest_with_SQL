@@ -9,25 +9,17 @@ export class PostsRepository {
   async getPosts(
     page: number,
     pageSize: number,
-    userId: string,
-    blogId: string,
-    searchNameTerm: string,
     sortBy: string,
     sortDirection: any,
+    userId: string,
   ): Promise<Paginator<PostsCon[]>> {
     const query = await this.dataSource.query(`
-    SELECT * FROM public.posts`);
+    SELECT p.* FROM public.posts p
+    ORDER BY "${sortBy}" ${sortDirection}
+    OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY`);
     const total = await this.dataSource.query(`
     SELECT * FROM public.posts`);
-    const pages = Math.ceil(total / pageSize);
-
-    return {
-      pagesCount: pages,
-      page: page,
-      pageSize: pageSize,
-      totalCount: total,
-      items: query,
-    };
+    return query;
   }
 
   async getPostById(id: string, userId: string) {
