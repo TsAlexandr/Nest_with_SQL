@@ -19,9 +19,7 @@ import { GetBlogsByIdCommand } from '../../usecases/queryCommands/getBlogsById.c
 
 @Controller('blogs')
 export class BlogsController {
-  constructor(
-    private queryBus: QueryBus /*private postsService: PostsService*/,
-  ) {}
+  constructor(private queryBus: QueryBus, private postsService: PostsService) {}
 
   @Get()
   async getAllBlogs(@Query() query): Promise<Paginator<Blogger[]>> {
@@ -51,14 +49,13 @@ export class BlogsController {
     return blogger;
   }
 
-  /*@Get(':blogId/posts')
-  async getPostForBlogger(
+  @Get(':blogId/posts')
+  async getPostsById(
     @Param('blogId') blogId: string,
     @Query() query,
     @Req() req,
   ): Promise<Paginator<PostsCon[]>> {
-    const { page, pageSize, searchNameTerm, sortBy, sortDirection } =
-      Pagination.getPaginationData(query);
+    const { page, pageSize, sortBy, sortDirection } = Pagination.getData(query);
     const userId = req.user.userId || null;
     const blogger = await this.queryBus.execute(
       new GetBlogsByIdCommand(blogId),
@@ -69,9 +66,8 @@ export class BlogsController {
       pageSize,
       userId,
       blogId,
-      searchNameTerm,
       sortBy,
       sortDirection,
     );
-  }*/
+  }
 }

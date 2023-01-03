@@ -91,7 +91,19 @@ export class PostsRepository {
   }
 
   async updateActions(postId: string, likeStatus: string, userId: string) {
-    return;
+    await this.dataSource.query(
+      `
+    DELETE FROM public.actions
+    WHERE "userId" = $1 AND "parentId" = $2 AND "parentType" = 'post'`,
+      [userId, postId],
+    );
+    const date = new Date();
+    return this.dataSource.query(
+      `
+    INSERT INTO public.actions
+    VALUES ($1, $2, $3, $4, 'post')`,
+      [userId, likeStatus, date, postId],
+    );
   }
 
   async findPostById(id: string) {
@@ -102,6 +114,8 @@ export class PostsRepository {
     ON p."blogId" = b.id
     LEFT JOIN public."banInfo" ban
     ON p."blogId" = ban."bannedId"
+    LEFT JOIN public.actions a
+    ON p.id = a."parentId"
     WHERE p.id = $1 AND ban."isBanned" = false`,
       [id],
     );
