@@ -15,6 +15,12 @@ export class PostsRepository {
   ): Promise<Paginator<PostsCon[]>> {
     const query = await this.dataSource.query(`
     SELECT p.* FROM public.posts p
+    LEFT JOIN public.actions a
+    ON p.id = a."parentId"
+    LEFT JOIN public.users u
+    ON p."userId" = u.id
+    LEFT JOIN public."banInfo" ban
+    ON u.id = ban."bannedId"
     ORDER BY "${sortBy}" ${sortDirection}
     OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY`);
     const total = await this.dataSource.query(`
