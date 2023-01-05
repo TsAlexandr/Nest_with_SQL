@@ -81,12 +81,15 @@ export class CommentsRepository {
       );
     }
     if (status === 'Like' || status === 'Dislike') {
-      return this.dataSource.query(`
+      return this.dataSource.query(
+        `
       UPDATE public.actions
       SET action = $1, "addedAt" = $2
-      WHERE "userId" = $1 
-        AND "parentId" = $2 
-          AND "parentType" = 'comment'`);
+      WHERE "userId" = $3 
+        AND "parentId" = $4 
+          AND "parentType" = 'comment'`,
+        [status, createdAt, userId, commentId],
+      );
     }
   }
 

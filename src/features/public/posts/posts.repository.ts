@@ -1,7 +1,6 @@
 import { Paginator, PostsCon } from '../../../common/types/classes/classes';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { authUserLogin } from '../../../../test/tests.data';
 
 export class PostsRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}

@@ -297,16 +297,6 @@ export class BlogsRepository {
       );
     }
   }
-
-  async findBannedUser(blogId: string, userId: string) {
-    const query = await this.dataSource.query(
-      `
-    SELECT * FROM public."userBlackList"
-    WHERE "blogId" = $1, "userId" = $2`,
-      [blogId, userId],
-    );
-    return query[0];
-  }
   async getBlogForValidation(id: string) {
     const query = await this.dataSource.query(
       `
