@@ -43,6 +43,6 @@ export class PostsService {
     sortBy: any,
     sortDirection: string,
   ) {
-    return;
+    return {};
   }
 }

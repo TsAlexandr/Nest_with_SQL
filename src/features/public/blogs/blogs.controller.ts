@@ -54,7 +54,7 @@ export class BlogsController {
     @Param('blogId') blogId: string,
     @Query() query,
     @Req() req,
-  ): Promise<Paginator<PostsCon[]>> {
+  ) {
     const { page, pageSize, sortBy, sortDirection } = Pagination.getData(query);
     const userId = req.user.userId || null;
     const blogger = await this.queryBus.execute(

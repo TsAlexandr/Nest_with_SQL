@@ -18,16 +18,12 @@ export class JwtExtract implements CanActivate {
         request.headers.authorization.split(' ')[1],
         secret,
       );
-      console.log(user);
       if (user) {
         request.user = { userId: user.userId, userLogin: user.userLogin };
       }
       return true;
     } catch (e) {
-      console.log(e);
       return true;
     }
   }
 }
-
-//process.env.JWT_SECRET_KEY

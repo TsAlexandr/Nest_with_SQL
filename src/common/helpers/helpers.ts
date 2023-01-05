@@ -1,33 +1,25 @@
 export const postMapper = (id, post) => {
-  const currentUserStatus = post.totalActions.find(
-    (el) => el.userId === id && el.isBanned === false,
-  );
-  const likesCount = post.totalActions.filter(
-    (el) => el.action === 'Like' && el.isBanned === false,
-  ).length;
-  const dislikesCount = post.totalActions.filter(
-    (el) => el.action === 'Dislike' && el.isBanned === false,
-  ).length;
-  const actions = post.totalActions;
+  const currentUserStatus = post.find((el) => el.userId === id);
+  const likesCount = post.filter((el) => el.action === 'Like').length;
+  const dislikesCount = post.filter((el) => el.action === 'Dislike').length;
   return {
-    createdAt: post.createdAt,
-    id: post.id,
-    title: post.title,
-    shortDescription: post.shortDescription,
-    content: post.content,
-    blogId: post.blogId,
-    blogName: post.blogName,
+    id: post[0].id,
+    title: post[0].title,
+    shortDescription: post[0].shortDescription,
+    content: post[0].content,
+    createdAt: post[0].createdAt,
+    blogId: post[0].blogId,
+    blogName: post[0].name,
     extendedLikesInfo: {
       likesCount: likesCount,
       dislikesCount: dislikesCount,
       myStatus: currentUserStatus ? currentUserStatus.action : 'None',
-      newestLikes: actions
-        .filter((el) => el.action === 'Like' && el.isBanned === false)
+      newestLikes: post
+        .filter((el) => el.action === 'Like')
         .reverse()
         .slice(0, 3)
         .map((el) => {
           delete el.action;
-          delete el.isBanned;
           return el;
         }),
     },

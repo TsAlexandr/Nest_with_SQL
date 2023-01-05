@@ -12,18 +12,36 @@ export class PostsRepository {
     sortDirection: any,
     userId: string,
   ): Promise<Paginator<PostsCon[]>> {
-    const query = await this.dataSource.query(`
-    SELECT p.* FROM public.posts p
+    const query = await this.dataSource.query(
+      `
+    SELECT p.*, b.name, u.login,
+        (SELECT COUNT(*) 
+            FROM public.actions a
+                LEFT JOIN public."banInfo" ban
+                    ON a."userId" = ban."bannedId" 
+            WHERE a.action = 'Like' AND ban."isBanned" = false) as "likesCount",
+        (SELECT COUNT(*)
+            FROM public.actions a
+                LEFT JOIN public."banInfo" ban
+                    ON a."userId" = ban."bannedId" 
+            WHERE a.action = 'Dislike' AND ban."isBanned" = false) as "dislikesCount"
+              
+    FROM public.posts p
     LEFT JOIN public.actions a
     ON p.id = a."parentId"
+    LEFT JOIN public.blogs b
+    ON b.id = p."blogId"
     LEFT JOIN public.users u
-    ON p."userId" = u.id
+    ON a."userId" = u.id
     LEFT JOIN public."banInfo" ban
     ON u.id = ban."bannedId"
+    WHERE ban."isBanned" = false 
     ORDER BY "${sortBy}" ${sortDirection}
-    OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY`);
+    OFFSET $1 ROWS FETCH NEXT $2 ROWS ONLY`,
+      [(page - 1) * pageSize, pageSize],
+    );
     const total = await this.dataSource.query(`
-    SELECT * FROM public.posts`);
+    SELECT COUNT(*) FROM public.posts`);
     return query;
   }
 
@@ -114,16 +132,20 @@ export class PostsRepository {
   async findPostById(id: string) {
     const query = await this.dataSource.query(
       `
-    SELECT p.*, b.name, ban.* FROM public.posts p
-    LEFT JOIN public.blogs b
-    ON p."blogId" = b.id
-    LEFT JOIN public."banInfo" ban
-    ON p."blogId" = ban."bannedId"
-    LEFT JOIN public.actions a
-    ON p.id = a."parentId"
+    SELECT p.*, b.name, a."userId", a.action, 
+       a."addedAt", u.login 
+    FROM public.posts p
+        LEFT JOIN public.blogs b
+            ON p."blogId" = b.id
+        LEFT JOIN public."banInfo" ban
+            ON p."blogId" = ban."bannedId"
+        LEFT JOIN public.actions a
+            ON p.id = a."parentId"
+        LEFT JOIN public.users u
+            ON a."userId" = u.id
     WHERE p.id = $1 AND ban."isBanned" = false`,
       [id],
     );
-    return query[0];
+    return query;
   }
 }
