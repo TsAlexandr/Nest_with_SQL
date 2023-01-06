@@ -14,7 +14,7 @@ export class ExistingBlogGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> | null {
     const request = context.switchToHttp().getRequest();
     const id = request.params.blogId;
-    const userId = request.user.payload.userId;
+    const userId = request.user.userId;
     const blog = await this.blogsService.validateBlogId(id);
     if (!blog)
       throw new NotFoundException({

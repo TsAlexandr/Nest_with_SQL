@@ -8,7 +8,7 @@ export class CommentsService {
   constructor(private commentsRepository: CommentsRepository) {}
 
   async findComment(commentId: string) {
-    return await this.commentsRepository.findComment(commentId);
+    return await this.commentsRepository.findComment(commentId, null);
   }
 
   async updateComment(id: string, content: string) {

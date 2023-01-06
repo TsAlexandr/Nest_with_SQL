@@ -12,47 +12,115 @@ export class PostsRepository {
     sortDirection: any,
     userId: string,
   ): Promise<Paginator<PostsCon[]>> {
+    const dynamicSort = `p."${sortBy}"`;
     const query = await this.dataSource.query(
       `
-    SELECT p.*, b.name, u.login,
-        (SELECT COUNT(*) 
-            FROM public.actions a
-                LEFT JOIN public."banInfo" ban
+    SELECT p.*, b.name as "blogName",
+        (SELECT ROW_TO_JSON(actions_info) FROM 
+            (SELECT * FROM (SELECT COUNT(*) as "likesCount"
+                FROM public.actions a
+                    LEFT JOIN public."banInfo" ban
+                    ON a."userId" = ban."bannedId"
+                WHERE a.action = 'Like' AND ban."isBanned" = false
+                AND a."parentId" = p.id) as "likesCount",
+            (SELECT COUNT(*) as "dislikesCount"
+                FROM public.actions a
+                    LEFT JOIN public."banInfo" ban
                     ON a."userId" = ban."bannedId" 
-            WHERE a.action = 'Like' AND ban."isBanned" = false) as "likesCount",
-        (SELECT COUNT(*)
-            FROM public.actions a
-                LEFT JOIN public."banInfo" ban
-                    ON a."userId" = ban."bannedId" 
-            WHERE a.action = 'Dislike' AND ban."isBanned" = false) as "dislikesCount"
-              
+                WHERE a.action = 'Dislike' AND ban."isBanned" = false
+                AND a."parentId" = p.id) as "dislikesCount",
+            COALESCE((SELECT a."action" as "myStatus" 
+                FROM public.actions a
+                WHERE a."userId" = $3
+                AND a."parentType" = 'post' 
+                AND a."parentId" = p.id), 'None') as "myStatus",
+        COALESCE((SELECT 
+        ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(last_likes))) as "newestLikes" 
+            FROM 
+                (SELECT a."userId", a."addedAt", u.login 
+                    FROM public.actions a
+                    LEFT JOIN public.users u 
+                    ON a."userId" = u.id
+                    LEFT JOIN "banInfo" ban2
+                    ON ban2."bannedId" = u.id
+                    WHERE a.action = 'Like' 
+                    AND a."parentType"='post' 
+                    AND a."parentId" = p.id 
+                    AND u.id = a."userId" 
+                    AND ban2."isBanned" = false 
+                    LIMIT 3) last_likes), '[]') as "newestLikes"
+                ) actions_info ) as "extendedLikesInfo"
     FROM public.posts p
-    LEFT JOIN public.actions a
-    ON p.id = a."parentId"
     LEFT JOIN public.blogs b
     ON b.id = p."blogId"
-    LEFT JOIN public.users u
-    ON a."userId" = u.id
     LEFT JOIN public."banInfo" ban
-    ON u.id = ban."bannedId"
-    WHERE ban."isBanned" = false 
-    ORDER BY "${sortBy}" ${sortDirection}
+    ON b.id = ban."bannedId"
+    WHERE ban."isBanned" = false
+    ORDER BY ${dynamicSort} ${sortDirection}
     OFFSET $1 ROWS FETCH NEXT $2 ROWS ONLY`,
-      [(page - 1) * pageSize, pageSize],
+      [(page - 1) * pageSize, pageSize, userId],
     );
-    const total = await this.dataSource.query(`
-    SELECT COUNT(*) FROM public.posts`);
-    return query;
+    const count = await this.dataSource.query(`
+    SELECT COUNT(*) FROM public.posts p
+    LEFT JOIN public.blogs b
+    ON b.id = p."blogId"
+    LEFT JOIN public."banInfo" ban
+    ON b.id = ban."bannedId"
+    WHERE ban."isBanned" = false`);
+    const total = Math.ceil(count[0].count / pageSize);
+    return {
+      pagesCount: total,
+      page: page,
+      pageSize: pageSize,
+      totalCount: +count[0].count,
+      items: query,
+    };
   }
-
   async getPostById(id: string, userId: string) {
     const query = await this.dataSource.query(
       `
-    SELECT p.*, b.name FROM public.posts p
+    SELECT p.*, b.name as "blogName",
+        (SELECT ROW_TO_JSON(actions_info) FROM 
+            (SELECT * FROM (SELECT COUNT(*) as "likesCount"
+                FROM public.actions a
+                    LEFT JOIN public."banInfo" ban
+                    ON a."userId" = ban."bannedId"
+                WHERE a.action = 'Like' AND ban."isBanned" = false
+                AND a."parentId" = p.id) as "likesCount",
+            (SELECT COUNT(*) as "dislikesCount"
+                FROM public.actions a
+                    LEFT JOIN public."banInfo" ban
+                    ON a."userId" = ban."bannedId" 
+                WHERE a.action = 'Dislike' AND ban."isBanned" = false
+                AND a."parentId" = p.id) as "dislikesCount",
+            COALESCE((SELECT a."action" as "myStatus" 
+                FROM public.actions a
+                WHERE a."userId" = $2
+                AND a."parentType" = 'post' 
+                AND a."parentId" = p.id), 'None') as "myStatus",
+        COALESCE((SELECT 
+        ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(last_likes))) as "newestLikes" 
+            FROM 
+                (SELECT a."userId", a."addedAt", u.login 
+                    FROM public.actions a
+                    LEFT JOIN public.users u 
+                    ON a."userId" = u.id
+                    LEFT JOIN public."banInfo" ban2
+                    ON ban2."bannedId" = u.id
+                    WHERE a.action = 'Like' 
+                    AND a."parentType"='post' 
+                    AND a."parentId" = p.id 
+                    AND u.id = a."userId" 
+                    AND ban2."isBanned" = false 
+                    LIMIT 3) last_likes), '[]') as "newestLikes"
+                ) actions_info ) as "extendedLikesInfo" 
+    FROM public.posts p
     LEFT JOIN public.blogs b
-    ON p."blogId" = b.id
+    ON b.id = p."blogId"
+    LEFT JOIN public."banInfo" ban
+    ON b.id = ban."bannedId"
     WHERE p.id = $1`,
-      [id],
+      [id, userId],
     );
     return query[0];
   }
@@ -127,25 +195,5 @@ export class PostsRepository {
     VALUES ($1, $2, $3, $4, 'post')`,
       [userId, likeStatus, date, postId],
     );
-  }
-
-  async findPostById(id: string) {
-    const query = await this.dataSource.query(
-      `
-    SELECT p.*, b.name, a."userId", a.action, 
-       a."addedAt", u.login 
-    FROM public.posts p
-        LEFT JOIN public.blogs b
-            ON p."blogId" = b.id
-        LEFT JOIN public."banInfo" ban
-            ON p."blogId" = ban."bannedId"
-        LEFT JOIN public.actions a
-            ON p.id = a."parentId"
-        LEFT JOIN public.users u
-            ON a."userId" = u.id
-    WHERE p.id = $1 AND ban."isBanned" = false`,
-      [id],
-    );
-    return query;
   }
 }
