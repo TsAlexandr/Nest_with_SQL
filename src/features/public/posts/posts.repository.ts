@@ -31,9 +31,7 @@ export class PostsRepository {
                 AND a."parentId" = p.id) as "dislikesCount",
             COALESCE((SELECT a."action" as "myStatus" 
                 FROM public.actions a
-                WHERE a."userId" = $3
-                AND a."parentType" = 'post' 
-                AND a."parentId" = p.id), 'None') as "myStatus",
+                WHERE a."userId" = $3), 'None') as "myStatus",
         COALESCE((SELECT 
         ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(last_likes))) as "newestLikes" 
             FROM 
@@ -95,9 +93,7 @@ export class PostsRepository {
                 AND a."parentId" = p.id) as "dislikesCount",
             COALESCE((SELECT a."action" as "myStatus" 
                 FROM public.actions a
-                WHERE a."userId" = $2
-                AND a."parentType" = 'post' 
-                AND a."parentId" = p.id), 'None') as "myStatus",
+                WHERE a."userId" = $2), 'None') as "myStatus",
         COALESCE((SELECT 
         ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(last_likes))) as "newestLikes" 
             FROM 

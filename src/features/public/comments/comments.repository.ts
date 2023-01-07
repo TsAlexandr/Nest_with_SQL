@@ -23,9 +23,7 @@ export class CommentsRepository {
                 AND a."parentId" = c.id) as "dislikesCount",
             COALESCE((SELECT a."action" as "myStatus" 
                 FROM actions a
-                WHERE a."userId" = $2
-                AND a."parentType" = 'post' 
-                AND a."parentId" = c.id), 'None') as "myStatus"
+                WHERE a."userId" = $2), 'None') as "myStatus"
                 ) actions_info ) as "likesInfo" 
     FROM public.comments c
     LEFT JOIN public.users u
@@ -69,9 +67,7 @@ export class CommentsRepository {
                 AND a."parentId" = c.id) as "dislikesCount",
             COALESCE((SELECT a."action" as "myStatus" 
                 FROM actions a
-                WHERE a."userId" = $1
-                AND a."parentType" = 'post' 
-                AND a."parentId" = c.id), 'None') as "myStatus"
+                WHERE a."userId" = $1), 'None') as "myStatus"
                 ) actions_info ) as "likesInfo" 
     FROM public.comments c
     LEFT JOIN public.users u
@@ -210,9 +206,7 @@ export class CommentsRepository {
                 AND a."parentId" = c.id) as "dislikesCount",
             COALESCE((SELECT a."action" as "myStatus" 
                 FROM actions a
-                WHERE a."userId" = $1
-                AND a."parentType" = 'post' 
-                AND a."parentId" = c.id), 'None') as "myStatus"
+                WHERE a."userId" = $1), 'None') as "myStatus"
                 ) actions_info ) as "likesInfo",
         (SELECT ROW_TO_JSON(comments_info) FROM 
             (SELECT * FROM 
