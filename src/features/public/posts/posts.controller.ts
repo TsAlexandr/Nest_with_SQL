@@ -39,10 +39,16 @@ export class PostsController {
 
   @UseGuards(JwtExtract)
   @Get()
-  async getAll(@Query() query, @CurrentUserId() userId: string) {
+  async getAll(@Query() query, @Req() req) {
     const { page, pageSize, sortBy, sortDirection } = Pagination.getData(query);
     return this.queryBus.execute(
-      new GetAllPostsCommand(page, pageSize, sortBy, sortDirection, userId),
+      new GetAllPostsCommand(
+        page,
+        pageSize,
+        sortBy,
+        sortDirection,
+        req.user?.userId,
+      ),
     );
   }
   @UseGuards(JwtExtract)

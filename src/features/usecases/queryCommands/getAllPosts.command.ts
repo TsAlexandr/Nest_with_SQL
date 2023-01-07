@@ -4,6 +4,6 @@ export class GetAllPostsCommand {
     public readonly pageSize: number,
     public readonly sortBy: string,
     public readonly sortDirection: any,
-    public readonly userId: string,
+    public readonly userId: string | null,
   ) {}
 }
