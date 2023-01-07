@@ -1,5 +1,3 @@
-import { SortOrder } from 'mongoose';
-
 export class GetCommentsCommand {
   constructor(
     public readonly postId: string,

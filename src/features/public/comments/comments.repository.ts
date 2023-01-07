@@ -40,7 +40,7 @@ export class CommentsRepository {
     `,
       [commentId, userId],
     );
-    return query[0];
+    return query;
   }
   async getCommentWithPage(
     postId: string,
@@ -87,7 +87,22 @@ export class CommentsRepository {
     OFFSET $3 ROWS FETCH NEXT $4 ROWS ONLY`,
       [userId, postId, (page - 1) * pageSize, pageSize],
     );
-    return query[0];
+    const count = await this.dataSource.query(`
+    SELECT COUNT(*) FROM public.comments c
+    LEFT JOIN public.users u
+    ON c."userId" = u.id
+    LEFT JOIN public."banInfo" ban
+    ON u.id = ban."bannedId"
+    WHERE ban."isBanned" = false`);
+
+    const total = Math.ceil(count[0].count / pageSize);
+    return {
+      pagesCount: total,
+      page: page,
+      pageSize: pageSize,
+      totalCount: +count[0].count,
+      items: query,
+    };
   }
 
   async createComment(newComment: any) {
@@ -224,6 +239,21 @@ export class CommentsRepository {
     OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY`,
       [ownerId, (page - 1) * pageSize, pageSize],
     );
-    return query;
+    const count = await this.dataSource.query(`
+    SELECT COUNT(*) FROM public.comments c
+    LEFT JOIN public.users u
+    ON c."userId" = u.id
+    LEFT JOIN public."banInfo" ban
+    ON u.id = ban."bannedId"
+    WHERE ban."isBanned" = false`);
+
+    const total = Math.ceil(count[0].count / pageSize);
+    return {
+      pagesCount: total,
+      page: page,
+      pageSize: pageSize,
+      totalCount: +count[0].count,
+      items: query,
+    };
   }
 }
