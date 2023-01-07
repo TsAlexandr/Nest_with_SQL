@@ -140,21 +140,22 @@ export class PostsRepository {
         createPost.blogId,
       ],
     );
-    return {
-      id: query[0].id,
-      title: query[0].title,
-      shortDescription: query[0].shortDescription,
-      content: query[0].content,
-      createdAt: query[0].createdAt,
-      blogId: query[0].blogId,
-      blogName: createPost.blogName,
-      extendedLikesInfo: {
-        dislikesCount: 0,
-        likesCount: 0,
-        myStatus: 'None',
-        newestLikes: [],
-      },
+    const result = await this.dataSource.query(
+      `
+    SELECT p.*, b.name AS "blogName"
+    FROM public.posts p
+    LEFT JOIN public.blogs b
+    ON p."blogId" = b.id
+    WHERE p.id = $1`,
+      [query[0].id],
+    );
+    result[0].extendedLikesInfo = {
+      dislikesCount: 0,
+      likesCount: 0,
+      myStatus: 'None',
+      newestLikes: [],
     };
+    return result[0];
   }
 
   async updatePost(updPost: any) {

@@ -40,7 +40,7 @@ export class CommentsRepository {
     `,
       [commentId, userId],
     );
-    return query;
+    return query[0];
   }
   async getCommentWithPage(
     postId: string,
@@ -88,12 +88,17 @@ export class CommentsRepository {
       [userId, postId, (page - 1) * pageSize, pageSize],
     );
     const count = await this.dataSource.query(`
-    SELECT COUNT(*) FROM public.comments c
+    SELECT COUNT(*)
+    FROM public.comments c
     LEFT JOIN public.users u
     ON c."userId" = u.id
+    LEFT JOIN public.posts p
+    ON c."postId" = p.id
+    LEFT JOIN public.blogs b
+    ON p."blogId" = b.id
     LEFT JOIN public."banInfo" ban
-    ON u.id = ban."bannedId"
-    WHERE ban."isBanned" = false`);
+    ON b.id = ban."bannedId"
+    WHERE c."postId" = $2 AND ban."isBanned" = false`);
 
     const total = Math.ceil(count[0].count / pageSize);
     return {
@@ -239,13 +244,19 @@ export class CommentsRepository {
     OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY`,
       [ownerId, (page - 1) * pageSize, pageSize],
     );
-    const count = await this.dataSource.query(`
-    SELECT COUNT(*) FROM public.comments c
-    LEFT JOIN public.users u
-    ON c."userId" = u.id
+    const count = await this.dataSource.query(
+      `
+    SELECT COUNT(*)
+    FROM public.comments c
+    LEFT JOIN public.posts p
+    ON c."postId" = p.id
+    LEFT JOIN public.blogs b
+    ON p."blogId" = b.id
     LEFT JOIN public."banInfo" ban
-    ON u.id = ban."bannedId"
-    WHERE ban."isBanned" = false`);
+    ON b.id = ban."bannedId"
+    WHERE b."userId" = $1 AND ban."isBanned" = false`,
+      [ownerId],
+    );
 
     const total = Math.ceil(count[0].count / pageSize);
     return {
