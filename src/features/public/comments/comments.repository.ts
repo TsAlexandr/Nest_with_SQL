@@ -156,9 +156,10 @@ export class CommentsRepository {
     sortDirection: any,
     ownerId: string,
   ) {
+    const dynamicSort = `p."${sortBy}"`;
     const query = await this.dataSource.query(
       `
-    SELECT c.*,
+    SELECT c.id, c.content, c."createdAt",
        (SELECT ROW_TO_JSON(actions_info) FROM 
           (SELECT * FROM 
             (SELECT COUNT(*) as "likesCount"
@@ -179,13 +180,36 @@ export class CommentsRepository {
                 AND a."parentType" = 'post' 
                 AND a."parentId" = c.id), 'None') as "myStatus"
                 ) actions_info ) as "likesInfo",
-          (SELECT ROW_TO_JSON(comments_info) FROM 
+        (SELECT ROW_TO_JSON(comments_info) FROM 
             (SELECT * FROM 
-                (SELECT * FROM))    )
+                (SELECT u.id as "userId", u.login as "userLogin" 
+                    FROM public.users u
+                    WHERE u.id = c."userId") as "c_info") 
+                comments_info ) as "commentatorInfo",
+        (SELECT ROW_TO_JSON(posts_info) FROM 
+            (SELECT * FROM 
+                (SELECT 
+                    p.id as id, 
+                    p.title as title, 
+                    p."blogId" as "blogId", 
+                    b.name as "blogName" 
+                        FROM public.posts p
+                        LEFT JOIN public.blogs b
+                        ON p."blogId" = b.id
+                        WHERE p.id = c."postId") as "p_info")
+                        posts_info ) as "postInfo"
     FROM public.comments c
-    WHERE "blogId" = $1`,
-      [ownerId],
+    LEFT JOIN public.posts p
+    ON p.id = c."postId"
+    LEFT JOIN public.blogs b
+    ON b.id = p."blogId"
+    LEFT JOIN public."banInfo" ban
+    ON b.id = ban."bannedId"
+    WHERE b."userId" = $1 AND ban."isBanned" = false
+    ORDER BY ${dynamicSort} ${sortDirection}
+    OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY`,
+      [ownerId, (page - 1) * pageSize, pageSize],
     );
-    return query[0];
+    return query;
   }
 }
