@@ -1,6 +1,7 @@
 import { Paginator, PostsCon } from '../../../common/types/classes/classes';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { authUserLogin } from '../../../../test/tests.data';
 
 export class PostsRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
@@ -46,6 +47,7 @@ export class PostsRepository {
                     AND a."parentId" = p.id 
                     AND u.id = a."userId" 
                     AND ban2."isBanned" = false 
+                    ORDER BY a."addedAt" DESC
                     LIMIT 3) last_likes), '[]') as "newestLikes"
                 ) actions_info ) as "extendedLikesInfo"
     FROM public.posts p
@@ -93,7 +95,9 @@ export class PostsRepository {
                 AND a."parentId" = p.id) as "dislikesCount",
             COALESCE((SELECT a."action" as "myStatus" 
                 FROM public.actions a
-                WHERE a."userId" = $2), 'None') as "myStatus",
+                WHERE a."userId" = $2
+                AND a."parentId" = $1
+                AND a."parentType" = 'post'), 'None') as "myStatus",
         COALESCE((SELECT 
         ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(last_likes))) as "newestLikes" 
             FROM 
@@ -108,6 +112,7 @@ export class PostsRepository {
                     AND a."parentId" = p.id 
                     AND u.id = a."userId" 
                     AND ban2."isBanned" = false 
+                    ORDER BY a."addedAt" DESC
                     LIMIT 3) last_likes), '[]') as "newestLikes"
                 ) actions_info ) as "extendedLikesInfo" 
     FROM public.posts p
@@ -192,5 +197,80 @@ export class PostsRepository {
     VALUES ($1, $2, $3, $4, 'post')`,
       [userId, likeStatus, date, postId],
     );
+  }
+
+  async getPostsByBlogId(
+    page: number,
+    pageSize: number,
+    userId,
+    blogId: string,
+    sortBy: any,
+    sortDirection: string,
+  ) {
+    const dynamicSort = `p."${sortBy}"`;
+    const query = await this.dataSource.query(
+      `
+    SELECT p.*, b.name as "blogName",
+        (SELECT ROW_TO_JSON(actions_info) FROM 
+            (SELECT * FROM (SELECT COUNT(*) as "likesCount"
+                FROM public.actions a
+                    LEFT JOIN public."banInfo" ban
+                    ON a."userId" = ban."bannedId"
+                WHERE a.action = 'Like' AND ban."isBanned" = false
+                AND a."parentId" = p.id) as "likesCount",
+            (SELECT COUNT(*) as "dislikesCount"
+                FROM public.actions a
+                    LEFT JOIN public."banInfo" ban
+                    ON a."userId" = ban."bannedId" 
+                WHERE a.action = 'Dislike' AND ban."isBanned" = false
+                AND a."parentId" = p.id) as "dislikesCount",
+            COALESCE((SELECT a."action" as "myStatus" 
+                FROM public.actions a
+                WHERE a."userId" = $3), 'None') as "myStatus",
+        COALESCE((SELECT 
+        ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(last_likes))) as "newestLikes" 
+            FROM 
+                (SELECT a."userId", a."addedAt", u.login 
+                    FROM public.actions a
+                    LEFT JOIN public.users u 
+                    ON a."userId" = u.id
+                    LEFT JOIN "banInfo" ban2
+                    ON u.id = ban2."bannedId"
+                    WHERE a.action = 'Like' 
+                    AND a."parentType"='post' 
+                    AND a."parentId" = p.id 
+                    AND u.id = a."userId" 
+                    AND ban2."isBanned" = false 
+                    ORDER BY a."addedAt" DESC
+                    LIMIT 3) last_likes), '[]') as "newestLikes"
+                ) actions_info ) as "extendedLikesInfo"
+    FROM public.posts p
+    LEFT JOIN public.blogs b
+    ON p."blogId" = b.id
+    LEFT JOIN public."banInfo" ban
+    ON b.id = ban."bannedId"
+    WHERE ban."isBanned" = false AND p."blogId" = $4
+    ORDER BY ${dynamicSort} ${sortDirection}
+    OFFSET $1 ROWS FETCH NEXT $2 ROWS ONLY`,
+      [(page - 1) * pageSize, pageSize, userId, blogId],
+    );
+    const count = await this.dataSource.query(
+      `
+    SELECT COUNT(*) FROM public.posts p
+    LEFT JOIN public.blogs b
+    ON p."blogId" = b.id
+    LEFT JOIN public."banInfo" ban
+    ON b.id = ban."bannedId"
+    WHERE ban."isBanned" = false AND p."blogId" = $1`,
+      [blogId],
+    );
+    const total = Math.ceil(count[0].count / pageSize);
+    return {
+      pagesCount: total,
+      page: page,
+      pageSize: pageSize,
+      totalCount: +count[0].count,
+      items: query,
+    };
   }
 }

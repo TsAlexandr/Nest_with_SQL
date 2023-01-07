@@ -1,9 +1,5 @@
 import { PostsService } from '../posts/posts.service';
-import {
-  Blogger,
-  Paginator,
-  PostsCon,
-} from '../../../common/types/classes/classes';
+import { Blogger, Paginator } from '../../../common/types/classes/classes';
 import { Pagination } from '../../../common/types/classes/pagination';
 import {
   Controller,
@@ -56,7 +52,7 @@ export class BlogsController {
     @Req() req,
   ) {
     const { page, pageSize, sortBy, sortDirection } = Pagination.getData(query);
-    const userId = req.user.userId || null;
+    const userId = req.user?.userId;
     const blogger = await this.queryBus.execute(
       new GetBlogsByIdCommand(blogId),
     );

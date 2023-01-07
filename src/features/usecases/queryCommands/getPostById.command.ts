@@ -1,3 +1,3 @@
 export class GetPostByIdCommand {
-  constructor(public readonly id: string, public readonly userId = '') {}
+  constructor(public readonly id: string, public readonly userId: string) {}
 }

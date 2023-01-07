@@ -145,7 +145,9 @@ export class UsersRepository {
   async findById(id: string) {
     const query = await this.dataSource.query(
       `
-    SELECT * FROM public.users
+    SELECT u.*, bl.* FROM public.users u
+    LEFT JOIN public."userBlackList" bl
+    ON u.id = bl."userId"
     WHERE id = $1`,
       [id],
     );

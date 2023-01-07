@@ -23,7 +23,8 @@ export class CommentsRepository {
                 AND a."parentId" = c.id) as "dislikesCount",
             COALESCE((SELECT a."action" as "myStatus" 
                 FROM public.actions a
-                WHERE a."userId" = $2), 'None') as "myStatus"
+                WHERE a."userId" = $2
+                AND a."parentId" = $1), 'None') as "myStatus"
                 ) actions_info ) as "likesInfo" 
     FROM public.comments c
     LEFT JOIN public.users u

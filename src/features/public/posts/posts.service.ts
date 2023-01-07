@@ -35,7 +35,7 @@ export class PostsService {
     return this.postsRepository.updateActions(postId, likeStatus, userId);
   }
 
-  findAll(
+  async findAll(
     page: number,
     pageSize: number,
     userId,
@@ -43,6 +43,13 @@ export class PostsService {
     sortBy: any,
     sortDirection: string,
   ) {
-    return {};
+    return this.postsRepository.getPostsByBlogId(
+      page,
+      pageSize,
+      userId,
+      blogId,
+      sortBy,
+      sortDirection,
+    );
   }
 }
