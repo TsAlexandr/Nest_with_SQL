@@ -66,7 +66,7 @@ export class PostsController {
   async getCommentsInPages(
     @Query() query,
     @Param('postId') postId: string,
-    @CurrentUserId() userId: string,
+    @Req() req,
   ) {
     const { page, pageSize, sortBy, sortDirection } = Pagination.getData(query);
     return await this.queryBus.execute(
@@ -74,7 +74,7 @@ export class PostsController {
         postId,
         page,
         pageSize,
-        userId,
+        req.user?.userId,
         sortBy,
         sortDirection,
       ),

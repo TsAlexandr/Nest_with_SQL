@@ -13,6 +13,7 @@ export class GetCommentByIdHandler
   async execute(query: GetCommentByIdCommand) {
     const { id, userId } = query;
     const comment = await this.commentsRepository.findComment(id, userId);
+    if (!comment) throw new NotFoundException();
     return comment;
   }
 }

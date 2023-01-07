@@ -22,7 +22,7 @@ export class CommentsRepository {
                 WHERE a.action = 'Dislike' AND ban."isBanned" = false
                 AND a."parentId" = c.id) as "dislikesCount",
             COALESCE((SELECT a."action" as "myStatus" 
-                FROM actions a
+                FROM public.actions a
                 WHERE a."userId" = $2), 'None') as "myStatus"
                 ) actions_info ) as "likesInfo" 
     FROM public.comments c
@@ -83,7 +83,8 @@ export class CommentsRepository {
     OFFSET $3 ROWS FETCH NEXT $4 ROWS ONLY`,
       [userId, postId, (page - 1) * pageSize, pageSize],
     );
-    const count = await this.dataSource.query(`
+    const count = await this.dataSource.query(
+      `
     SELECT COUNT(*)
     FROM public.comments c
     LEFT JOIN public.users u
@@ -94,7 +95,9 @@ export class CommentsRepository {
     ON p."blogId" = b.id
     LEFT JOIN public."banInfo" ban
     ON b.id = ban."bannedId"
-    WHERE c."postId" = $2 AND ban."isBanned" = false`);
+    WHERE c."postId" = $1 AND ban."isBanned" = false`,
+      [postId],
+    );
 
     const total = Math.ceil(count[0].count / pageSize);
     return {
