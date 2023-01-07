@@ -7,7 +7,7 @@ export class CommentsRepository {
   async findComment(commentId: string, userId: string) {
     const query = await this.dataSource.query(
       `
-    SELECT c.*, u.login as "userLogin", 
+    SELECT c.id, c.content, c."createdAt", c."userId", u.login as "userLogin", 
         (SELECT ROW_TO_JSON(actions_info) FROM 
             (SELECT * FROM (SELECT COUNT(*) as "likesCount"
                 FROM public.actions a
@@ -53,7 +53,7 @@ export class CommentsRepository {
     const dynamicSort = `p."${sortBy}"`;
     const query = await this.dataSource.query(
       `
-    SELECT c.*, u.login as "userLogin", 
+    SELECT c.id, c.content, c."createdAt", c."userId", u.login as "userLogin", 
         (SELECT ROW_TO_JSON(actions_info) FROM 
             (SELECT * FROM (SELECT COUNT(*) as "likesCount"
                 FROM public.actions a
@@ -95,7 +95,7 @@ export class CommentsRepository {
       `
     INSERT INTO public.comments
     VALUES ($1, $2, $3, $4, $5)
-    RETURNING id, content, "createdAt", "postId", "userId"`,
+    RETURNING id`,
       [
         newComment.id,
         newComment.content,
@@ -104,7 +104,21 @@ export class CommentsRepository {
         newComment.userId,
       ],
     );
-    return query[0];
+    const result = await this.dataSource.query(
+      `
+    SELECT c.id, c.content, c."createdAt", c."userId", u.login as "userLogin"
+    FROM public.comments c
+    LEFT JOIN public.users u
+    ON c."userId" = u.id
+    WHERE c.id = $1`,
+      [query[0].id],
+    );
+    result[0].likesInfo = {
+      likesCount: 0,
+      dislikesCount: 0,
+      myStatus: 'None',
+    };
+    return result[0];
   }
 
   async updateComment(id: string, content: string) {

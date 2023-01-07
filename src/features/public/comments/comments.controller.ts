@@ -36,7 +36,7 @@ export class CommentsController {
   @UseGuards(JwtExtract)
   @Get(':commentId')
   async findComment(@Param('commentId') id: string, @Req() req) {
-    return await this.queryBus.execute(
+    return this.queryBus.execute(
       new GetCommentByIdCommand(id, req.user?.userId),
     );
   }
@@ -52,10 +52,7 @@ export class CommentsController {
     const comment = await this.commentsService.findComment(id);
     if (!comment) throw new NotFoundException();
     if (userId !== comment.userId) throw new ForbiddenException();
-    return await this.commentsService.updateComment(
-      id,
-      updateCommentDto.content,
-    );
+    return this.commentsService.updateComment(id, updateCommentDto.content);
   }
 
   @UseGuards(JwtAuthGuards, CommentBelongsGuard)
@@ -67,7 +64,7 @@ export class CommentsController {
     @CurrentUserId() userId: string,
   ) {
     if (Object.values(Actions).includes(status)) {
-      return await this.commentsService.updateLikes(commentId, status, userId);
+      return this.commentsService.updateLikes(commentId, status, userId);
     }
     throw new HttpException(
       { message: [{ message: 'invalid value', field: 'likeStatus' }] },
@@ -85,6 +82,6 @@ export class CommentsController {
     const comment = await this.commentsService.findComment(id);
     if (!comment) throw new NotFoundException();
     if (userId !== comment.userId) throw new ForbiddenException();
-    return await this.commentsService.deleteComment(id);
+    return this.commentsService.deleteComment(id);
   }
 }
