@@ -24,7 +24,8 @@ export class CommentsRepository {
             COALESCE((SELECT a."action" as "myStatus" 
                 FROM public.actions a
                 WHERE a."userId" = $2
-                AND a."parentId" = $1), 'None') as "myStatus"
+                AND a."parentId" = $1
+                AND a."parentType" = 'comment'), 'None') as "myStatus"
                 ) actions_info ) as "likesInfo" 
     FROM public.comments c
     LEFT JOIN public.users u
@@ -49,7 +50,7 @@ export class CommentsRepository {
     sortBy: string,
     sortDirection: any,
   ) {
-    const dynamicSort = `p."${sortBy}"`;
+    const dynamicSort = `c."${sortBy}"`;
     const query = await this.dataSource.query(
       `
     SELECT c.id, c.content, c."createdAt", c."userId", u.login as "userLogin", 
@@ -68,7 +69,9 @@ export class CommentsRepository {
                 AND a."parentId" = c.id) as "dislikesCount",
             COALESCE((SELECT a."action" as "myStatus" 
                 FROM actions a
-                WHERE a."userId" = $1), 'None') as "myStatus"
+                WHERE a."userId" = $1
+                AND a."parentId" = c.id
+                AND a."parentType" = 'comment'), 'None') as "myStatus"
                 ) actions_info ) as "likesInfo" 
     FROM public.comments c
     LEFT JOIN public.users u
@@ -174,12 +177,9 @@ export class CommentsRepository {
     );
     return this.dataSource.query(
       `
-      UPDATE public.actions
-      SET action = $1, "addedAt" = $2
-      WHERE "userId" = $3 
-        AND "parentId" = $4 
-          AND "parentType" = 'comment'`,
-      [status, createdAt, userId, commentId],
+      INSERT INTO public.actions
+      VALUES ($1, $2, $3, $4, 'comment')`,
+      [userId, status, createdAt, commentId],
     );
   }
 
@@ -190,7 +190,7 @@ export class CommentsRepository {
     sortDirection: any,
     ownerId: string,
   ) {
-    const dynamicSort = `p."${sortBy}"`;
+    const dynamicSort = `c."${sortBy}"`;
     const query = await this.dataSource.query(
       `
     SELECT c.id, c.content, c."createdAt",
@@ -210,7 +210,9 @@ export class CommentsRepository {
                 AND a."parentId" = c.id) as "dislikesCount",
             COALESCE((SELECT a."action" as "myStatus" 
                 FROM actions a
-                WHERE a."userId" = $1), 'None') as "myStatus"
+                WHERE a."userId" = $1
+                AND a."parentId" = c.id
+                AND a."parentType" = 'comment'), 'None') as "myStatus"
                 ) actions_info ) as "likesInfo",
         (SELECT ROW_TO_JSON(comments_info) FROM 
             (SELECT * FROM 
