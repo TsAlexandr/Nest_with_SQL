@@ -42,7 +42,7 @@ export class PostsRepository {
                     LEFT JOIN public.users u 
                     ON a."userId" = u.id
                     LEFT JOIN "banInfo" ban2
-                    ON ban2."bannedId" = u.id
+                    ON u.id = ban2."bannedId"
                     WHERE a.action = 'Like' 
                     AND a."parentType"='post' 
                     AND a."parentId" = p.id 
@@ -52,7 +52,7 @@ export class PostsRepository {
                 ) actions_info ) as "extendedLikesInfo"
     FROM public.posts p
     LEFT JOIN public.blogs b
-    ON b.id = p."blogId"
+    ON p."blogId" = b.id
     LEFT JOIN public."banInfo" ban
     ON b.id = ban."bannedId"
     WHERE ban."isBanned" = false
@@ -63,7 +63,7 @@ export class PostsRepository {
     const count = await this.dataSource.query(`
     SELECT COUNT(*) FROM public.posts p
     LEFT JOIN public.blogs b
-    ON b.id = p."blogId"
+    ON p."blogId" = b.id
     LEFT JOIN public."banInfo" ban
     ON b.id = ban."bannedId"
     WHERE ban."isBanned" = false`);
@@ -106,7 +106,7 @@ export class PostsRepository {
                     LEFT JOIN public.users u 
                     ON a."userId" = u.id
                     LEFT JOIN public."banInfo" ban2
-                    ON ban2."bannedId" = u.id
+                    ON u.id = ban2."bannedId"
                     WHERE a.action = 'Like' 
                     AND a."parentType"='post' 
                     AND a."parentId" = p.id 
@@ -116,9 +116,9 @@ export class PostsRepository {
                 ) actions_info ) as "extendedLikesInfo" 
     FROM public.posts p
     LEFT JOIN public.blogs b
-    ON b.id = p."blogId"
+    ON p."blogId" = b.id
     LEFT JOIN public."banInfo" ban
-    ON b.id = ban."bannedId"
+    ON ban."bannedId" = b.id
     WHERE p.id = $1`,
       [id, userId],
     );

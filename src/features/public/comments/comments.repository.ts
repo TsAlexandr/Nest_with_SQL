@@ -29,11 +29,11 @@ export class CommentsRepository {
                 ) actions_info ) as "likesInfo" 
     FROM public.comments c
     LEFT JOIN public.users u
-    ON u.id = c."userId"
+    ON c."userId" = u.id
     LEFT JOIN public.posts p
-    ON p.id = c."postId"
+    ON c."postId" = p.id
     LEFT JOIN public.blogs b
-    ON b.id = p."blogId"
+    ON p."blogId" = b.id
     LEFT JOIN public."banInfo" ban
     ON b.id = ban."bannedId"
     WHERE c.id = $1 AND ban."isBanned" = false
@@ -75,11 +75,11 @@ export class CommentsRepository {
                 ) actions_info ) as "likesInfo" 
     FROM public.comments c
     LEFT JOIN public.users u
-    ON u.id = c."userId"
+    ON c."userId" = u.id
     LEFT JOIN public.posts p
-    ON p.id = c."postId"
+    ON c."postId" = p.id
     LEFT JOIN public.blogs b
-    ON b.id = p."blogId"
+    ON p."blogId" = b.id
     LEFT JOIN public."banInfo" ban
     ON b.id = ban."bannedId"
     WHERE c."postId" = $2 AND ban."isBanned" = false
@@ -214,9 +214,9 @@ export class CommentsRepository {
                         posts_info ) as "postInfo"
     FROM public.comments c
     LEFT JOIN public.posts p
-    ON p.id = c."postId"
+    ON c."postId" = p.id
     LEFT JOIN public.blogs b
-    ON b.id = p."blogId"
+    ON p."blogId" = b.id
     LEFT JOIN public."banInfo" ban
     ON b.id = ban."bannedId"
     WHERE b."userId" = $1 AND ban."isBanned" = false
