@@ -24,6 +24,8 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 import { QueryBus } from '@nestjs/cqrs';
 import { GetCommentByIdCommand } from '../../usecases/queryCommands/getCommentById.commmand';
 import { JwtExtract } from '../auth/guards/jwt.extract';
+import * as jwt from 'jsonwebtoken';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('comments')
 export class CommentsController {
@@ -31,14 +33,24 @@ export class CommentsController {
     private readonly commentsService: CommentsService,
     private usersService: UsersService,
     private queryBus: QueryBus,
+    private configService: ConfigService,
   ) {}
 
   @UseGuards(JwtExtract)
   @Get(':commentId')
   async findComment(@Param('commentId') id: string, @Req() req) {
-    return this.queryBus.execute(
-      new GetCommentByIdCommand(id, req.user?.userId),
-    );
+    let currentUserId = null;
+    if (req.headers.authorization) {
+      const secret = this.configService.get('JWT_SECRET_KEY');
+      const user: any = jwt.verify(
+        req.headers.authorization.split(' ')[1],
+        secret,
+      );
+      if (user) {
+        currentUserId = user.id;
+      }
+    }
+    return this.queryBus.execute(new GetCommentByIdCommand(id, currentUserId));
   }
 
   @UseGuards(AuthGuard, JwtAuthGuards)

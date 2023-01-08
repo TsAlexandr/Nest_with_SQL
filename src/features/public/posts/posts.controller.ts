@@ -27,6 +27,8 @@ import { GetCommentsCommand } from '../../usecases/queryCommands/getComments.com
 import { CreateCommentCommand } from '../../usecases/commands/createComment.command';
 import { CurrentUserId } from '../../../common/custom-decorator/current.user.decorator';
 import { GetAllPostsCommand } from '../../usecases/queryCommands/getAllPosts.command';
+import * as jwt from 'jsonwebtoken';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('posts')
 export class PostsController {
@@ -35,6 +37,7 @@ export class PostsController {
     private usersService: UsersService,
     private queryBus: QueryBus,
     private commandBus: CommandBus,
+    private configService: ConfigService,
   ) {}
 
   @UseGuards(JwtExtract)
@@ -54,8 +57,19 @@ export class PostsController {
   @UseGuards(JwtExtract)
   @Get(':id')
   async findOne(@Param('id') id: string, @Req() req) {
+    let currentUserId = null;
+    if (req.headers.authorization) {
+      const secret = this.configService.get('JWT_SECRET_KEY');
+      const user: any = jwt.verify(
+        req.headers.authorization.split(' ')[1],
+        secret,
+      );
+      if (user) {
+        currentUserId = user.id;
+      }
+    }
     const post = await this.queryBus.execute(
-      new GetPostByIdCommand(id, req.user?.userId),
+      new GetPostByIdCommand(id, currentUserId),
     );
     if (!post) throw new NotFoundException();
     return post;
