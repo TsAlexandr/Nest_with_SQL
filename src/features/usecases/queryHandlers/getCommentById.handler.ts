@@ -14,9 +14,10 @@ export class GetCommentByIdHandler
   ) {}
 
   async execute(query: GetCommentByIdCommand) {
-    const { id, userId } = query;
-    const bannedUser = await this.usersRepository.findById(userId);
-    console.log(bannedUser);
+    let { id, userId } = query;
+    if (!userId) {
+      userId = '84a4fc41-3812-4456-9ff8-c108f47b13b8';
+    }
     const comment = await this.commentsRepository.findComment(id, userId);
     if (!comment) throw new NotFoundException();
     return comment;
