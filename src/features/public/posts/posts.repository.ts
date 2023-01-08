@@ -81,7 +81,6 @@ export class PostsRepository {
     };
   }
   async getPostById(id: string, userId: string) {
-    console.log(userId, 'post by id');
     const query = await this.dataSource.query(
       `
     SELECT p.*, b.name as "blogName",
