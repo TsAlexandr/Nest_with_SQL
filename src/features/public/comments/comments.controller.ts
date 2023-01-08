@@ -37,7 +37,7 @@ export class CommentsController {
   @Get(':commentId')
   async findComment(@Param('commentId') id: string, @Req() req) {
     return this.queryBus.execute(
-      new GetCommentByIdCommand(id, req.user?.userId),
+      new GetCommentByIdCommand(id, req.user.userId),
     );
   }
 
