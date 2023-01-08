@@ -8,16 +8,10 @@ import { UsersRepository } from '../../sa/users/users.repository';
 export class GetCommentByIdHandler
   implements IQueryHandler<GetCommentByIdCommand>
 {
-  constructor(
-    private commentsRepository: CommentsRepository,
-    private usersRepository: UsersRepository,
-  ) {}
+  constructor(private commentsRepository: CommentsRepository) {}
 
   async execute(query: GetCommentByIdCommand) {
-    let { id, userId } = query;
-    if (!userId) {
-      userId = '84a4fc41-3812-4456-9ff8-c108f47b13b8';
-    }
+    const { id, userId } = query;
     const comment = await this.commentsRepository.findComment(id, userId);
     if (!comment) throw new NotFoundException();
     return comment;

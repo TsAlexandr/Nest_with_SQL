@@ -8,10 +8,7 @@ export class GetPostByIdHandler implements IQueryHandler<GetPostByIdCommand> {
   constructor(private postsRepository: PostsRepository) {}
 
   async execute(command: GetPostByIdCommand) {
-    let { id, userId } = command;
-    if (!userId) {
-      userId = '84a4fc41-3812-4456-9ff8-c108f47b13b8';
-    }
+    const { id, userId } = command;
     const post = await this.postsRepository.getPostById(id, userId);
     if (!post) throw new NotFoundException();
     return post;
