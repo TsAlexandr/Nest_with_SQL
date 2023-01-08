@@ -5,6 +5,7 @@ export class CommentsRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async findComment(commentId: string, userId: string) {
+    console.log(userId, 'user id from comment by id');
     const query = await this.dataSource.query(
       `
     SELECT c.id, c.content, c."createdAt", c."userId", u.login as "userLogin", 
@@ -40,6 +41,7 @@ export class CommentsRepository {
     `,
       [commentId, userId],
     );
+    console.log(query, 'info about comment');
     return query[0];
   }
   async getCommentWithPage(

@@ -209,6 +209,7 @@ export class PostsRepository {
     sortBy: any,
     sortDirection: string,
   ) {
+    console.log(userId, 'from post by id');
     const dynamicSort = `p."${sortBy}"`;
     const query = await this.dataSource.query(
       `
@@ -228,7 +229,9 @@ export class PostsRepository {
                 AND a."parentId" = p.id) as "dislikesCount",
             COALESCE((SELECT a."action" as "myStatus" 
                 FROM public.actions a
-                WHERE a."userId" = $3), 'None') as "myStatus",
+                WHERE a."userId" = $3 
+                AND a."parentId" = p.id
+                AND a."parentType" = 'post'), 'None') as "myStatus",
         COALESCE((SELECT 
         ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(last_likes))) as "newestLikes" 
             FROM 
@@ -258,7 +261,7 @@ export class PostsRepository {
     );
     const count = await this.dataSource.query(
       `
-    SELECT COUNT(*) FROM public.posts p
+    SELECT COUNT(p.*) FROM public.posts p
     LEFT JOIN public.blogs b
     ON p."blogId" = b.id
     LEFT JOIN public."banInfo" ban
@@ -267,6 +270,7 @@ export class PostsRepository {
       [blogId],
     );
     const total = Math.ceil(count[0].count / pageSize);
+    console.log(query, 'info about post');
     return {
       pagesCount: total,
       page: page,
