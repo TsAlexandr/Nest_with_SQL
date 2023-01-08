@@ -31,9 +31,12 @@ export class PostsRepository {
                 AND a."parentId" = p.id) as "dislikesCount",
             COALESCE((SELECT a."action" as "myStatus" 
                 FROM public.actions a
+                LEFT JOIN public."banInfo" ban
+                ON a."userId" = ban."bannedId"
                 WHERE a."userId" = $3
                 AND a."parentId" = p.id
-                AND a."parentType" = 'post'), 'None') as "myStatus",
+                AND a."parentType" = 'post'
+                AND ban."isBanned" = false ), 'None') as "myStatus",
         COALESCE((SELECT 
         ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(last_likes))) as "newestLikes" 
             FROM 
@@ -97,9 +100,12 @@ export class PostsRepository {
                 AND a."parentId" = p.id) as "dislikesCount",
             COALESCE((SELECT a."action" as "myStatus" 
                 FROM public.actions a
+                LEFT JOIN public."banInfo" ban
+                ON a."userId" = ban."bannedId"
                 WHERE a."userId" = $2
                 AND a."parentId" = $1
-                AND a."parentType" = 'post'), 'None') as "myStatus",
+                AND a."parentType" = 'post'
+                AND ban."isBanned" = false), 'None') as "myStatus",
         COALESCE((SELECT 
         ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(last_likes))) as "newestLikes" 
             FROM 
@@ -229,9 +235,12 @@ export class PostsRepository {
                 AND a."parentId" = p.id) as "dislikesCount",
             COALESCE((SELECT a."action" as "myStatus" 
                 FROM public.actions a
+                LEFT JOIN public."banInfo" ban
+                ON a."userId" = ban."bannedId"
                 WHERE a."userId" = $3 
                 AND a."parentId" = p.id
-                AND a."parentType" = 'post'), 'None') as "myStatus",
+                AND a."parentType" = 'post'
+                AND ban."isBanned" = false), 'None') as "myStatus",
         COALESCE((SELECT 
         ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(last_likes))) as "newestLikes" 
             FROM 

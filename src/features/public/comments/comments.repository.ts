@@ -24,9 +24,12 @@ export class CommentsRepository {
                 AND a."parentId" = c.id) as "dislikesCount",
             COALESCE((SELECT a."action" as "myStatus" 
                 FROM public.actions a
+                LEFT JOIN public."banInfo" ban
+                ON a."userId" = ban."bannedId"
                 WHERE a."userId" = $2
                 AND a."parentId" = $1
-                AND a."parentType" = 'comment'), 'None') as "myStatus"
+                AND a."parentType" = 'comment'
+                AND ban."isBanned" = false), 'None') as "myStatus"
                 ) actions_info ) as "likesInfo" 
     FROM public.comments c
     LEFT JOIN public.users u
@@ -71,9 +74,12 @@ export class CommentsRepository {
                 AND a."parentId" = c.id) as "dislikesCount",
             COALESCE((SELECT a."action" as "myStatus" 
                 FROM actions a
+                LEFT JOIN public."banInfo" ban
+                ON a."userId" = ban."bannedId"
                 WHERE a."userId" = $1
                 AND a."parentId" = c.id
-                AND a."parentType" = 'comment'), 'None') as "myStatus"
+                AND a."parentType" = 'comment'
+                AND ban."isBanned" = false), 'None') as "myStatus"
                 ) actions_info ) as "likesInfo" 
     FROM public.comments c
     LEFT JOIN public.users u
@@ -212,9 +218,12 @@ export class CommentsRepository {
                 AND a."parentId" = c.id) as "dislikesCount",
             COALESCE((SELECT a."action" as "myStatus" 
                 FROM actions a
+                LEFT JOIN public."banInfo" ban
+                ON a."userId" = ban."bannedId"
                 WHERE a."userId" = $1
                 AND a."parentId" = c.id
-                AND a."parentType" = 'comment'), 'None') as "myStatus"
+                AND a."parentType" = 'comment'
+                AND ban."isBanned" = false), 'None') as "myStatus"
                 ) actions_info ) as "likesInfo",
         (SELECT ROW_TO_JSON(comments_info) FROM 
             (SELECT * FROM 
