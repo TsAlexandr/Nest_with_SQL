@@ -12,7 +12,10 @@ export class PostsRepository {
     sortDirection: any,
     userId: string,
   ): Promise<Paginator<PostsCon[]>> {
-    const dynamicSort = `p."${sortBy}"`;
+    let dynamicSort = `p."${sortBy}"`;
+    if ((sortBy = 'blogName')) {
+      dynamicSort = `b.name`;
+    }
     const query = await this.dataSource.query(
       `
     SELECT p.*, b.name as "blogName",
@@ -130,7 +133,6 @@ export class PostsRepository {
     WHERE p.id = $1`,
       [id, userId],
     );
-    console.log(query, 'info about post');
     return query[0];
   }
 

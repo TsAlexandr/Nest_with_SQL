@@ -50,7 +50,7 @@ export class PostsController {
         pageSize,
         sortBy,
         sortDirection,
-        req.user.userId,
+        req.user?.userId,
       ),
     );
   }
