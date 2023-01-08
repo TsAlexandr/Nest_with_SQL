@@ -14,7 +14,7 @@ export class PostsRepository {
   ): Promise<Paginator<PostsCon[]>> {
     let dynamicSort = `p."${sortBy}"`;
     if ((sortBy = 'blogName')) {
-      dynamicSort = `b.name`;
+      dynamicSort = `"blogName"`;
     }
     const query = await this.dataSource.query(
       `
