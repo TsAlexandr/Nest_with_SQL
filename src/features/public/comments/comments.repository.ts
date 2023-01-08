@@ -36,7 +36,7 @@ export class CommentsRepository {
     LEFT JOIN public.blogs b
     ON p."blogId" = b.id
     LEFT JOIN public."banInfo" ban
-    ON b.id = ban."bannedId"
+    ON c."userId" = ban."bannedId"
     WHERE c.id = $1 AND ban."isBanned" = false
     `,
       [commentId, userId],

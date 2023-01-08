@@ -1,7 +1,6 @@
 import { Paginator, PostsCon } from '../../../common/types/classes/classes';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { authUserLogin } from '../../../../test/tests.data';
 
 export class PostsRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
@@ -79,6 +78,7 @@ export class PostsRepository {
     };
   }
   async getPostById(id: string, userId: string) {
+    console.log(userId, 'post by id');
     const query = await this.dataSource.query(
       `
     SELECT p.*, b.name as "blogName",
@@ -125,6 +125,7 @@ export class PostsRepository {
     WHERE p.id = $1`,
       [id, userId],
     );
+    console.log(query, 'info about post');
     return query[0];
   }
 
@@ -204,12 +205,11 @@ export class PostsRepository {
   async getPostsByBlogId(
     page: number,
     pageSize: number,
-    userId,
+    userId: string,
     blogId: string,
     sortBy: any,
     sortDirection: string,
   ) {
-    console.log(userId, 'from post by id');
     const dynamicSort = `p."${sortBy}"`;
     const query = await this.dataSource.query(
       `
@@ -270,7 +270,6 @@ export class PostsRepository {
       [blogId],
     );
     const total = Math.ceil(count[0].count / pageSize);
-    console.log(query, 'info about post');
     return {
       pagesCount: total,
       page: page,

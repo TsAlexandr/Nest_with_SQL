@@ -8,10 +8,12 @@ import {
   Param,
   Query,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import { GetAllBlogsCommand } from '../../usecases/queryCommands/getAllBlogs.command';
 import { GetBlogsByIdCommand } from '../../usecases/queryCommands/getBlogsById.command';
+import { JwtExtract } from '../auth/guards/jwt.extract';
 
 @Controller('blogs')
 export class BlogsController {
@@ -44,7 +46,7 @@ export class BlogsController {
     }
     return blogger;
   }
-
+  @UseGuards(JwtExtract)
   @Get(':blogId/posts')
   async getPostsById(
     @Param('blogId') blogId: string,
@@ -53,6 +55,7 @@ export class BlogsController {
   ) {
     const { page, pageSize, sortBy, sortDirection } = Pagination.getData(query);
     const userId = req.user?.userId;
+    console.log(req.user);
     const blogger = await this.queryBus.execute(
       new GetBlogsByIdCommand(blogId),
     );
