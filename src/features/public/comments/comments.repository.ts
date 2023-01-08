@@ -36,7 +36,9 @@ export class CommentsRepository {
     ON p."blogId" = b.id
     LEFT JOIN public."banInfo" ban
     ON b.id = ban."bannedId"
-    WHERE c.id = $1 AND ban."isBanned" = false
+    LEFT JOIN public."banInfo" ban2 //TODO easiest way to avoid second left join for hidden banned user
+    ON u.id = ban2."bannedId"
+    WHERE c.id = $1 AND ban."isBanned" = false AND ban2."isBanned" = false
     `,
       [commentId, userId],
     );
