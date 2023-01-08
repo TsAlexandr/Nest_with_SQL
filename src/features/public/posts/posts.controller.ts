@@ -53,9 +53,9 @@ export class PostsController {
   }
   @UseGuards(JwtExtract)
   @Get(':id')
-  async findOne(@Param('id') id: string, @Req() req) {
+  async findOne(@Param('id') id: string, @CurrentUserId() userId: string) {
     const post = await this.queryBus.execute(
-      new GetPostByIdCommand(id, req.user.userId),
+      new GetPostByIdCommand(id, userId),
     );
     if (!post) throw new NotFoundException();
     return post;
