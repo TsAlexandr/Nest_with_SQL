@@ -65,7 +65,7 @@ export class PostsController {
         secret,
       );
       if (user) {
-        currentUserId = user.id;
+        currentUserId = user.userId;
       }
     }
     const post = await this.queryBus.execute(

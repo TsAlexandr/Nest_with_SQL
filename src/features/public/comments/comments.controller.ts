@@ -47,7 +47,7 @@ export class CommentsController {
         secret,
       );
       if (user) {
-        currentUserId = user.id;
+        currentUserId = user.userId;
       }
     }
     return this.queryBus.execute(new GetCommentByIdCommand(id, currentUserId));
