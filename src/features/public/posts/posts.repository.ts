@@ -130,7 +130,7 @@ export class PostsRepository {
     ON p."blogId" = b.id
     LEFT JOIN public."banInfo" ban
     ON ban."bannedId" = b.id
-    WHERE p.id = $1`,
+    WHERE p.id = $1 AND ban."isBanned" = false`,
       [id, userId],
     );
     return query[0];
