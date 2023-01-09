@@ -14,7 +14,7 @@ export class PostsRepository {
   ): Promise<Paginator<PostsCon[]>> {
     let dynamicSort = `p."${sortBy}"`;
     if ((sortBy = 'blogName')) {
-      dynamicSort = `NULLIF(regexp_replace(name, E'\\D', '', 'g'), '')::int NULLS LAST, name`;
+      dynamicSort = `substring(name, 9)::int `;
     }
     const query = await this.dataSource.query(
       `
