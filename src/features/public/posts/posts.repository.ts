@@ -13,7 +13,9 @@ export class PostsRepository {
     userId: string,
   ): Promise<Paginator<PostsCon[]>> {
     let dynamicSort = `p."${sortBy}"`;
-    if ((sortBy = 'blogName')) {
+    if (sortBy == 'blogName' && sortDirection == 'desc') {
+      dynamicSort = `substring(name, 9)::int`;
+    } else if (sortBy == 'blogName' && sortDirection == 'asc') {
       dynamicSort = `name COLLATE "C"`;
     }
     const query = await this.dataSource.query(
