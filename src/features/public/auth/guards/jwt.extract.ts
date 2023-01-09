@@ -23,6 +23,7 @@ export class JwtExtract implements CanActivate {
       }
       return true;
     } catch (e) {
+      console.log(e);
       return true;
     }
   }

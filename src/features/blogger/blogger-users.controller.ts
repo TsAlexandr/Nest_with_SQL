@@ -24,10 +24,10 @@ export class BloggerUsersController {
   constructor(private queryBus: QueryBus, private commandBus: CommandBus) {}
 
   @UseGuards(ExistingBlogGuard)
-  @Get('blog/:id')
+  @Get('blog/:blogId')
   async getAllBannedUsers(
     @Query() query,
-    @Param('id') blogId: string,
+    @Param('blogId') blogId: string,
     @CurrentUserId() ownerId: string,
   ) {
     const { page, pageSize, sortBy, sortDirection, searchLoginTerm } =

@@ -1,5 +1,3 @@
-import { SortOrder } from 'mongoose';
-
 export class Pagination {
   static getPaginationData(query) {
     const page = typeof query.pageNumber === 'string' ? +query.pageNumber : 1;

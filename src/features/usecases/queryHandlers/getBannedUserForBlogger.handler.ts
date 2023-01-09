@@ -18,11 +18,6 @@ export class GetBannedUserForBloggerHandler
       blogId,
       ownerId,
     } = query;
-    const ownerBlog = await this.blogsRepository.getOwnerBlogId(
-      ownerId,
-      blogId,
-    );
-    if (!ownerBlog) throw new ForbiddenException();
     const users = await this.blogsRepository.getBannedUsers(
       page,
       pageSize,
