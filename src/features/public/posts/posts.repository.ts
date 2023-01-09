@@ -14,7 +14,13 @@ export class PostsRepository {
   ): Promise<Paginator<PostsCon[]>> {
     let dynamicSort = `p."${sortBy}"`;
     if ((sortBy = 'blogName')) {
-      dynamicSort = `name COLLATE "C"`;
+      dynamicSort = `ARRAY(
+        SELECT ROW(
+            CAST(COALESCE(NULLIF(match[1], ''), '9223372036854775807') AS BIGINT),
+            match[2]
+          )
+          FROM REGEXP_MATCHES(name, '(\d*)|(\D*)', 'g')
+          AS match )`;
     }
     const query = await this.dataSource.query(
       `

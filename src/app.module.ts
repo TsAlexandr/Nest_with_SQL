@@ -120,11 +120,8 @@ export const CommandHandlers = [
           password: configService.get('DB_PASS'),
           database: configService.get('DB_NAME'),
           synchronize: true,
-          poolSize: 5,
           extra: {
-            connectionLimit: 5,
-            max: 5,
-            connectionTimeoutMillis: 1000,
+            poolSize: 4,
           },
         };
       },
