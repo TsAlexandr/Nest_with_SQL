@@ -24,7 +24,7 @@ export class PostsRepository {
     let subQuery = ``;
     if (userId) {
       subQuery = `,
-      coalesce((select  l.status as "myStatus" from likes l where l."likeableType" ='post' and l."likeableId" = p.id and l."userId" = '${userId}'  ),'None') as "myStatus"`;
+      coalesce((select  l.action as "myStatus" from actions l where l."parentType" ='post' and l."parentId" = p.id and l."userId" = '${userId}'  ),'None') as "myStatus"`;
     }
     const query = `select 
       p.*, b.name as "blogName", (select row_to_json(x2) from (select * from (select count(*) as "likesCount" from actions a left join "banInfo" ab on a."userId" = ab."bannedId" where a."parentType" ='post' and a.action = 'Like' and a."parentId" =p.id and ab."isBanned" = false ) as likesCount ,
