@@ -227,7 +227,6 @@ export class BlogsRepository {
       [id, '%' + searchLoginTerm + '%'],
     );
     const pages = Math.ceil(total[0].count / pageSize);
-    console.log(query);
     const mappedUser = query.map((obj) => {
       return {
         id: obj.id,
