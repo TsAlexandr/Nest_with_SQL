@@ -12,10 +12,85 @@ export class PostsRepository {
     sortDirection: any,
     userId: string,
   ): Promise<Paginator<PostsCon[]>> {
-    let dynamicSort = `p."${sortBy}"`;
-    if (sortBy == 'blogName' && sortDirection == 'desc') {
-      dynamicSort = `substring(name, 9)::int`;
-    } else if (sortBy == 'blogName' && sortDirection == 'asc') {
+    const offset = (page - 1) * pageSize;
+
+    if (sortBy == 'blogName') {
+      sortBy = 'name';
+    }
+    const orderBy =
+      sortBy != 'createdAt' ? `"${sortBy}" COLLATE "C"` : `b."${sortBy}"`;
+
+    console.log(userId);
+    let subQuery = ``;
+    if (userId) {
+      subQuery = `,
+      coalesce((select  l.status as "myStatus" from likes l where l."likeableType" ='post' and l."likeableId" = p.id and l."userId" = '${userId}'  ),'None') as "myStatus"`;
+    }
+    const query = `select 
+      p.*, b.name as "blogName", (select row_to_json(x2) from (select * from (select count(*) as "likesCount" from actions a left join "banInfo" ab on a."userId" = ab."bannedId" where a."parentType" ='post' and a.action = 'Like' and a."parentId" =p.id and ab."isBanned" = false ) as likesCount ,
+      (select count(*) as "dislikesCount" from actions a left join "banInfo" ab on a."userId" = ab."bannedId" where a."parentType" ='post' and a.action = 'Dislike' and a."parentId" = p.id and ab."isBanned" = false ) as dislikesCount ${subQuery}) x2)as "extendedLikesInfo",
+      (select ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(last_likes))) as "newestLikes" 
+            FROM 
+                (SELECT a."userId", a."addedAt", u.login 
+                    FROM public.actions a
+                    LEFT JOIN public.users u 
+                    ON a."userId" = u.id
+                    LEFT JOIN "banInfo" ban2
+                    ON u.id = ban2."bannedId"
+                    WHERE a.action = 'Like' 
+                    AND a."parentType"='post' 
+                    AND a."parentId" = p.id 
+                    AND u.id = a."userId" 
+                    AND ban2."isBanned" = false 
+                    ORDER BY a."addedAt" DESC
+                    LIMIT 3) last_likes) as "newestLikes"
+        from  posts p  join blogs b on p."blogId" = b.id order by ${orderBy} ${sortDirection} limit ${pageSize} offset ${offset}`;
+
+    console.log(query);
+
+    const posts = await this.dataSource.query(query);
+    console.log(posts);
+    const temp = posts.map((item) => {
+      const t = {
+        title: item.title,
+        content: item.content,
+        shortDescription: item.shortDescription,
+        createdAt: item.createdAt,
+        id: item.id,
+        blogId: item.blogId,
+        blogName: item.blogName,
+        extendedLikesInfo: {
+          likesCount: item.extendedLikesInfo.likesCount,
+          dislikesCount: item.extendedLikesInfo.dislikesCount,
+          myStatus: item.extendedLikesInfo.myStatus
+            ? item.extendedLikesInfo.myStatus
+            : 'None',
+          newestLikes: item.newestLikes ? item.newestLikes : [],
+        },
+      };
+      return t;
+    });
+
+    const totalCount = await this.dataSource.query(
+      `SELECT COUNT(*) FROM public.posts p
+    LEFT JOIN public.blogs b
+    ON p."blogId" = b.id
+    LEFT JOIN public."banInfo" ban
+    ON b.id = ban."bannedId"
+    WHERE ban."isBanned" = false`,
+    );
+    console.log(totalCount);
+    return {
+      pagesCount: Math.ceil(+totalCount[0].count / pageSize),
+      page: page,
+      pageSize: pageSize,
+      totalCount: +totalCount[0].count,
+      items: temp,
+    };
+  }
+  /*let dynamicSort = `p."${sortBy}"`;
+    if (sortBy == 'blogName') {
+
       dynamicSort = `name COLLATE "C"`;
     }
     const query = await this.dataSource.query(
@@ -83,8 +158,8 @@ export class PostsRepository {
       pageSize: pageSize,
       totalCount: +count[0].count,
       items: query,
-    };
-  }
+    }; }*/
+
   async getPostById(id: string, userId: string) {
     const query = await this.dataSource.query(
       `
