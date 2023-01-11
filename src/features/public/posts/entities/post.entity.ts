@@ -8,9 +8,8 @@ import {
 import { BloggersEntity } from '../../blogs/entities/bloggers.entity';
 import { UserEntity } from '../../../sa/users/entities/user.entity';
 import { CommentEntity } from '../../comments/entities/comment.entity';
-import { TotalActionsEntity } from '../../../../library/entities/actions.entity';
 
-@Entity('posts')
+@Entity()
 export class PostEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -22,16 +21,12 @@ export class PostEntity {
   content: string;
   @Column('uuid')
   blogId: string;
-  @Column('text')
-  blogName: string;
-  @Column('text')
+  @Column('timestamp with time zone')
   createdAt: Date;
-  @ManyToOne(() => BloggersEntity, (blogger) => blogger.post)
+  @ManyToOne(() => BloggersEntity, (blogger) => blogger.id)
   blogger: BloggersEntity;
-  @ManyToOne(() => UserEntity, (user) => user.post)
+  @ManyToOne(() => UserEntity, (user) => user.id)
   user: UserEntity;
-  @OneToMany(() => CommentEntity, (comment) => comment.postId)
+  @OneToMany(() => CommentEntity, (comment) => comment)
   comment: CommentEntity[];
-  @OneToMany(() => TotalActionsEntity, (totalActions) => totalActions.postId)
-  totalActions: TotalActionsEntity[];
 }

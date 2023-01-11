@@ -9,7 +9,7 @@ import { UserEntity } from '../../../sa/users/entities/user.entity';
 import { PostEntity } from '../../posts/entities/post.entity';
 import { TotalActionsEntity } from '../../../../library/entities/actions.entity';
 
-@Entity('comments')
+@Entity()
 export class CommentEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;

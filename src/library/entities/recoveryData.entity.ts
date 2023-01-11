@@ -1,18 +1,16 @@
 import { Column, Entity, ManyToOne } from 'typeorm';
 import { UserEntity } from '../../features/sa/users/entities/user.entity';
 
-@Entity()
-export class ActionsEntity {
-  @Column('text')
-  addedAt: string;
+@Entity('recoveryData')
+export class RecoveryDataEntity {
   @Column('uuid')
   userId: string;
   @Column('text')
-  action: string;
-  @Column('uuid')
-  parentId: string;
-  @Column('text')
-  parentType: string;
+  recoveryCode: string;
+  @Column('boolean')
+  isConfirmed: boolean;
+  @Column('timestamp with time zone')
+  expirationDate: Date;
   @ManyToOne(() => UserEntity, (user) => user.id)
   user: UserEntity;
 }
