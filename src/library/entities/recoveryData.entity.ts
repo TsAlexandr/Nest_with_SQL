@@ -1,8 +1,10 @@
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { UserEntity } from '../../features/sa/users/entities/user.entity';
 
 @Entity('recoveryData')
 export class RecoveryDataEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
   @Column('uuid')
   userId: string;
   @Column('text')
@@ -11,6 +13,6 @@ export class RecoveryDataEntity {
   isConfirmed: boolean;
   @Column('timestamp with time zone')
   expirationDate: Date;
-  @ManyToOne(() => UserEntity, (user) => user.id)
+  @ManyToOne(() => UserEntity, (user) => user.id, { onDelete: 'CASCADE' })
   user: UserEntity;
 }

@@ -46,7 +46,6 @@ import { PostEntity } from './features/public/posts/entities/post.entity';
 import { CommentEntity } from './features/public/comments/entities/comment.entity';
 import { UserEntity } from './features/sa/users/entities/user.entity';
 import { PostsRepositoryRAW } from './library/rawDb/postsRepositoryRAW';
-import { TotalActionsEntity } from './library/entities/actions.entity';
 import { DeviceController } from './features/public/devices/device.controller';
 import { DeviceService } from './features/public/devices/device.service';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -76,6 +75,12 @@ import { CreateUserCommandHandler } from './features/usecases/handlers/createUse
 import { GetAllBloggersBlogsCommand } from './features/usecases/queryCommands/getAllBloggersBlogs.command';
 import { GetAllBloggersBlogsHandler } from './features/usecases/queryHandlers/getAllBloggersBlogs.handler';
 import { GetAllPostsHandler } from './features/usecases/queryHandlers/getAllPosts.handler';
+import { ActionsEntity } from './library/entities/actions.entity';
+import { BanInfoEntity } from './library/entities/banInfo.entity';
+import { UserBlackListEntity } from './library/entities/userBlackList.entity';
+import { DeviceEntity } from './features/public/devices/entities/device.entity';
+import { EmailConfirmEntity } from './library/entities/emailConfirm.entity';
+import { RecoveryDataEntity } from './library/entities/recoveryData.entity';
 
 export const CommandHandlers = [
   GetAllBlogsHandler,
@@ -119,6 +124,18 @@ export const CommandHandlers = [
           username: configService.get('DB_USER'),
           password: configService.get('DB_PASS'),
           database: configService.get('DB_NAME'),
+          entities: [
+            BloggersEntity,
+            PostEntity,
+            CommentEntity,
+            UserEntity,
+            ActionsEntity,
+            BanInfoEntity,
+            UserBlackListEntity,
+            DeviceEntity,
+            EmailConfirmEntity,
+            RecoveryDataEntity,
+          ],
           synchronize: true,
           extra: {
             poolSize: 4,

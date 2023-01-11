@@ -20,7 +20,6 @@ export class PostsTypeORM {
           shortDescription: createPost.shortDescription,
           createdAt: createPost.createdAt,
           blogId: createPost.blogId,
-          blogName: createPost.blogName,
         },
       ])
       .execute();
@@ -72,7 +71,6 @@ export class PostsTypeORM {
       .update(PostEntity)
       .set({
         blogId: blogId,
-        blogName: blogName,
         title: updPost.title,
         shortDescription: updPost.shortDescription,
         content: updPost.content,

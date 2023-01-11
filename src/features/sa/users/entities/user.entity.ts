@@ -5,6 +5,7 @@ import { UserBlackListEntity } from '../../../../library/entities/userBlackList.
 import { ActionsEntity } from '../../../../library/entities/actions.entity';
 import { EmailConfirmEntity } from '../../../../library/entities/emailConfirm.entity';
 import { RecoveryDataEntity } from '../../../../library/entities/recoveryData.entity';
+import { DeviceEntity } from '../../../public/devices/entities/device.entity';
 
 @Entity('users')
 export class UserEntity {
@@ -14,12 +15,10 @@ export class UserEntity {
   login: string;
   @Column('text')
   email: string;
-  @Column('time with time zone')
+  @Column('timestamp with time zone')
   createdAt: Date;
   @Column('text')
   passwordHash: string;
-  @OneToMany(() => PostEntity, (post) => post.user)
-  post: PostEntity[];
   @OneToMany(() => CommentEntity, (comment) => comment.userId)
   comment: CommentEntity[];
   @OneToMany(() => ActionsEntity, (actions) => actions.userId)
@@ -30,4 +29,6 @@ export class UserEntity {
   recovery: RecoveryDataEntity[];
   @OneToMany(() => UserBlackListEntity, (blackList) => blackList)
   blackList: UserBlackListEntity[];
+  @OneToMany(() => DeviceEntity, (device) => device)
+  device: DeviceEntity[];
 }

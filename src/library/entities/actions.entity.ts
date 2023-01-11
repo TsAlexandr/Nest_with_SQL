@@ -1,8 +1,10 @@
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { UserEntity } from '../../features/sa/users/entities/user.entity';
 
-@Entity()
+@Entity('actions')
 export class ActionsEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
   @Column('text')
   addedAt: string;
   @Column('uuid')
@@ -13,6 +15,6 @@ export class ActionsEntity {
   parentId: string;
   @Column('text')
   parentType: string;
-  @ManyToOne(() => UserEntity, (user) => user.id)
+  @ManyToOne(() => UserEntity, (user) => user.id, { onDelete: 'CASCADE' })
   user: UserEntity;
 }

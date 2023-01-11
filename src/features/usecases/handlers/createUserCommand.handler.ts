@@ -15,7 +15,7 @@ export class CreateUserCommandHandler
     private authService: AuthService,
     private emailService: EmailService,
   ) {}
-  async execute(command: CreateUserCommand): Promise<any> {
+  async execute(command: CreateUserCommand) {
     const { createUser } = command;
     const validEmail = await this.usersRepository.findByEmail(createUser.email);
     if (validEmail)
@@ -38,27 +38,15 @@ export class CreateUserCommandHandler
       email: createUser.email,
       passwordHash,
       createdAt: new Date().toISOString(),
-      emailConfirmation: {
-        confirmationCode: v4(),
-        expirationDate: new Date(),
-        isConfirmed: false,
-      },
-      recoveryData: {
-        recoveryCode: '',
-        isConfirmed: false,
-        expirationDate: new Date(),
-      },
-      banInfo: {
-        isBanned: false,
-        banDate: null,
-        banReason: null,
-      },
+      confirmationCode: v4(),
+      recoveryCode: '',
+      expirationDate: new Date(),
     };
 
     const createdUser = await this.usersRepository.createUser(user);
     if (createdUser) {
       const messageBody = this.emailService.getConfirmMessage(
-        user.emailConfirmation.confirmationCode,
+        user.confirmationCode,
       );
       await this.emailService.sendEmail(
         user.email,
@@ -70,7 +58,11 @@ export class CreateUserCommandHandler
         login: createdUser.q.login,
         email: createdUser.q.email,
         createdAt: createdUser.q.createdAt,
-        banInfo: createdUser.b,
+        banInfo: {
+          banDate: createdUser.b.banDate,
+          banReason: createdUser.b.banReason,
+          isBanned: createdUser.b.isBanned,
+        },
       };
     } else {
       return null;

@@ -7,9 +7,9 @@ import {
 } from 'typeorm';
 import { UserEntity } from '../../../sa/users/entities/user.entity';
 import { PostEntity } from '../../posts/entities/post.entity';
-import { TotalActionsEntity } from '../../../../library/entities/actions.entity';
+import { ActionsEntity } from '../../../../library/entities/actions.entity';
 
-@Entity()
+@Entity('comments')
 export class CommentEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -23,10 +23,10 @@ export class CommentEntity {
   userLogin: string;
   @Column('text')
   addedAt: string;
-  @ManyToOne(() => PostEntity, (post) => post.comment)
+  @ManyToOne(() => PostEntity, (post) => post.comment, { onDelete: 'CASCADE' })
   post: PostEntity;
-  @ManyToOne(() => UserEntity, (user) => user.comment)
+  @ManyToOne(() => UserEntity, (user) => user.comment, { onDelete: 'CASCADE' })
   user: UserEntity;
-  @OneToMany(() => TotalActionsEntity, (totalActions) => totalActions.postId)
-  totalActions: TotalActionsEntity[];
+  @OneToMany(() => ActionsEntity, (actions) => actions)
+  actions: ActionsEntity[];
 }

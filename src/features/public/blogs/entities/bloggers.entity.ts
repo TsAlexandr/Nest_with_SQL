@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  JoinColumn,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -8,9 +9,8 @@ import {
 import { PostEntity } from '../../posts/entities/post.entity';
 import { UserBlackListEntity } from '../../../../library/entities/userBlackList.entity';
 import { UserEntity } from '../../../sa/users/entities/user.entity';
-import { JoinColumn } from 'typeorm/browser';
 
-@Entity()
+@Entity('blogs')
 export class BloggersEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;

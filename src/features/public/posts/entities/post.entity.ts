@@ -6,10 +6,9 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { BloggersEntity } from '../../blogs/entities/bloggers.entity';
-import { UserEntity } from '../../../sa/users/entities/user.entity';
 import { CommentEntity } from '../../comments/entities/comment.entity';
 
-@Entity()
+@Entity('posts')
 export class PostEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -23,10 +22,10 @@ export class PostEntity {
   blogId: string;
   @Column('timestamp with time zone')
   createdAt: Date;
-  @ManyToOne(() => BloggersEntity, (blogger) => blogger.id)
+  @ManyToOne(() => BloggersEntity, (blogger) => blogger.id, {
+    onDelete: 'CASCADE',
+  })
   blogger: BloggersEntity;
-  @ManyToOne(() => UserEntity, (user) => user.id)
-  user: UserEntity;
   @OneToMany(() => CommentEntity, (comment) => comment)
   comment: CommentEntity[];
 }
