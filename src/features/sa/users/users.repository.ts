@@ -108,10 +108,9 @@ export class UsersRepository {
       .insert()
       .into(BanInfoEntity)
       .values({
-        bannedId: newUser.id,
+        userId: newUser.id,
         banDate: null,
         banReason: null,
-        bannedType: 'user',
         isBanned: false,
       })
       .returning(['banDate', 'banReason', 'isBanned'])
@@ -143,14 +142,15 @@ export class UsersRepository {
   }
 
   async findByLogin(login: string) {
-    const query = await this.dataSource.query(
-      `
-    SELECT u.*, b.* FROM public.users u
-    LEFT JOIN public."banInfo" b
-    ON u.id = b."bannedId"
-    WHERE login = $1`,
-      [login],
-    );
+    const query = await this.dataSource
+      .createQueryBuilder()
+      .select()
+      .from(UserEntity, 'users')
+      .leftJoinAndSelect('banInfo', 'ban')
+      .andWhere('ban.isBanned = false')
+      .where('users.login ilike =: login', { login: `%${login}%` })
+      .getOne();
+    console.log(query);
     return query[0];
   }
 

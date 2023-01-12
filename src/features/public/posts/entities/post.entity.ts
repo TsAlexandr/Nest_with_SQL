@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { BloggersEntity } from '../../blogs/entities/bloggers.entity';
 import { CommentEntity } from '../../comments/entities/comment.entity';
+import { ActionsEntity } from '../../../../library/entities/actions.entity';
 
 @Entity('posts')
 export class PostEntity {
@@ -26,6 +27,8 @@ export class PostEntity {
     onDelete: 'CASCADE',
   })
   blogger: BloggersEntity;
-  @OneToMany(() => CommentEntity, (comment) => comment)
+  @OneToMany(() => CommentEntity, (comment) => comment.post)
   comment: CommentEntity[];
+  @OneToMany(() => ActionsEntity, (action) => action.post)
+  action: ActionsEntity[];
 }

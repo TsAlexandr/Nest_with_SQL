@@ -27,8 +27,8 @@ export class BloggersEntity {
   @OneToOne(() => UserEntity)
   @JoinColumn()
   user: UserEntity;
-  @OneToMany(() => PostEntity, (post) => post.blogId)
+  @OneToMany(() => PostEntity, (post) => post.blogger)
   post: PostEntity[];
-  @OneToMany(() => UserBlackListEntity, (blackList) => blackList)
+  @OneToMany(() => UserBlackListEntity, (blackList) => blackList.blogger)
   blackList: UserBlackListEntity[];
 }

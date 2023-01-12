@@ -1,11 +1,11 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { PostEntity } from '../../../public/posts/entities/post.entity';
 import { CommentEntity } from '../../../public/comments/entities/comment.entity';
 import { UserBlackListEntity } from '../../../../library/entities/userBlackList.entity';
 import { ActionsEntity } from '../../../../library/entities/actions.entity';
 import { EmailConfirmEntity } from '../../../../library/entities/emailConfirm.entity';
 import { RecoveryDataEntity } from '../../../../library/entities/recoveryData.entity';
 import { DeviceEntity } from '../../../public/devices/entities/device.entity';
+import { BanInfoEntity } from '../../../../library/entities/banInfo.entity';
 
 @Entity('users')
 export class UserEntity {
@@ -27,8 +27,10 @@ export class UserEntity {
   emailConfirm: EmailConfirmEntity[];
   @OneToMany(() => RecoveryDataEntity, (recovery) => recovery.userId)
   recovery: RecoveryDataEntity[];
-  @OneToMany(() => UserBlackListEntity, (blackList) => blackList)
+  @OneToMany(() => UserBlackListEntity, (blackList) => blackList.user)
   blackList: UserBlackListEntity[];
-  @OneToMany(() => DeviceEntity, (device) => device)
+  @OneToMany(() => DeviceEntity, (device) => device.user)
   device: DeviceEntity[];
+  @OneToMany(() => BanInfoEntity, (ban) => ban.user)
+  ban: BanInfoEntity[];
 }
