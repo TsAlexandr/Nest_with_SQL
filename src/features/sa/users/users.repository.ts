@@ -60,7 +60,6 @@ export class UsersRepository {
             THEN b."isBanned" = true
     ELSE b."isBanned" IN (true, false)
         END
-    
     `,
       ['%' + searchLoginTerm + '%', '%' + searchEmailTerm + '%'],
     );
@@ -108,7 +107,8 @@ export class UsersRepository {
       .insert()
       .into(BanInfoEntity)
       .values({
-        userId: newUser.id,
+        bannedId: newUser.id,
+        bannedType: 'user',
         banDate: null,
         banReason: null,
         isBanned: false,
@@ -145,25 +145,22 @@ export class UsersRepository {
     const query = await this.dataSource
       .createQueryBuilder()
       .select()
-      .from(UserEntity, 'users')
-      .leftJoinAndSelect('banInfo', 'ban')
-      .andWhere('ban.isBanned = false')
-      .where('users.login ilike =: login', { login: `%${login}%` })
-      .getOne();
-    console.log(query);
-    return query[0];
+      .from(UserEntity, 'u')
+      .leftJoinAndSelect('banInfo', 'b', 'b.isBanned = false')
+      .where('u.login ilike :login', { login: `%${login}%` })
+      .getRawOne();
+    return query;
   }
 
   async findById(id: string) {
-    const query = await this.dataSource.query(
-      `
-    SELECT u.*, bl.* FROM public.users u
-    LEFT JOIN public."userBlackList" bl
-    ON u.id = bl."userId"
-    WHERE id = $1`,
-      [id],
-    );
-    return query[0];
+    const query = await this.dataSource
+      .createQueryBuilder()
+      .select()
+      .from(UserEntity, 'u')
+      .leftJoinAndSelect('userBlackList', 'ub', 'u.id = ub.userId')
+      .where('u.id =:id', { id })
+      .getRawOne();
+    return query;
   }
 
   async delUser(id: string) {
@@ -176,25 +173,24 @@ export class UsersRepository {
   }
 
   async findByEmail(email: string) {
-    const query = await this.dataSource.query(
-      `
-    SELECT u.*, b.* FROM public.users u
-    LEFT JOIN public."emailConfirm" b
-    ON u.id = b."userId"
-    WHERE email = $1`,
-      [email],
-    );
-    return query[0];
+    const query = await this.dataSource
+      .createQueryBuilder()
+      .select()
+      .from(UserEntity, 'u')
+      .leftJoinAndSelect('emailConfirm', 'e', 'u.id = e.userId')
+      .where('u.email ilike :email', { email: `%${email}%` })
+      .getRawOne();
+    return query;
   }
 
   async findByConfirmCode(code: string) {
-    const query = await this.dataSource.query(
-      `
-    SELECT * FROM public."emailConfirm"
-    WHERE code = $1`,
-      [code],
-    );
-    return query[0];
+    const query = await this.dataSource
+      .createQueryBuilder()
+      .select()
+      .from(EmailConfirmEntity, 'e')
+      .where('e.code =:code', { code })
+      .getRawOne();
+    return query;
   }
 
   async updateConfirm(id: string) {
@@ -204,7 +200,7 @@ export class UsersRepository {
       .set({ isConfirmed: true })
       .where('userId = :id', { id })
       .execute();
-    return query[0];
+    return query;
   }
   async updateConfirmationCode(id: string) {
     const query = await this.dataSource
@@ -213,7 +209,7 @@ export class UsersRepository {
       .set({ code: v4() })
       .where('userId =: id', { id })
       .execute();
-    return query[0];
+    return query;
   }
 
   async updateUserWithRecoveryData(
@@ -235,17 +231,17 @@ export class UsersRepository {
       .where('userId = :id', { id })
       .returning('userId')
       .execute();
-    return query[0];
+    return query.raw;
   }
 
   async findUserByCode(recoveryCode: string) {
-    const query = await this.dataSource.query(
-      `
-    SELECT * FROM public."recoveryData"
-    WHERE "recoveryCode" = $1`,
-      [recoveryCode],
-    );
-    return query[0];
+    const query = await this.dataSource
+      .createQueryBuilder()
+      .select()
+      .from(RecoveryDataEntity, 'r')
+      .where('r.recoveryCode =:recoveryCode', { recoveryCode })
+      .getRawOne();
+    return query;
   }
 
   async confirmPassword(id: string, generatePassword: string) {
@@ -272,15 +268,20 @@ export class UsersRepository {
           banDate: new Date(),
         })
         .where('bannedId =: userId', { userId })
-        .andWhere('bannedType =: "user"');
+        .andWhere('bannedType = "user"')
+        .execute();
     } else {
-      return this.dataSource.query(
-        `
-    UPDATE public."banInfo" 
-    SET "isBanned" = $1, "banReason" = NULL, "banDate" = NULL 
-    WHERE "bannedId" = $2 AND "bannedType" = $3`,
-        [banInfo.isBanned, userId, 'user'],
-      );
+      return this.dataSource
+        .createQueryBuilder()
+        .update(BanInfoEntity)
+        .set({
+          isBanned: banInfo.isBanned,
+          banReason: null,
+          banDate: null,
+        })
+        .where('bannedId =: userId', { userId })
+        .andWhere('bannedType = "user"')
+        .execute();
     }
   }
 

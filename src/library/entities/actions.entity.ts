@@ -14,9 +14,9 @@ export class ActionsEntity {
   @Column('text')
   action: string;
   @Column('uuid')
-  postId: string;
-  @Column('uuid')
-  commentId: string;
+  parentId: string;
+  @Column('text')
+  parentType: string;
   @ManyToOne(() => UserEntity, (user) => user.id, { onDelete: 'CASCADE' })
   user: UserEntity;
   @ManyToOne(() => PostEntity, (post) => post.id, { onDelete: 'CASCADE' })
