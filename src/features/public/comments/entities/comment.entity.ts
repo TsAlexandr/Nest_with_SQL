@@ -3,6 +3,7 @@ import {
   Entity,
   ManyToOne,
   OneToMany,
+  PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { UserEntity } from '../../../sa/users/entities/user.entity';
@@ -11,7 +12,7 @@ import { ActionsEntity } from '../../../../library/entities/actions.entity';
 
 @Entity('comments')
 export class CommentEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn('uuid')
   id: string;
   @Column('uuid')
   postId: string;

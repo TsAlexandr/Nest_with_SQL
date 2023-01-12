@@ -4,6 +4,7 @@ import {
   JoinColumn,
   OneToMany,
   OneToOne,
+  PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { PostEntity } from '../../posts/entities/post.entity';
@@ -12,7 +13,7 @@ import { UserEntity } from '../../../sa/users/entities/user.entity';
 
 @Entity('blogs')
 export class BloggersEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn('uuid')
   id: string;
   @Column({ type: 'text', collation: 'C' })
   name: string;

@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { CommentEntity } from '../../../public/comments/entities/comment.entity';
 import { UserBlackListEntity } from '../../../../library/entities/userBlackList.entity';
 import { ActionsEntity } from '../../../../library/entities/actions.entity';
@@ -9,7 +9,7 @@ import { BanInfoEntity } from '../../../../library/entities/banInfo.entity';
 
 @Entity('users')
 export class UserEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn('uuid')
   id: string;
   @Column({ type: 'text', collation: 'C' })
   login: string;

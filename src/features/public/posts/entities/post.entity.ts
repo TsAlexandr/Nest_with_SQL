@@ -3,6 +3,7 @@ import {
   Entity,
   ManyToOne,
   OneToMany,
+  PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { BloggersEntity } from '../../blogs/entities/bloggers.entity';
@@ -11,7 +12,7 @@ import { ActionsEntity } from '../../../../library/entities/actions.entity';
 
 @Entity('posts')
 export class PostEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn('uuid')
   id: string;
   @Column('text')
   title: string;

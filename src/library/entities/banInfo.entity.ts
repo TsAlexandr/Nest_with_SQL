@@ -1,10 +1,16 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { UserEntity } from '../../features/sa/users/entities/user.entity';
 import { BloggersEntity } from '../../features/public/blogs/entities/bloggers.entity';
 
 @Entity('banInfo')
 export class BanInfoEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn('uuid')
   id: string;
   @Column('uuid')
   bannedId: string;

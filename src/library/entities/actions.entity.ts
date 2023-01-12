@@ -1,11 +1,17 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { UserEntity } from '../../features/sa/users/entities/user.entity';
 import { PostEntity } from '../../features/public/posts/entities/post.entity';
 import { CommentEntity } from '../../features/public/comments/entities/comment.entity';
 
 @Entity('actions')
 export class ActionsEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn('uuid')
   id: string;
   @Column('text')
   addedAt: string;
