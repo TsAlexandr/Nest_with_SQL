@@ -101,12 +101,13 @@ export class UsersRepository {
       })
       .returning(['id', 'login', 'email', 'createdAt'])
       .execute();
-
+    const devicePrimaryColumn = v4();
     const ban = await this.dataSource
       .createQueryBuilder()
       .insert()
       .into(BanInfoEntity)
       .values({
+        id: devicePrimaryColumn,
         bannedId: newUser.id,
         bannedType: 'user',
         banDate: null,
