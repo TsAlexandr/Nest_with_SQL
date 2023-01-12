@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
-import { UserMongo } from '../../../common/types/schemas/schemas.model';
 import { BanUserDto } from './dto/banUser.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
@@ -157,7 +156,7 @@ export class UsersRepository {
       .select()
       .from(UserEntity, 'u')
       .leftJoinAndSelect('userBlackList', 'ub', 'u.id = ub.userId')
-      .where('u.id =:id', { id })
+      .where('u.id = :id', { id })
       .getRawOne();
     return query;
   }
@@ -187,7 +186,7 @@ export class UsersRepository {
       .createQueryBuilder()
       .select()
       .from(EmailConfirmEntity, 'e')
-      .where('e.code =:code', { code })
+      .where('e.code = :code', { code })
       .getRawOne();
     return query;
   }
@@ -206,7 +205,7 @@ export class UsersRepository {
       .createQueryBuilder()
       .update(EmailConfirmEntity)
       .set({ code: v4() })
-      .where('userId =: id', { id })
+      .where('userId = :id', { id })
       .execute();
     return query;
   }
@@ -238,7 +237,7 @@ export class UsersRepository {
       .createQueryBuilder()
       .select()
       .from(RecoveryDataEntity, 'r')
-      .where('r.recoveryCode =:recoveryCode', { recoveryCode })
+      .where('r.recoveryCode = :recoveryCode', { recoveryCode })
       .getRawOne();
     return query;
   }
@@ -266,7 +265,7 @@ export class UsersRepository {
           banReason: banInfo.banReason,
           banDate: new Date(),
         })
-        .where('bannedId =: userId', { userId })
+        .where('bannedId = :userId', { userId })
         .andWhere('bannedType = "user"')
         .execute();
     } else {
@@ -278,7 +277,7 @@ export class UsersRepository {
           banReason: null,
           banDate: null,
         })
-        .where('bannedId =: userId', { userId })
+        .where('bannedId = :userId', { userId })
         .andWhere('bannedType = "user"')
         .execute();
     }
