@@ -4,9 +4,7 @@ import { BloggersEntity } from '../../features/public/blogs/entities/bloggers.en
 
 @Entity('banInfo')
 export class BanInfoEntity {
-  @PrimaryColumn({ type: 'uuid' })
-  id: string;
-  @Column('uuid')
+  @PrimaryColumn('uuid')
   bannedId: string;
   @Column('text')
   bannedType: string;

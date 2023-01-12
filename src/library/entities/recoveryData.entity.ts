@@ -10,8 +10,6 @@ import { UserEntity } from '../../features/sa/users/entities/user.entity';
 @Entity('recoveryData')
 export class RecoveryDataEntity {
   @PrimaryColumn('uuid')
-  id: string;
-  @Column('uuid')
   userId: string;
   @Column('text')
   recoveryCode: string;

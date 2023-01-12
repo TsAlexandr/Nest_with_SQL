@@ -10,8 +10,6 @@ import { UserEntity } from '../../features/sa/users/entities/user.entity';
 @Entity('emailConfirm')
 export class EmailConfirmEntity {
   @PrimaryColumn('uuid')
-  id: string;
-  @Column('uuid')
   userId: string;
   @Column('boolean')
   isConfirmed: boolean;

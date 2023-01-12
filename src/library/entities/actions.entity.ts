@@ -11,11 +11,9 @@ import { CommentEntity } from '../../features/public/comments/entities/comment.e
 
 @Entity('actions')
 export class ActionsEntity {
-  @PrimaryColumn('uuid')
-  id: string;
   @Column('text')
   addedAt: string;
-  @Column('uuid')
+  @PrimaryColumn('uuid')
   userId: string;
   @Column('text')
   action: string;
