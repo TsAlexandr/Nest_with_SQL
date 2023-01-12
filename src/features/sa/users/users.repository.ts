@@ -144,7 +144,7 @@ export class UsersRepository {
       .createQueryBuilder()
       .select()
       .from(UserEntity, 'u')
-      .leftJoinAndSelect('banInfo', 'b', 'b.isBanned = false')
+      .leftJoin('banInfo', 'b', 'b.isBanned = false')
       .where('u.login ilike :login', { login: `%${login}%` })
       .getRawOne();
     return query;
@@ -201,10 +201,11 @@ export class UsersRepository {
     return query;
   }
   async updateConfirmationCode(id: string) {
+    const code = v4();
     const query = await this.dataSource
       .createQueryBuilder()
       .update(EmailConfirmEntity)
-      .set({ code: v4() })
+      .set({ code: code })
       .where('userId = :id', { id })
       .execute();
     return query;
