@@ -12,7 +12,7 @@ export class DeviceRepository {
     const query = await this.dataSource
       .getRepository(DeviceEntity)
       .createQueryBuilder()
-      .where('userId =:userId', { userId })
+      .where('userId = :userId', { userId })
       .getRawMany();
     return query;
   }
@@ -41,7 +41,7 @@ export class DeviceRepository {
       .delete()
       .from(DeviceEntity)
       .where('userId = :userId', { userId })
-      .andWhere('deviceId !=: deviceId', { deviceId })
+      .andWhere('deviceId != :deviceId', { deviceId })
       .execute();
   }
 
@@ -49,9 +49,9 @@ export class DeviceRepository {
     const query = await this.dataSource
       .getRepository(DeviceEntity)
       .createQueryBuilder()
-      .where('userId =: userId', { userId })
-      .andWhere('deviceId =: deviceId', { deviceId })
-      .andWhere('lastActiveDate =: lastActiveDate', { date })
+      .where('userId = :userId', { userId })
+      .andWhere('deviceId = :deviceId', { deviceId })
+      .andWhere('lastActiveDate = :lastActiveDate', { date })
       .getRawOne();
     return query;
   }
@@ -66,8 +66,8 @@ export class DeviceRepository {
       .createQueryBuilder()
       .update(DeviceEntity)
       .set({ expiredAt: expDate, lastActiveDate: lastActive })
-      .where('userId =: userId', { userId })
-      .andWhere('deviceId =: deviceId', { deviceId })
+      .where('userId = :userId', { userId })
+      .andWhere('deviceId = :deviceId', { deviceId })
       .execute();
   }
 
@@ -77,7 +77,7 @@ export class DeviceRepository {
       .delete()
       .from(DeviceEntity)
       .where('userId = :userId', { userId })
-      .andWhere('deviceId =: deviceId', { deviceId })
+      .andWhere('deviceId = :deviceId', { deviceId })
       .execute();
   }
 
@@ -85,7 +85,7 @@ export class DeviceRepository {
     const query = await this.dataSource
       .getRepository(DeviceEntity)
       .createQueryBuilder()
-      .where('deviceId =: deviceId', { deviceId })
+      .where('deviceId = :deviceId', { deviceId })
       .getRawOne();
     return query;
   }
