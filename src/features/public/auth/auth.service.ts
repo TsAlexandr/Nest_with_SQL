@@ -19,7 +19,6 @@ export class AuthService {
     const user: any = await this.usersRepository.findByLogin(
       loginBody.loginOrEmail,
     );
-    console.log(user);
     if (!user || user.isBanned === true) {
       throw new HttpException(
         { message: [{ message: 'invalid value', field: 'login' }] },
@@ -76,13 +75,13 @@ export class AuthService {
       { userId: userId, userLogin: userLogin },
       secret,
       {
-        expiresIn: '4h',
+        expiresIn: '10sec',
       },
     );
     const refreshToken = jwt.sign(
       { userId: userId, userLogin: userLogin, deviceId: deviceId },
       secret,
-      { expiresIn: '5h' },
+      { expiresIn: '20sec' },
     );
 
     return {
