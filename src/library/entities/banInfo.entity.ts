@@ -8,7 +8,7 @@ export class BanInfoEntity {
   bannedId: string;
   @Column('text')
   bannedType: string;
-  @Column({ type: 'time with time zone', nullable: true })
+  @Column({ type: 'timestamp with time zone', nullable: true })
   banDate: Date;
   @Column({ type: 'text', nullable: true })
   banReason: string;

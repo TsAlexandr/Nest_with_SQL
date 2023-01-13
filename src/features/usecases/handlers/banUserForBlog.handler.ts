@@ -16,8 +16,10 @@ export class BanUserForBlogHandler
     const blogger = await this.blogsRepository.getBlogForValidation(
       banBlogDto.blogId,
     );
+    console.log(blogger);
     if (blogger.userId !== ownerId) throw new ForbiddenException();
     const user = await this.usersRepository.findById(id);
+    console.log(user);
     if (!user) throw new NotFoundException();
     await this.blogsRepository.banUserForBlog(banBlogDto, user.id);
     return true;

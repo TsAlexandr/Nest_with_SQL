@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { v4 } from 'uuid';
 import { BanUserDto } from './dto/banUser.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
@@ -175,9 +174,10 @@ export class UsersRepository {
       .createQueryBuilder()
       .select()
       .from(UserEntity, 'u')
-      .leftJoinAndSelect('emailConfirm', 'e', 'u.id = e.userId')
+      .leftJoin('emailConfirm', 'e', 'u.id = e.userId')
       .where('u.email ilike :email', { email: `%${email}%` })
       .getRawOne();
+    console.log(query);
     return query;
   }
 
@@ -200,8 +200,7 @@ export class UsersRepository {
       .execute();
     return query;
   }
-  async updateConfirmationCode(id: string) {
-    const code = v4();
+  async updateConfirmationCode(id: string, code: string) {
     const query = await this.dataSource
       .createQueryBuilder()
       .update(EmailConfirmEntity)
@@ -268,7 +267,7 @@ export class UsersRepository {
           banDate: new Date(),
         })
         .where('bannedId = :userId', { userId })
-        .andWhere('bannedType = :userType', { userType: `%${userType}%` })
+        .andWhere('bannedType like :userType', { userType: `%${userType}%` })
         .execute();
     } else {
       return this.dataSource
@@ -280,7 +279,7 @@ export class UsersRepository {
           banDate: null,
         })
         .where('bannedId = :userId', { userId })
-        .andWhere('bannedType = :userType', { userType: `%${userType}%` })
+        .andWhere('bannedType like :userType', { userType: `%${userType}%` })
         .execute();
     }
   }
