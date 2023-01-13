@@ -145,6 +145,7 @@ export class UsersRepository {
       .from(UserEntity, 'u')
       .leftJoin('banInfo', 'b', 'b.isBanned = false')
       .where('u.login ilike :login', { login: `%${login}%` })
+      .andWhere('b.bannedId = u.id')
       .getRawOne();
     return query;
   }
