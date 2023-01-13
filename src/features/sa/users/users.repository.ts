@@ -257,6 +257,7 @@ export class UsersRepository {
     );
   }
   banUser(userId: string, banInfo: BanUserDto) {
+    const userType = 'user';
     if (banInfo.isBanned == true) {
       return this.dataSource
         .createQueryBuilder()
@@ -267,7 +268,7 @@ export class UsersRepository {
           banDate: new Date(),
         })
         .where('bannedId = :userId', { userId })
-        .andWhere('bannedType = "user"')
+        .andWhere('bannedType = :userType', { userType: `%${userType}%` })
         .execute();
     } else {
       return this.dataSource
@@ -279,7 +280,7 @@ export class UsersRepository {
           banDate: null,
         })
         .where('bannedId = :userId', { userId })
-        .andWhere('bannedType = "user"')
+        .andWhere('bannedType = :userType', { userType: `%${userType}%` })
         .execute();
     }
   }
