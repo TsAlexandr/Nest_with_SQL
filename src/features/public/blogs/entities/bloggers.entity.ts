@@ -2,6 +2,7 @@ import {
   Column,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryColumn,
@@ -25,8 +26,7 @@ export class BloggersEntity {
   createdAt: Date;
   @Column('uuid')
   userId: string;
-  @OneToOne(() => UserEntity)
-  @JoinColumn()
+  @ManyToOne(() => UserEntity, (user) => user.blogger)
   user: UserEntity;
   @OneToMany(() => PostEntity, (post) => post.blogger)
   post: PostEntity[];

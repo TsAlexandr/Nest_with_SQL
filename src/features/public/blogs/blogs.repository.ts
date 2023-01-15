@@ -111,11 +111,11 @@ export class BlogsRepository {
       })
       .execute();
     return {
-      id: query.raw.id,
-      name: query.raw.name,
-      websiteUrl: query.raw.websiteUrl,
-      description: query.raw.description,
-      createdAt: query.raw.createdAt,
+      id: query.raw[0].id,
+      name: query.raw[0].name,
+      websiteUrl: query.raw[0].websiteUrl,
+      description: query.raw[0].description,
+      createdAt: query.raw[0].createdAt,
     };
   }
 

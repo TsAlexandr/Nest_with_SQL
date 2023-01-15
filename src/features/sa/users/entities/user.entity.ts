@@ -6,6 +6,7 @@ import { EmailConfirmEntity } from '../../../../library/entities/emailConfirm.en
 import { RecoveryDataEntity } from '../../../../library/entities/recoveryData.entity';
 import { DeviceEntity } from '../../../public/devices/entities/device.entity';
 import { BanInfoEntity } from '../../../../library/entities/banInfo.entity';
+import { BloggersEntity } from '../../../public/blogs/entities/bloggers.entity';
 
 @Entity('users')
 export class UserEntity {
@@ -19,6 +20,8 @@ export class UserEntity {
   createdAt: Date;
   @Column('text')
   passwordHash: string;
+  @OneToMany(() => BloggersEntity, (blogger) => blogger.userId)
+  blogger: BloggersEntity[];
   @OneToMany(() => CommentEntity, (comment) => comment.userId)
   comment: CommentEntity[];
   @OneToMany(() => ActionsEntity, (actions) => actions.userId)
