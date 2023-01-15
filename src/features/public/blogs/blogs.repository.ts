@@ -5,6 +5,9 @@ import { BloggersDto } from './dto/bloggers.dto';
 import { BanBlogDto } from '../../blogger/dto/banBlog.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { BloggersEntity } from './entities/bloggers.entity';
+import { BanInfoEntity } from '../../../library/entities/banInfo.entity';
+import { UserBlackListEntity } from '../../../library/entities/userBlackList.entity';
 
 @Injectable()
 export class BlogsRepository {
@@ -48,61 +51,72 @@ export class BlogsRepository {
   }
 
   async getBlogsById(id: string) {
-    const query = await this.dataSource.query(
-      `
-    SELECT b.*, ban.* FROM public.blogs b
-    LEFT JOIN public."banInfo" ban
-    ON id = ban."bannedId"
-    WHERE id = $1 AND ban."isBanned" = false`,
-      [id],
-    );
-    return query[0];
+    const query = await this.dataSource
+      .createQueryBuilder()
+      .select()
+      .from(BloggersEntity, 'b')
+      .leftJoin('banInfo', 'ban', 'ban.isBanned = false')
+      .where('id = :id', { id })
+      .andWhere('b.id = ban.bannedId')
+      .getRawOne();
+    return query;
   }
 
   async deleteBloggerById(id: string) {
-    return this.dataSource.query(
-      `
-    DELETE FROM public.blogs
-    WHERE id = $1`,
-      [id],
-    );
+    return this.dataSource
+      .createQueryBuilder()
+      .delete()
+      .from(BloggersEntity)
+      .where('id = :id', { id })
+      .execute();
   }
 
   async updateBloggerById(id: string, update: BloggersDto) {
-    return this.dataSource.query(
-      `
-    UPDATE public.blogs 
-    SET name = $1, 
-        "websiteUrl" = $2, 
-        description = $3
-    WHERE id = $4`,
-      [update.name, update.websiteUrl, update.description, id],
-    );
+    return this.dataSource
+      .createQueryBuilder()
+      .update(BloggersEntity)
+      .set({
+        name: update.name,
+        websiteUrl: update.websiteUrl,
+        description: update.description,
+      })
+      .where('id = :id', { id });
   }
 
   async createBlogger(newBlogger: Blogger, userId: string) {
-    const query = await this.dataSource.query(
-      `
-    INSERT INTO public.blogs 
-    (id, name, "websiteUrl", description, "createdAt", "userId")
-    VALUES ($1, $2, $3, $4, $5, $6)
-    RETURNING id, name, "websiteUrl", description, "createdAt"`,
-      [
-        newBlogger.id,
-        newBlogger.name,
-        newBlogger.websiteUrl,
-        newBlogger.description,
-        newBlogger.createdAt,
-        userId,
-      ],
-    );
-    await this.dataSource.query(
-      `
-    INSERT INTO public."banInfo"
-    VALUES ($1, 'blog', NULL, NULL,  false)`,
-      [newBlogger.id],
-    );
-    return query[0];
+    const query = await this.dataSource
+      .createQueryBuilder()
+      .insert()
+      .into(BloggersEntity)
+      .values({
+        id: newBlogger.id,
+        name: newBlogger.name,
+        websiteUrl: newBlogger.websiteUrl,
+        description: newBlogger.description,
+        createdAt: newBlogger.createdAt,
+        userId: userId,
+      })
+      .returning(['id', 'name', 'websiteUrl', 'description', 'createdAt'])
+      .execute();
+    await this.dataSource
+      .createQueryBuilder()
+      .insert()
+      .into(BanInfoEntity)
+      .values({
+        bannedId: newBlogger.id,
+        bannedType: 'blog',
+        banReason: null,
+        banDate: null,
+        isBanned: false,
+      })
+      .execute();
+    return {
+      id: query.raw.id,
+      name: query.raw.name,
+      websiteUrl: query.raw.websiteUrl,
+      description: query.raw.description,
+      createdAt: query.raw.createdAt,
+    };
   }
 
   async getBlogsWithOwnerInfo(
@@ -250,19 +264,24 @@ export class BlogsRepository {
   async banUserForBlog(banBlogDto: BanBlogDto, id: string) {
     if (banBlogDto.isBanned === true) {
       const banDate = new Date();
-      return this.dataSource.query(
-        `
-      INSERT INTO public."userBlackList"
-      VALUES ($1, $2, $3, $4)`,
-        [banBlogDto.blogId, id, banBlogDto.banReason, banDate],
-      );
+      return this.dataSource
+        .createQueryBuilder()
+        .insert()
+        .into(UserBlackListEntity)
+        .values({
+          blogId: banBlogDto.blogId,
+          userId: id,
+          banReason: banBlogDto.banReason,
+          banDate: banDate,
+        })
+        .execute();
     } else {
-      return this.dataSource.query(
-        `
-      DELETE FROM public."userBlackList"
-      WHERE "userId" = $1`,
-        [id],
-      );
+      return this.dataSource
+        .createQueryBuilder()
+        .delete()
+        .from(UserBlackListEntity)
+        .where('"userId" = :id ', { id })
+        .execute();
     }
   }
 
@@ -279,30 +298,35 @@ export class BlogsRepository {
   async banBlogById(id: string, isBanned: boolean) {
     if (isBanned === true) {
       const banDate = new Date();
-      return this.dataSource.query(
-        `
-    UPDATE public."banInfo" 
-    SET "isBanned" = $1, "banDate" = $2 
-    WHERE "bannedId" = $3 AND "bannedType" = $4`,
-        [true, banDate, id, 'blog'],
-      );
+      return this.dataSource
+        .createQueryBuilder()
+        .update(BanInfoEntity)
+        .set({
+          isBanned: true,
+          banDate: banDate,
+          bannedId: id,
+          bannedType: 'blog',
+        })
+        .execute();
     } else {
-      return this.dataSource.query(
-        `
-    UPDATE public."banInfo" 
-    SET "isBanned" = $1, "banDate" = $2 
-    WHERE "bannedId" = $3 AND "bannedType" = $4`,
-        [false, null, id, 'blog'],
-      );
+      return this.dataSource
+        .createQueryBuilder()
+        .update(BanInfoEntity)
+        .set({
+          isBanned: false,
+          banDate: null,
+          bannedId: id,
+          bannedType: 'blog',
+        })
+        .execute();
     }
   }
   async getBlogForValidation(id: string) {
-    const query = await this.dataSource.query(
-      `
-    SELECT * FROM public.blogs
-    WHERE id = $1`,
-      [id],
-    );
-    return query[0];
+    const query = await this.dataSource
+      .getRepository(BloggersEntity)
+      .createQueryBuilder()
+      .where('id = :id', { id })
+      .getOne();
+    return query;
   }
 }

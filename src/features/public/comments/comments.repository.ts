@@ -1,11 +1,13 @@
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { CommentEntity } from './entities/comment.entity';
+import { UserEntity } from '../../sa/users/entities/user.entity';
+import { ActionsEntity } from '../../../library/entities/actions.entity';
 
 export class CommentsRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async findComment(commentId: string, userId: string) {
-    console.log(userId, 'user id from comment by id');
     const query = await this.dataSource.query(
       `
     SELECT c.id, c.content, c."createdAt", c."userId", u.login as "userLogin", 
@@ -44,7 +46,6 @@ export class CommentsRepository {
     `,
       [commentId, userId],
     );
-    console.log(query, 'info about comment');
     return query[0];
   }
   async getCommentWithPage(
@@ -122,53 +123,57 @@ export class CommentsRepository {
   }
 
   async createComment(newComment: any) {
-    const query = await this.dataSource.query(
-      `
-    INSERT INTO public.comments
-    VALUES ($1, $2, $3, $4, $5)
-    RETURNING id`,
-      [
-        newComment.id,
-        newComment.content,
-        newComment.createdAt,
-        newComment.postId,
-        newComment.userId,
-      ],
-    );
-    const result = await this.dataSource.query(
-      `
-    SELECT c.id, c.content, c."createdAt", c."userId", u.login as "userLogin"
-    FROM public.comments c
-    LEFT JOIN public.users u
-    ON c."userId" = u.id
-    WHERE c.id = $1`,
-      [query[0].id],
-    );
-    result[0].likesInfo = {
-      likesCount: 0,
-      dislikesCount: 0,
-      myStatus: 'None',
+    const query = await this.dataSource
+      .createQueryBuilder()
+      .insert()
+      .into(CommentEntity)
+      .values({
+        id: newComment.id,
+        content: newComment.content,
+        addedAt: newComment.createdAt,
+        postId: newComment.postId,
+        userId: newComment.userId,
+      })
+      .returning('id')
+      .execute();
+    const result = await this.dataSource
+      .createQueryBuilder()
+      .select()
+      .from(CommentEntity, 'c')
+      .leftJoin(UserEntity, 'u', 'c.userId = u.id')
+      .where('id = :id', { id: query.raw.id })
+      .getOne();
+    return {
+      id: result.id,
+      content: result.content,
+      userId: result.userId,
+      userLogin: result.user.login,
+      createdAt: result.addedAt,
+      likesInfo: {
+        likesCount: 0,
+        dislikesCount: 0,
+        myStatus: 'None',
+      },
     };
-    return result[0];
   }
 
   async updateComment(id: string, content: string) {
-    return this.dataSource.query(
-      `
-    UPDATE public.comments
-    SET content = $1
-    WHERE id = $2`,
-      [content, id],
-    );
+    return this.dataSource
+      .createQueryBuilder()
+      .update(CommentEntity)
+      .set({
+        content: content,
+      })
+      .where('id = :id', { id })
+      .execute();
   }
 
   async deleteComment(id: string) {
-    return this.dataSource.query(
-      `
-    DELETE FROM public.comments
-    WHERE id = $1`,
-      [id],
-    );
+    return this.dataSource
+      .createQueryBuilder()
+      .delete()
+      .from(CommentEntity)
+      .where('id = :id', { id });
   }
 
   async updateLikes(
@@ -177,18 +182,27 @@ export class CommentsRepository {
     userId: string,
     createdAt: Date,
   ) {
-    await this.dataSource.query(
-      `
-      DELETE FROM public.actions
-      WHERE "userId" = $1 AND "parentId" = $2 AND "parentType" = 'comment'`,
-      [userId, commentId],
-    );
-    return this.dataSource.query(
-      `
-      INSERT INTO public.actions
-      VALUES ($1, $2, $3, $4, 'comment')`,
-      [userId, status, createdAt, commentId],
-    );
+    const parentType = 'comment';
+    await this.dataSource
+      .createQueryBuilder()
+      .delete()
+      .from(ActionsEntity)
+      .where('"userId" = :userId', { userId })
+      .andWhere('"parentId" = :commentId', { commentId })
+      .andWhere('"parentType" = :parentType', { parentType })
+      .execute();
+    return this.dataSource
+      .createQueryBuilder()
+      .insert()
+      .into(ActionsEntity)
+      .values({
+        userId: userId,
+        action: status,
+        addedAt: createdAt,
+        parentId: commentId,
+        parentType: 'comment',
+      })
+      .execute();
   }
 
   async getBlogsWithPostsAndComments(

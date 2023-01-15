@@ -1,18 +1,12 @@
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  PrimaryColumn,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 import { UserEntity } from '../../features/sa/users/entities/user.entity';
 import { PostEntity } from '../../features/public/posts/entities/post.entity';
 import { CommentEntity } from '../../features/public/comments/entities/comment.entity';
 
 @Entity('actions')
 export class ActionsEntity {
-  @Column('text')
-  addedAt: string;
+  @Column('timestamp with time zone')
+  addedAt: Date;
   @PrimaryColumn('uuid')
   userId: string;
   @Column('text')

@@ -5,7 +5,6 @@ import {
   HttpStatus,
   Ip,
   Post,
-  Req,
   Res,
   UseGuards,
   Headers,
@@ -25,7 +24,7 @@ import { RegistrationDto } from './dto/registration.dto';
 import { LoginDto } from './dto/login.dto';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { NewPasswordDto } from './dto/newPassword.dto';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { EmailInputDto } from './dto/emailInput.dto';
 import { AuthGuard } from './guards/auth.guard';
 import { CreateUserCommand } from '../../usecases/commands/createUser.command';
@@ -80,7 +79,7 @@ export class AuthController {
     return null;
   }
 
-  @UseGuards(ThrottlerGuard)
+  //@UseGuards(ThrottlerGuard)
   @HttpCode(HttpStatus.OK)
   @Post('/login')
   async login(

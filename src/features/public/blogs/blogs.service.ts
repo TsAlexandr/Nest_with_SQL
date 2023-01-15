@@ -20,7 +20,7 @@ export class BlogsService {
     return await this.bloggersRepository.updateBloggerById(id, update);
   }
 
-  async deleteBlogger(id: string): Promise<boolean> {
+  async deleteBlogger(id: string) {
     return await this.bloggersRepository.deleteBloggerById(id);
   }
 

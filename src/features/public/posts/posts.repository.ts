@@ -1,6 +1,9 @@
 import { Paginator, PostsCon } from '../../../common/types/classes/classes';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { PostEntity } from './entities/post.entity';
+import { BloggersEntity } from '../blogs/entities/bloggers.entity';
+import { ActionsEntity } from '../../../library/entities/actions.entity';
 
 export class PostsRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
@@ -138,76 +141,89 @@ export class PostsRepository {
   }
 
   async createPosts(createPost: any) {
-    const query = await this.dataSource.query(
-      `
-    INSERT INTO public.posts
-    VALUES ($1, $2, $3, $4, $5, $6)
-    RETURNING id, title, "shortDescription", content, "createdAt", "blogId"`,
-      [
-        createPost.id,
-        createPost.title,
-        createPost.shortDescription,
-        createPost.content,
-        createPost.createdAt,
-        createPost.blogId,
-      ],
-    );
-    const result = await this.dataSource.query(
-      `
-    SELECT p.*, b.name AS "blogName"
-    FROM public.posts p
-    LEFT JOIN public.blogs b
-    ON p."blogId" = b.id
-    WHERE p.id = $1`,
-      [query[0].id],
-    );
-    result[0].extendedLikesInfo = {
-      dislikesCount: 0,
-      likesCount: 0,
-      myStatus: 'None',
-      newestLikes: [],
+    const query = await this.dataSource
+      .createQueryBuilder()
+      .insert()
+      .into(PostEntity)
+      .values({
+        id: createPost.id,
+        title: createPost.title,
+        shortDescription: createPost.shortDescription,
+        content: createPost.content,
+        createdAt: createPost.createdAt,
+        blogId: createPost.blogId,
+      })
+      .returning('id')
+      .execute();
+    const result = await this.dataSource
+      .createQueryBuilder()
+      .select()
+      .from(PostEntity, 'p')
+      .leftJoin(BloggersEntity, 'b', 'p.blogId = b.id')
+      .where('id = :id', { id: query.raw.id })
+      .getOne();
+    return {
+      id: result.id,
+      title: result.title,
+      shortDescription: result.shortDescription,
+      content: result.content,
+      blogId: result.blogId,
+      blogName: result.blogger.name,
+      createdAt: result.createdAt,
+      extendedLikesInfo: {
+        dislikesCount: 0,
+        likesCount: 0,
+        myStatus: 'None',
+        newestLikes: [],
+      },
     };
-    return result[0];
   }
 
   async updatePost(updPost: any) {
-    return this.dataSource.query(
-      `
-    UPDATE public.posts
-    SET content = $1, "shortDescription" = $2, title = $3
-    WHERE id = $4`,
-      [
-        updPost.content,
-        updPost.shortDescription,
-        updPost.title,
-        updPost.postId,
-      ],
-    );
+    return this.dataSource
+      .createQueryBuilder()
+      .update(PostEntity)
+      .set({
+        content: updPost.content,
+        shortDescription: updPost.shortDescription,
+        title: updPost.title,
+      })
+      .where('id = :id', { id: updPost.id })
+      .execute();
   }
 
   async deletePost(id: string) {
-    return this.dataSource.query(
-      `
-    DELETE FROM public.posts
-    WHERE id = $1`,
-      [id],
-    );
+    return this.dataSource
+      .createQueryBuilder()
+      .delete()
+      .from(PostEntity)
+      .where('id = :id', { id })
+      .execute();
   }
 
   async updateActions(postId: string, likeStatus: string, userId: string) {
-    await this.dataSource.query(
-      `
-    DELETE FROM public.actions
-    WHERE "userId" = $1 AND "parentId" = $2 AND "parentType" = 'post'`,
-      [userId, postId],
-    );
+    const parentType = 'post';
+    await this.dataSource
+      .createQueryBuilder()
+      .delete()
+      .from(ActionsEntity)
+      .where('"userId" = :userId', { userId })
+      .andWhere('"parentId" = :postId', { postId })
+      .andWhere('"parentType" = :parentType', { parentType })
+      .execute();
     const date = new Date();
-    return this.dataSource.query(
-      `
-    INSERT INTO public.actions
-    VALUES ($1, $2, $3, $4, 'post')`,
-      [userId, likeStatus, date, postId],
-    );
+    return this.dataSource
+      .createQueryBuilder()
+      .insert()
+      .into(ActionsEntity)
+      .values({
+        userId: userId,
+        action: likeStatus,
+        addedAt: date,
+        parentId: postId,
+        parentType: 'post',
+      })
+      .execute();
   }
 
   async getPostsByBlogId(

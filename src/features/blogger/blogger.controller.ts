@@ -2,11 +2,9 @@ import {
   Body,
   Controller,
   Delete,
-  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
-  NotFoundException,
   Param,
   Post,
   Put,
@@ -14,16 +12,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuards } from '../public/auth/guards/jwt-auth.guards';
-import {
-  Blogger,
-  Paginator,
-  PostsCon,
-} from '../../common/types/classes/classes';
+import { Blogger, Paginator } from '../../common/types/classes/classes';
 import { BloggersDto } from '../public/blogs/dto/bloggers.dto';
 import { BlogsService } from '../public/blogs/blogs.service';
 import { PostsService } from '../public/posts/posts.service';
 import { Pagination } from '../../common/types/classes/pagination';
-import { UsersService } from '../sa/users/users.service';
 import { CurrentUserId } from '../../common/custom-decorator/current.user.decorator';
 import { QueryBus } from '@nestjs/cqrs';
 import { GetAllBloggerCommentsCommand } from '../usecases/queryCommands/getAllBloggerComments.command';
@@ -104,7 +97,7 @@ export class BloggerController {
     @Param('blogId') id: string,
     @Body() bloggersDto: BloggersDto,
     @CurrentUserId() userId: string,
-  ): Promise<boolean> {
+  ) {
     return this.bloggersService.updateBlogger(id, { ...bloggersDto });
   }
 
@@ -122,7 +115,7 @@ export class BloggerController {
   @UseGuards(ExistingBlogGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':blogId')
-  async deleteBlogger(@Param('blogId') id: string): Promise<boolean> {
+  async deleteBlogger(@Param('blogId') id: string) {
     return this.bloggersService.deleteBlogger(id);
   }
 
