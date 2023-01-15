@@ -75,13 +75,13 @@ export class AuthService {
       { userId: userId, userLogin: userLogin },
       secret,
       {
-        expiresIn: '10sec',
+        expiresIn: '1h',
       },
     );
     const refreshToken = jwt.sign(
       { userId: userId, userLogin: userLogin, deviceId: deviceId },
       secret,
-      { expiresIn: '20sec' },
+      { expiresIn: '2h' },
     );
 
     return {

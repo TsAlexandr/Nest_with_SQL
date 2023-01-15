@@ -12,9 +12,16 @@ export class DeviceRepository {
     const query = await this.dataSource
       .getRepository(DeviceEntity)
       .createQueryBuilder()
-      .where('userId = :userId', { userId })
-      .getRawMany();
-    return query;
+      .where('"userId" = :userId', { userId })
+      .getMany();
+    return query.map((el) => {
+      return {
+        ip: el.ip,
+        title: el.title,
+        lastActiveDate: el.lastActiveDate,
+        deviceId: el.deviceId,
+      };
+    });
   }
 
   async addDevices(newDevice: Device) {
@@ -40,8 +47,8 @@ export class DeviceRepository {
       .createQueryBuilder()
       .delete()
       .from(DeviceEntity)
-      .where('userId = :userId', { userId })
-      .andWhere('deviceId != :deviceId', { deviceId })
+      .where('"userId" = :userId', { userId })
+      .andWhere('"deviceId" != :deviceId', { deviceId })
       .execute();
   }
 
@@ -49,10 +56,10 @@ export class DeviceRepository {
     const query = await this.dataSource
       .getRepository(DeviceEntity)
       .createQueryBuilder()
-      .where('userId = :userId', { userId })
-      .andWhere('deviceId = :deviceId', { deviceId })
-      .andWhere('lastActiveDate = :lastActiveDate', { date })
-      .getRawOne();
+      .where('"userId" = :userId', { userId })
+      .andWhere('"deviceId" = :deviceId', { deviceId })
+      .andWhere('"lastActiveDate" = :date', { date })
+      .getOne();
     return query;
   }
 
@@ -66,8 +73,8 @@ export class DeviceRepository {
       .createQueryBuilder()
       .update(DeviceEntity)
       .set({ expiredAt: expDate, lastActiveDate: lastActive })
-      .where('userId = :userId', { userId })
-      .andWhere('deviceId = :deviceId', { deviceId })
+      .where('"userId" = :userId', { userId })
+      .andWhere('"deviceId" = :deviceId', { deviceId })
       .execute();
   }
 
@@ -76,8 +83,8 @@ export class DeviceRepository {
       .createQueryBuilder()
       .delete()
       .from(DeviceEntity)
-      .where('userId = :userId', { userId })
-      .andWhere('deviceId = :deviceId', { deviceId })
+      .where('"userId" = :userId', { userId })
+      .andWhere('"deviceId" = :deviceId', { deviceId })
       .execute();
   }
 
@@ -85,8 +92,8 @@ export class DeviceRepository {
     const query = await this.dataSource
       .getRepository(DeviceEntity)
       .createQueryBuilder()
-      .where('deviceId = :deviceId', { deviceId })
-      .getRawOne();
+      .where('"deviceId" = :deviceId', { deviceId })
+      .getOne();
     return query;
   }
 }

@@ -12,12 +12,12 @@ import { JwtExtract } from '../auth/guards/jwt.extract';
 import { DeviceService } from './device.service';
 import { Cookies } from '../../../common/custom-decorator/current.user.decorator';
 
-@Controller('security')
+@Controller('security/devices')
 export class DeviceController {
   constructor(private deviceService: DeviceService) {}
 
   @UseGuards(JwtExtract)
-  @Get('/devices')
+  @Get()
   async getDevice(@Cookies() cookies) {
     if (!cookies) {
       throw new HttpException(
@@ -29,7 +29,7 @@ export class DeviceController {
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete('/devices')
+  @Delete()
   async deleteAllDevice(@Cookies() cookies) {
     if (!cookies) {
       throw new HttpException(
@@ -41,7 +41,7 @@ export class DeviceController {
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete('/devices/:deviceId')
+  @Delete(':deviceId')
   async deleteDeviceById(
     @Param('deviceId') deviceId: string,
     @Cookies() cookies,
