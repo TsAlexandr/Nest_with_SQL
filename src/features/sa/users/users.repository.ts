@@ -157,7 +157,7 @@ export class UsersRepository {
       .from(UserEntity, 'u')
       .leftJoinAndSelect('userBlackList', 'ub', 'u.id = ub.userId')
       .where('u.id = :id', { id })
-      .getRawOne();
+      .getOne();
     return query;
   }
 
@@ -178,7 +178,6 @@ export class UsersRepository {
       .leftJoin('emailConfirm', 'e', 'u.id = e.userId')
       .where('u.email ilike :email', { email: `%${email}%` })
       .getRawOne();
-    console.log(query);
     return query;
   }
 

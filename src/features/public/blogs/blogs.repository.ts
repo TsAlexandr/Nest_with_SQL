@@ -99,7 +99,7 @@ export class BlogsRepository {
     await this.dataSource.query(
       `
     INSERT INTO public."banInfo"
-    VALUES ($1, NULL, NULL, 'blog', false)`,
+    VALUES ($1, 'blog', NULL, NULL,  false)`,
       [newBlogger.id],
     );
     return query[0];
