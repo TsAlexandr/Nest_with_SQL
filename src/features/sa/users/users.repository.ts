@@ -155,9 +155,9 @@ export class UsersRepository {
       .createQueryBuilder()
       .select()
       .from(UserEntity, 'u')
-      .leftJoinAndSelect('userBlackList', 'ub', 'u.id = ub.userId')
+      .leftJoin('userBlackList', 'ub', 'u.id = ub.userId')
       .where('u.id = :id', { id })
-      .getOne();
+      .getRawOne();
     return query;
   }
 

@@ -17,7 +17,7 @@ export class CreateCommentHandler
   async execute(command: CreateCommentCommand) {
     const { postId, content, userId } = command;
     const bannedUser = await this.usersRepository.findById(userId);
-    if (bannedUser.id) throw new ForbiddenException();
+    if (bannedUser.userId) throw new ForbiddenException();
     const newComment = {
       id: v4(),
       postId,
