@@ -130,7 +130,7 @@ export class CommentsRepository {
       .values({
         id: newComment.id,
         content: newComment.content,
-        addedAt: newComment.createdAt,
+        createdAt: newComment.createdAt,
         postId: newComment.postId,
         userId: newComment.userId,
       })
