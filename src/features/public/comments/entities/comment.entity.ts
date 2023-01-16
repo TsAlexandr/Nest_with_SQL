@@ -26,6 +26,6 @@ export class CommentEntity {
   post: PostEntity;
   @ManyToOne(() => UserEntity, (user) => user.comment, { onDelete: 'CASCADE' })
   user: UserEntity;
-  @OneToMany(() => ActionsEntity, (actions) => actions)
+  @OneToMany(() => ActionsEntity, (actions) => actions, { onDelete: 'CASCADE' })
   actions: ActionsEntity[];
 }

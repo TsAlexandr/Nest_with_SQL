@@ -125,10 +125,10 @@ export class BlogsRepository {
     searchNameTerm: string,
     sortBy: string,
     sortDirection: any,
-  ): Promise<Paginator<BloggersMongo[]>> {
+  ) {
     const query = await this.dataSource.query(
       `
-    SELECT b.*, u.login, ban.* 
+    SELECT b.*, u.login, ban.*, b."userId" 
     FROM public.blogs b
     LEFT JOIN public.users u
     ON b."userId" = u.id
