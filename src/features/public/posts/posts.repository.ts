@@ -155,7 +155,7 @@ export class PostsRepository {
       })
       .returning('*')
       .execute();
-    const result = await this.dataSource
+    const result = await this.dataSource //TODO what the f...
       .createQueryBuilder()
       .select()
       .from(PostEntity, 'p')
@@ -163,13 +163,13 @@ export class PostsRepository {
       .where('p.id = :id', { id: query.raw[0].id })
       .getRawOne();
     return {
-      id: result.id,
-      title: result.title,
-      shortDescription: result.shortDescription,
-      content: result.content,
+      id: createPost.id,
+      title: createPost.title,
+      shortDescription: createPost.shortDescription,
+      content: createPost.content,
       blogId: result.blogId,
       blogName: result.name,
-      createdAt: result.createdAt,
+      createdAt: createPost.createdAt,
       extendedLikesInfo: {
         dislikesCount: 0,
         likesCount: 0,

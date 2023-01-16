@@ -1,16 +1,8 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-  PrimaryColumn,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 import { PostEntity } from '../../posts/entities/post.entity';
 import { UserBlackListEntity } from '../../../../library/entities/userBlackList.entity';
 import { UserEntity } from '../../../sa/users/entities/user.entity';
+import { BanInfoEntity } from '../../../../library/entities/banInfo.entity';
 
 @Entity('blogs')
 export class BloggersEntity {
@@ -32,4 +24,6 @@ export class BloggersEntity {
   post: PostEntity[];
   @OneToMany(() => UserBlackListEntity, (blackList) => blackList.blogId)
   blackList: UserBlackListEntity[];
+  @OneToMany(() => BanInfoEntity, (ban) => ban.bannedId)
+  ban: BanInfoEntity[];
 }

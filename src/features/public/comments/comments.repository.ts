@@ -136,19 +136,19 @@ export class CommentsRepository {
       })
       .returning('id')
       .execute();
-    const result = await this.dataSource
+    const result = await this.dataSource //TODO what the f...
       .createQueryBuilder()
       .select()
       .from(CommentEntity, 'c')
-      .leftJoin(UserEntity, 'u', 'c.userId = u.id')
-      .where('id = :id', { id: query.raw[0].id })
+      .leftJoin(UserEntity, 'u', 'c."userId" = u.id')
+      .where('c.id = :id', { id: query.raw[0].id })
       .getRawOne();
     return {
-      id: result.id,
-      content: result.content,
+      id: newComment.id,
+      content: newComment.content,
       userId: result.userId,
       userLogin: result.login,
-      createdAt: result.addedAt,
+      createdAt: newComment.createdAt,
       likesInfo: {
         likesCount: 0,
         dislikesCount: 0,

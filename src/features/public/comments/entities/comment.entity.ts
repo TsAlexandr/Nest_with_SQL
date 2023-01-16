@@ -21,8 +21,6 @@ export class CommentEntity {
   @Column('uuid')
   userId: string;
   @Column('text')
-  userLogin: string;
-  @Column('text')
   addedAt: string;
   @ManyToOne(() => PostEntity, (post) => post.comment, { onDelete: 'CASCADE' })
   post: PostEntity;

@@ -304,9 +304,9 @@ export class BlogsRepository {
         .set({
           isBanned: true,
           banDate: banDate,
-          bannedId: id,
           bannedType: 'blog',
         })
+        .where('bannedId = :id', { id })
         .execute();
     } else {
       return this.dataSource
@@ -318,6 +318,7 @@ export class BlogsRepository {
           bannedId: id,
           bannedType: 'blog',
         })
+        .where('bannedId = :id', { id })
         .execute();
     }
   }
