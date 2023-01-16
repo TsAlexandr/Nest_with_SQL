@@ -153,22 +153,22 @@ export class PostsRepository {
         createdAt: createPost.createdAt,
         blogId: createPost.blogId,
       })
-      .returning('id')
+      .returning('*')
       .execute();
     const result = await this.dataSource
       .createQueryBuilder()
       .select()
       .from(PostEntity, 'p')
-      .leftJoin(BloggersEntity, 'b', 'p.blogId = b.id')
-      .where('id = :id', { id: query.raw[0].id })
-      .getOne();
+      .leftJoin('blogs', 'b', 'p.blogId = b.id')
+      .where('p.id = :id', { id: query.raw[0].id })
+      .getRawOne();
     return {
       id: result.id,
       title: result.title,
       shortDescription: result.shortDescription,
       content: result.content,
       blogId: result.blogId,
-      blogName: result.blogger.name,
+      blogName: result.name,
       createdAt: result.createdAt,
       extendedLikesInfo: {
         dislikesCount: 0,

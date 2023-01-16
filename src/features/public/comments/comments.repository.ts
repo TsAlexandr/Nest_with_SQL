@@ -141,7 +141,7 @@ export class CommentsRepository {
       .select()
       .from(CommentEntity, 'c')
       .leftJoin(UserEntity, 'u', 'c.userId = u.id')
-      .where('id = :id', { id: query.raw.id })
+      .where('id = :id', { id: query.raw[0].id })
       .getOne();
     return {
       id: result.id,

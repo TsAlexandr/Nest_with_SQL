@@ -24,10 +24,10 @@ export class PostEntity {
   blogId: string;
   @Column('timestamp with time zone')
   createdAt: Date;
-  @ManyToOne(() => BloggersEntity, (blogger) => blogger.id, {
+  @ManyToOne(() => BloggersEntity, (blog) => blog.id, {
     onDelete: 'CASCADE',
   })
-  blogger: BloggersEntity;
+  blog: BloggersEntity;
   @OneToMany(() => CommentEntity, (comment) => comment.post)
   comment: CommentEntity[];
   @OneToMany(() => ActionsEntity, (action) => action.post)

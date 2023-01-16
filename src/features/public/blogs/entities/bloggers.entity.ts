@@ -28,8 +28,8 @@ export class BloggersEntity {
   userId: string;
   @ManyToOne(() => UserEntity, (user) => user.blogger, { onDelete: 'CASCADE' })
   user: UserEntity;
-  @OneToMany(() => PostEntity, (post) => post.blogger)
+  @OneToMany(() => PostEntity, (post) => post.blogId)
   post: PostEntity[];
-  @OneToMany(() => UserBlackListEntity, (blackList) => blackList.blogger)
+  @OneToMany(() => UserBlackListEntity, (blackList) => blackList.blogId)
   blackList: UserBlackListEntity[];
 }

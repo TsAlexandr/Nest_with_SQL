@@ -294,6 +294,7 @@ export class UsersRepository {
     DELETE FROM public."emailConfirm";
     DELETE FROM public."recoveryData";
     DELETE FROM public.actions;
+    DELETE FROM public.posts
     `,
     );
   }
