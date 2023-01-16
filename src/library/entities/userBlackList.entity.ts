@@ -1,18 +1,10 @@
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  PrimaryColumn,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 import { BloggersEntity } from '../../features/public/blogs/entities/bloggers.entity';
 import { UserEntity } from '../../features/sa/users/entities/user.entity';
 
 @Entity('userBlackList')
 export class UserBlackListEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-  @Column('uuid')
+  @PrimaryColumn('uuid')
   blogId: string;
   @Column('uuid')
   userId: string;
