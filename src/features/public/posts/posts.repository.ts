@@ -19,6 +19,7 @@ export class PostsRepository {
     if (sortBy == 'blogName') {
       dynamicSort = `name COLLATE "C"`;
     }
+    console.log(userId);
     const query = await this.dataSource.query(
       `
     SELECT p.*, b.name as "blogName",
@@ -155,9 +156,9 @@ export class PostsRepository {
       })
       .returning('*')
       .execute();
-    const result = await this.dataSource //TODO what the f...
+    const result = await this.dataSource
       .createQueryBuilder()
-      .select()
+      .select(['p.*', 'name'])
       .from(PostEntity, 'p')
       .leftJoin('blogs', 'b', 'p.blogId = b.id')
       .where('p.id = :id', { id: query.raw[0].id })
@@ -188,7 +189,7 @@ export class PostsRepository {
         shortDescription: updPost.shortDescription,
         title: updPost.title,
       })
-      .where('id = :id', { id: updPost.id })
+      .where('id = :id', { id: updPost.postId })
       .execute();
   }
 

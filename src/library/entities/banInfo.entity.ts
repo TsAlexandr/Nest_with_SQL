@@ -1,4 +1,10 @@
-import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { UserEntity } from '../../features/sa/users/entities/user.entity';
 import { BloggersEntity } from '../../features/public/blogs/entities/bloggers.entity';
 
@@ -14,8 +20,4 @@ export class BanInfoEntity {
   banReason: string;
   @Column({ type: 'boolean', default: false })
   isBanned: boolean;
-  @ManyToOne(() => UserEntity, (user) => user.id, { onDelete: 'CASCADE' })
-  user: UserEntity;
-  @ManyToOne(() => BloggersEntity, (blog) => blog.id, { onDelete: 'CASCADE' })
-  blog: BloggersEntity;
 }

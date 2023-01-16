@@ -80,7 +80,8 @@ export class BlogsRepository {
         websiteUrl: update.websiteUrl,
         description: update.description,
       })
-      .where('id = :id', { id });
+      .where('id = :id', { id })
+      .execute();
   }
 
   async createBlogger(newBlogger: Blogger, userId: string) {
@@ -128,7 +129,7 @@ export class BlogsRepository {
   ) {
     const query = await this.dataSource.query(
       `
-    SELECT b.*, u.login, ban.*, b."userId" 
+    SELECT b.*, u.login, ban.*
     FROM public.blogs b
     LEFT JOIN public.users u
     ON b."userId" = u.id

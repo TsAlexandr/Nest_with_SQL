@@ -34,6 +34,4 @@ export class UserEntity {
   blackList: UserBlackListEntity[];
   @OneToMany(() => DeviceEntity, (device) => device.user)
   device: DeviceEntity[];
-  @OneToMany(() => BanInfoEntity, (ban) => ban.user)
-  ban: BanInfoEntity[];
 }

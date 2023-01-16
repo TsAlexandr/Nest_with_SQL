@@ -18,12 +18,19 @@ export class BloggersEntity {
   createdAt: Date;
   @Column('uuid')
   userId: string;
-  @ManyToOne(() => UserEntity, (user) => user.blogger, { onDelete: 'CASCADE' })
+  @ManyToOne(() => UserEntity, (user) => user.blogger, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   user: UserEntity;
-  @OneToMany(() => PostEntity, (post) => post.blogId)
+  @OneToMany(() => PostEntity, (post) => post.blogId, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   post: PostEntity[];
-  @OneToMany(() => UserBlackListEntity, (blackList) => blackList.blogId)
+  @OneToMany(() => UserBlackListEntity, (blackList) => blackList.blogId, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   blackList: UserBlackListEntity[];
-  @OneToMany(() => BanInfoEntity, (ban) => ban.bannedId)
-  ban: BanInfoEntity[];
 }

@@ -136,9 +136,9 @@ export class CommentsRepository {
       })
       .returning('id')
       .execute();
-    const result = await this.dataSource //TODO what the f...
+    const result = await this.dataSource
       .createQueryBuilder()
-      .select()
+      .select(['c.*', 'login'])
       .from(CommentEntity, 'c')
       .leftJoin(UserEntity, 'u', 'c."userId" = u.id')
       .where('c.id = :id', { id: query.raw[0].id })

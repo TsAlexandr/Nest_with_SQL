@@ -144,7 +144,7 @@ export class UsersRepository {
       .select()
       .from(UserEntity, 'u')
       .leftJoin('banInfo', 'b', 'b.isBanned = false')
-      .where('u.login ilike :login', { login: `%${login}%` })
+      .where('u.login = :login', { login })
       .andWhere('b.bannedId = u.id')
       .getRawOne();
     return query;
@@ -176,7 +176,7 @@ export class UsersRepository {
       .select()
       .from(UserEntity, 'u')
       .leftJoin('emailConfirm', 'e', 'u.id = e.userId')
-      .where('u.email ilike :email', { email: `%${email}%` })
+      .where('u.email = :email', { email })
       .getRawOne();
     return query;
   }
