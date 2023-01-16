@@ -20,8 +20,8 @@ export class CommentEntity {
   content: string;
   @Column('uuid')
   userId: string;
-  @Column('text')
-  createdAt: string;
+  @Column('timestamp with time zone')
+  createdAt: Date;
   @ManyToOne(() => PostEntity, (post) => post.comment, { onDelete: 'CASCADE' })
   post: PostEntity;
   @ManyToOne(() => UserEntity, (user) => user.comment, { onDelete: 'CASCADE' })
