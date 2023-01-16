@@ -10,7 +10,9 @@ import { UserEntity } from '../../features/sa/users/entities/user.entity';
 
 @Entity('userBlackList')
 export class UserBlackListEntity {
-  @PrimaryColumn('uuid')
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+  @Column('uuid')
   blogId: string;
   @Column('uuid')
   userId: string;
