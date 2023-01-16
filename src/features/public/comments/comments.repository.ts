@@ -142,12 +142,12 @@ export class CommentsRepository {
       .from(CommentEntity, 'c')
       .leftJoin(UserEntity, 'u', 'c.userId = u.id')
       .where('id = :id', { id: query.raw[0].id })
-      .getOne();
+      .getRawOne();
     return {
       id: result.id,
       content: result.content,
       userId: result.userId,
-      userLogin: result.user.login,
+      userLogin: result.login,
       createdAt: result.addedAt,
       likesInfo: {
         likesCount: 0,
