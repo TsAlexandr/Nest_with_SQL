@@ -153,7 +153,7 @@ export class UsersRepository {
   async findById(id: string) {
     const query = await this.dataSource
       .createQueryBuilder()
-      .select()
+      .select(['u.*'])
       .from(UserEntity, 'u')
       .leftJoin('userBlackList', 'ub', 'u.id = ub.userId')
       .where('u.id = :id', { id })
