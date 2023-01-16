@@ -160,7 +160,7 @@ export class PostsRepository {
       .select()
       .from(PostEntity, 'p')
       .leftJoin(BloggersEntity, 'b', 'p.blogId = b.id')
-      .where('id = :id', { id: query.raw.id })
+      .where('id = :id', { id: query.raw[0].id })
       .getOne();
     return {
       id: result.id,

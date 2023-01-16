@@ -26,7 +26,7 @@ export class BloggersEntity {
   createdAt: Date;
   @Column('uuid')
   userId: string;
-  @ManyToOne(() => UserEntity, (user) => user.blogger)
+  @ManyToOne(() => UserEntity, (user) => user.blogger, { onDelete: 'CASCADE' })
   user: UserEntity;
   @OneToMany(() => PostEntity, (post) => post.blogger)
   post: PostEntity[];
