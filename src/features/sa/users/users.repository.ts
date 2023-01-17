@@ -158,7 +158,6 @@ export class UsersRepository {
       .leftJoin('userBlackList', 'ub', 'u.id = ub.userId')
       .where('u.id = :id', { id })
       .getRawOne();
-    console.log(query);
     return query;
   }
 

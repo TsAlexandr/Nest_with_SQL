@@ -1,6 +1,5 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { GetAllBloggerCommentsCommand } from '../queryCommands/getAllBloggerComments.command';
-import { BlogsRepository } from '../../public/blogs/blogs.repository';
 import { CommentsRepository } from '../../public/comments/comments.repository';
 
 @QueryHandler(GetAllBloggerCommentsCommand)

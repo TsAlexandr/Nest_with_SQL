@@ -1,10 +1,4 @@
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  PrimaryColumn,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { BloggersEntity } from '../../features/public/blogs/entities/bloggers.entity';
 import { UserEntity } from '../../features/sa/users/entities/user.entity';
 

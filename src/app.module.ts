@@ -81,6 +81,7 @@ import { UserBlackListEntity } from './library/entities/userBlackList.entity';
 import { DeviceEntity } from './features/public/devices/entities/device.entity';
 import { EmailConfirmEntity } from './library/entities/emailConfirm.entity';
 import { RecoveryDataEntity } from './library/entities/recoveryData.entity';
+import { QuizModule } from './quiz/quiz.module';
 
 export const CommandHandlers = [
   GetAllBlogsHandler,
@@ -154,6 +155,7 @@ export const CommandHandlers = [
     //   synchronize: true,
     // }),
     CqrsModule,
+    QuizModule,
   ],
   controllers: [
     TelegramController,
