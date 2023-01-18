@@ -7,8 +7,8 @@ enum PublishedStatus {
 }
 
 enum SortDirection {
-  asc = 'ASC',
-  desc = 'DESC',
+  asc = 'asc',
+  desc = 'desc',
 }
 
 export class QueryDto {
@@ -32,6 +32,7 @@ export class QueryDto {
   @IsString()
   @IsOptional()
   readonly sortBy: string = 'createdAt';
+  @Transform(({ value }) => value.toLowerCase())
   @IsEnum(SortDirection)
   @IsOptional()
   readonly sortDirection: SortDirection = SortDirection.desc;
