@@ -5,6 +5,8 @@ import { QuizRepository } from './quiz.repository';
 import { CqrsModule } from '@nestjs/cqrs';
 import { CreateQuestionHandler } from './usecases/commandHandlers/createQuestion';
 import { FindAllQuestionsHandler } from './usecases/queryHandlers/findAllQuestions';
+import { UpdateQuestionHandler } from './usecases/commandHandlers/updateQuestion';
+import { UpdatePublishHandler } from './usecases/commandHandlers/updatePublish';
 
 @Module({
   imports: [CqrsModule],
@@ -14,6 +16,8 @@ import { FindAllQuestionsHandler } from './usecases/queryHandlers/findAllQuestio
     QuizRepository,
     CreateQuestionHandler,
     FindAllQuestionsHandler,
+    UpdateQuestionHandler,
+    UpdatePublishHandler,
   ],
 })
 export class QuizModule {}

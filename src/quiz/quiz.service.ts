@@ -1,14 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { CreateQuizDto } from './dto/create-quiz.dto';
-import { UpdateQuizDto } from './dto/update-quiz.dto';
+import { QuizRepository } from './quiz.repository';
 
 @Injectable()
 export class QuizService {
-  update(id: string, updateQuizDto: UpdateQuizDto) {
-    return `This action updates a #${id} quiz`;
-  }
+  constructor(private quizRepo: QuizRepository) {}
 
-  remove(id: string) {
-    return `This action removes a #${id} quiz`;
+  async remove(id: string) {
+    return this.quizRepo.removeQuestions(id);
   }
 }

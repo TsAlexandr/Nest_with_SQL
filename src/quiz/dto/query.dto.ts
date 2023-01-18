@@ -1,5 +1,4 @@
 import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
-import { Transform } from 'class-transformer';
 enum PublishedStatus {
   all = 'all',
   published = 'published',
@@ -33,4 +32,7 @@ export class QueryDto {
   @IsEnum(SortDirection)
   @IsOptional()
   readonly sortDirection: SortDirection = SortDirection.desc;
+  get skip(): number {
+    return (this.pageNumber - 1) * this.pageSize;
+  }
 }

@@ -14,15 +14,6 @@ export class CreateQuestionHandler
   constructor(private quizRepo: QuizRepository) {}
 
   async execute(command: CreateQuestionCommand) {
-    const id = v4();
-    const mappedQuestions = command.createQuizDto.correctAnswers.map((el) => {
-      return { questionId: id, answer: el };
-    });
-    console.log(mappedQuestions);
-    return this.quizRepo.create(
-      id,
-      command.createQuizDto.body,
-      mappedQuestions,
-    );
+    return this.quizRepo.create(command.createQuizDto);
   }
 }

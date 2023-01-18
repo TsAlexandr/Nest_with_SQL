@@ -4,8 +4,6 @@ import cookieParser from 'cookie-parser';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { ValidationException } from './common/exceptions/validation.exception';
 import { useContainer } from 'class-validator';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import { TelegramAdapter } from './adapters/telegram.adapter';
 
 async function bootstrap() {
   const PORT = process.env.PORT || 5000;
