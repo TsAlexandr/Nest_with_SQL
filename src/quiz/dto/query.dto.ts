@@ -17,7 +17,6 @@ export class QueryDto {
   readonly pageNumber: number = 1;
   @IsInt()
   @Min(1)
-  @Max(50)
   @IsOptional()
   readonly pageSize: number = 10;
   @IsString()

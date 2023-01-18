@@ -22,6 +22,7 @@ import { CreateQuestionCommand } from './usecases/commandHandlers/createQuestion
 import { UpdatePublishCommand } from './usecases/commandHandlers/updatePublish';
 import { BasicGuards } from '../features/public/auth/guards/basic.guards';
 import { UpdateQuestionCommand } from './usecases/commandHandlers/updateQuestion';
+import { QuestionIsExist } from './guards/questionIsExist';
 
 @UseGuards(BasicGuards)
 @Controller('sa/quiz/questions')
@@ -42,6 +43,7 @@ export class QuizController {
     return this.queryBus.execute(new FindAllQuestions(queryDto));
   }
 
+  @UseGuards(QuestionIsExist)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':id')
   async updateQuestion(
@@ -62,6 +64,7 @@ export class QuizController {
     return this.commandBus.execute(new UpdatePublishCommand(id, published));
   }
 
+  @UseGuards(QuestionIsExist)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   async removeQuestion(@Param('id') id: string) {

@@ -7,6 +7,7 @@ import { CreateQuestionHandler } from './usecases/commandHandlers/createQuestion
 import { FindAllQuestionsHandler } from './usecases/queryHandlers/findAllQuestions';
 import { UpdateQuestionHandler } from './usecases/commandHandlers/updateQuestion';
 import { UpdatePublishHandler } from './usecases/commandHandlers/updatePublish';
+import { QuestionIsExist } from './guards/questionIsExist';
 
 @Module({
   imports: [CqrsModule],
@@ -18,6 +19,7 @@ import { UpdatePublishHandler } from './usecases/commandHandlers/updatePublish';
     FindAllQuestionsHandler,
     UpdateQuestionHandler,
     UpdatePublishHandler,
+    QuestionIsExist,
   ],
 })
 export class QuizModule {}
