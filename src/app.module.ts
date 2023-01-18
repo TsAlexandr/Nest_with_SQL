@@ -82,6 +82,8 @@ import { DeviceEntity } from './features/public/devices/entities/device.entity';
 import { EmailConfirmEntity } from './library/entities/emailConfirm.entity';
 import { RecoveryDataEntity } from './library/entities/recoveryData.entity';
 import { QuizModule } from './quiz/quiz.module';
+import { QuizQuestionsEntity } from './quiz/entities/quiz.questions.entity';
+import { QuizAnswersEntity } from './quiz/entities/quiz.answers.entity';
 
 export const CommandHandlers = [
   GetAllBlogsHandler,
@@ -136,6 +138,8 @@ export const CommandHandlers = [
             DeviceEntity,
             EmailConfirmEntity,
             RecoveryDataEntity,
+            QuizQuestionsEntity,
+            QuizAnswersEntity,
           ],
           synchronize: true,
           extra: {

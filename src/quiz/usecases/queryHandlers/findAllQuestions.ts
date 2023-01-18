@@ -7,7 +7,9 @@ export class FindAllQuestions {
 }
 
 @QueryHandler(FindAllQuestions)
-export class FindQueryDtoHandler implements IQueryHandler<FindAllQuestions> {
+export class FindAllQuestionsHandler
+  implements IQueryHandler<FindAllQuestions>
+{
   constructor(private quizRepo: QuizRepository) {}
   async execute(query: FindAllQuestions) {
     return this.quizRepo.findAll(query.queryDto);

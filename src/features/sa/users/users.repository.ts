@@ -297,6 +297,7 @@ export class UsersRepository {
     DELETE FROM public.posts;
     DELETE FROM public.comments;
     DELETE FROM public."userBlackList";
+    DELETE FROM public."questions" CASCADE;
     `,
     );
   }
