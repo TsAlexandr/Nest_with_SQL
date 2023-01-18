@@ -55,6 +55,7 @@ export class QuizController {
     );
   }
 
+  @UseGuards(QuestionIsExist)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':id/publish')
   async updatePublish(

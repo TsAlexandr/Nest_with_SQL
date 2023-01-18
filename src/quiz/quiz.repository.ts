@@ -5,7 +5,7 @@ import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { QuizAnswersEntity } from './entities/quiz.answers.entity';
 import { QuizQuestionsEntity } from './entities/quiz.questions.entity';
-import { UpdatePublishDto, UpdateQuizDto } from './dto/update-quiz.dto';
+import { UpdateQuizDto } from './dto/update-quiz.dto';
 
 @Injectable()
 export class QuizRepository {
