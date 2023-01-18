@@ -20,7 +20,7 @@ export class TruncateBase {
 
   @HttpCode(204)
   @Delete()
-  async dropData() {
+  async truncateBase() {
     await this.testRepo.removeAllData();
     return;
   }

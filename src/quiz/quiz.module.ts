@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { QuizService } from './quiz.service';
-import { QuizController } from './quiz.controller';
+import { QuizService } from './quiz-questions/quiz.service';
+import { QuizController } from './quiz-questions/quiz.controller';
 import { QuizRepository } from './quiz.repository';
 import { CqrsModule } from '@nestjs/cqrs';
 import { CreateQuestionHandler } from './usecases/commandHandlers/createQuestion';
@@ -8,10 +8,11 @@ import { FindAllQuestionsHandler } from './usecases/queryHandlers/findAllQuestio
 import { UpdateQuestionHandler } from './usecases/commandHandlers/updateQuestion';
 import { UpdatePublishHandler } from './usecases/commandHandlers/updatePublish';
 import { QuestionIsExist } from './guards/questionIsExist';
+import { QuizPairController } from './quiz-pair/quiz-pair.controller';
 
 @Module({
   imports: [CqrsModule],
-  controllers: [QuizController],
+  controllers: [QuizController, QuizPairController],
   providers: [
     QuizService,
     QuizRepository,

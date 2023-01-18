@@ -13,16 +13,16 @@ import {
   Put,
 } from '@nestjs/common';
 import { QuizService } from './quiz.service';
-import { CreateQuizDto } from './dto/create-quiz.dto';
-import { UpdatePublishDto, UpdateQuizDto } from './dto/update-quiz.dto';
+import { CreateQuizDto } from '../dto/create-quiz.dto';
+import { UpdatePublishDto, UpdateQuizDto } from '../dto/update-quiz.dto';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { QueryDto } from './dto/query.dto';
-import { FindAllQuestions } from './usecases/queryHandlers/findAllQuestions';
-import { CreateQuestionCommand } from './usecases/commandHandlers/createQuestion';
-import { UpdatePublishCommand } from './usecases/commandHandlers/updatePublish';
-import { BasicGuards } from '../features/public/auth/guards/basic.guards';
-import { UpdateQuestionCommand } from './usecases/commandHandlers/updateQuestion';
-import { QuestionIsExist } from './guards/questionIsExist';
+import { QueryDto } from '../dto/query.dto';
+import { FindAllQuestions } from '../usecases/queryHandlers/findAllQuestions';
+import { CreateQuestionCommand } from '../usecases/commandHandlers/createQuestion';
+import { UpdatePublishCommand } from '../usecases/commandHandlers/updatePublish';
+import { BasicGuards } from '../../features/public/auth/guards/basic.guards';
+import { UpdateQuestionCommand } from '../usecases/commandHandlers/updateQuestion';
+import { QuestionIsExist } from '../guards/questionIsExist';
 
 @UseGuards(BasicGuards)
 @Controller('sa/quiz/questions')

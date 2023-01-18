@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -7,18 +6,6 @@ import {
   TruncateBase,
   TestRepo,
 } from './library/truncateBaseForTests/truncateBase';
-import {
-  BloggerSchema,
-  BloggersMongo,
-  Comments,
-  CommentsSchema,
-  Device,
-  DeviceSchema,
-  Posts,
-  PostsSchema,
-  UserMongo,
-  UserSchema,
-} from './common/types/schemas/schemas.model';
 import { PostsController } from './features/public/posts/posts.controller';
 import { BlogsController } from './features/public/blogs/blogs.controller';
 import { UsersController } from './features/sa/users/users.controller';
@@ -40,12 +27,10 @@ import { PostsRepository } from './features/public/posts/posts.repository';
 import { AuthService } from './features/public/auth/auth.service';
 import { EmailService } from './adapters/email.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BloggersRepositoryRAW } from './library/rawDb/bloggersRepositoryRAW';
 import { BloggersEntity } from './features/public/blogs/entities/bloggers.entity';
 import { PostEntity } from './features/public/posts/entities/post.entity';
 import { CommentEntity } from './features/public/comments/entities/comment.entity';
 import { UserEntity } from './features/sa/users/entities/user.entity';
-import { PostsRepositoryRAW } from './library/rawDb/postsRepositoryRAW';
 import { DeviceController } from './features/public/devices/device.controller';
 import { DeviceService } from './features/public/devices/device.service';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -53,7 +38,6 @@ import { DeviceRepository } from './features/public/devices/device.repository';
 import { CqrsModule } from '@nestjs/cqrs';
 import { GetCommentsHandler } from './features/usecases/queryHandlers/getComments.handler';
 import { CreateCommentHandler } from './features/usecases/handlers/createComment.handler';
-import { BloggersRepositoryORM } from './library/typeORM/bloggers.typeORM';
 import { BlogIdValidation } from './common/exceptions/validationBlog';
 import { TelegramController } from './telegram/telegram.controller';
 import { TelegramAdapter } from './adapters/telegram.adapter';
@@ -72,7 +56,6 @@ import { BanBlogByIdHandler } from './features/usecases/handlers/banBlogById.han
 import { GetAllBloggerCommentsHandler } from './features/usecases/queryHandlers/getAllBloggerComments.handler';
 import { BloggerUsersController } from './features/blogger/blogger-users.controller';
 import { CreateUserCommandHandler } from './features/usecases/handlers/createUserCommand.handler';
-import { GetAllBloggersBlogsCommand } from './features/usecases/queryCommands/getAllBloggersBlogs.command';
 import { GetAllBloggersBlogsHandler } from './features/usecases/queryHandlers/getAllBloggersBlogs.handler';
 import { GetAllPostsHandler } from './features/usecases/queryHandlers/getAllPosts.handler';
 import { ActionsEntity } from './library/entities/actions.entity';
