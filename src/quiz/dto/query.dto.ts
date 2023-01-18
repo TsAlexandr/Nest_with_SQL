@@ -1,4 +1,5 @@
 import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { Transform } from 'class-transformer';
 enum PublishedStatus {
   all = 'all',
   published = 'published',
@@ -11,12 +12,15 @@ enum SortDirection {
 }
 
 export class QueryDto {
+  @Transform(({ value }) => parseInt(value))
   @IsInt()
   @Min(1)
   @IsOptional()
   readonly pageNumber: number = 1;
+  @Transform(({ value }) => parseInt(value))
   @IsInt()
   @Min(1)
+  @Max(50)
   @IsOptional()
   readonly pageSize: number = 10;
   @IsString()
