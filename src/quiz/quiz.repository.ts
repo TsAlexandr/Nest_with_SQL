@@ -5,7 +5,7 @@ import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { QuizAnswersEntity } from './entities/quiz.answers.entity';
 import { QuizQuestionsEntity } from './entities/quiz.questions.entity';
-import { UpdateQuizDto } from './dto/update-quiz.dto';
+import { UpdatePublishDto, UpdateQuizDto } from './dto/update-quiz.dto';
 
 @Injectable()
 export class QuizRepository {
@@ -74,7 +74,7 @@ export class QuizRepository {
       .createQueryBuilder()
       .insert()
       .into(QuizQuestionsEntity)
-      .values({ body: fields.body })
+      .values({ body: fields.body, updatedAt: null })
       .returning(['id', 'body'])
       .execute();
     const raw = question.raw[0];
@@ -101,10 +101,11 @@ export class QuizRepository {
   }
 
   async updateQuestion(id: string, updateQuizDto: UpdateQuizDto) {
+    const date = new Date();
     await this.dataSource
       .createQueryBuilder()
       .update(QuizQuestionsEntity)
-      .set({ body: updateQuizDto.body })
+      .set({ body: updateQuizDto.body, updatedAt: date })
       .where('id = :id', { id })
       .execute();
 

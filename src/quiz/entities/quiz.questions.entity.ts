@@ -18,7 +18,7 @@ export class QuizQuestionsEntity {
   published: boolean;
   @CreateDateColumn({ type: 'timestamp with time zone', nullable: false })
   createdAt: Date;
-  @UpdateDateColumn({ type: 'timestamp with time zone', nullable: false })
+  @Column({ type: 'timestamp with time zone', nullable: true })
   updatedAt: Date;
   @OneToMany(() => QuizAnswersEntity, (answers) => answers, {
     onDelete: 'CASCADE',

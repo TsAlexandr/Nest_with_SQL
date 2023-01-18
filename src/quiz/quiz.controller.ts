@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { QuizService } from './quiz.service';
 import { CreateQuizDto } from './dto/create-quiz.dto';
-import { UpdateQuizDto } from './dto/update-quiz.dto';
+import { UpdatePublishDto, UpdateQuizDto } from './dto/update-quiz.dto';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { QueryDto } from './dto/query.dto';
 import { FindAllQuestions } from './usecases/queryHandlers/findAllQuestions';
@@ -55,7 +55,10 @@ export class QuizController {
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':id/publish')
-  async updatePublish(@Param('id') id: string, @Body() published: boolean) {
+  async updatePublish(
+    @Param('id') id: string,
+    @Body() published: UpdatePublishDto,
+  ) {
     return this.commandBus.execute(new UpdatePublishCommand(id, published));
   }
 
