@@ -112,7 +112,7 @@ export class QuizRepository {
       .createQueryBuilder()
       .delete()
       .from(QuizAnswersEntity)
-      .where('id = :questionId', { questionId: id })
+      .where('questionId = :questionId', { questionId: id })
       .execute();
 
     await this.dataSource
@@ -124,10 +124,11 @@ export class QuizRepository {
   }
 
   async updatePublish(id: string, published: boolean) {
+    const date = new Date();
     await this.dataSource
       .createQueryBuilder()
       .update(QuizQuestionsEntity)
-      .set({ published: published })
+      .set({ published: published, updatedAt: date })
       .where('id = :id', { id })
       .execute();
   }
