@@ -15,13 +15,9 @@ export class QuizRepository {
     const dynamicSort = `q."${query.sortBy}"`;
     const questions = await this.dataSource.query(
       `
-    SELECT q.*,
-    (SELECT ARRAY_AGG(answers_info) as "correctAnswers"
-    FROM (SELECT a2.answer FROM public.answers a2
-          WHERE a."questionId" = q.id) answers_info) as "correctAnswers"
-    FROM public.questions q
-    LEFT JOIN public.answers a
-    ON q.id = a."questionId"
+    SELECT q.*, ARRAY(SELECT a.answer FROM public.answers a
+          WHERE a."questionId" = q.id) as "correctAnswers"
+    FROM public.questions q 
     WHERE (q.body ilike $1)
     AND 
     CASE
@@ -96,7 +92,7 @@ export class QuizRepository {
       correctAnswers: mappedAnswers,
       published: raw.published,
       createdAt: raw.createdAt,
-      updatedAt: raw.updatedAt,
+      updatedAt: null,
     };
   }
 

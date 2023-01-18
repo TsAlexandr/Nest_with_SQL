@@ -1,6 +1,5 @@
-import { PartialType } from '@nestjs/mapped-types';
 import { CreateQuizDto } from './create-quiz.dto';
-import { IsBoolean, IsString } from 'class-validator';
+import { IsBoolean } from 'class-validator';
 
 export class UpdateQuizDto extends CreateQuizDto {}
 
