@@ -1,6 +1,6 @@
-import { UpdateQuizDto } from '../../dto/update-quiz.dto';
+import { UpdateQuizDto } from '../../../dto/update-quiz.dto';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { QuizRepository } from '../../quiz.repository';
+import { QuizRepository } from '../../../quiz.repository';
 import { BadRequestException } from '@nestjs/common';
 
 export class UpdateQuestionCommand {

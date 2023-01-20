@@ -3,6 +3,7 @@ import { CreateQuizPairDto } from './dto/create-quiz-pair.dto';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { JwtAuthGuards } from '../../features/public/auth/guards/jwt-auth.guards';
 import { CurrentUserId } from '../../common/custom-decorator/current.user.decorator';
+import { ConnectToPairCommand } from './usecases/connect-to-pair';
 
 @UseGuards(JwtAuthGuards)
 @Controller('pair-game-quiz/pairs')
@@ -17,11 +18,8 @@ export class QuizPairController {
     return this.commandBus.execute(createQuizPairDto);
   }
   @Post('connection')
-  async connectToPair(
-    @Body() createQuizPairDto: CreateQuizPairDto,
-    @CurrentUserId() userId: string,
-  ) {
-    return this.commandBus.execute(createQuizPairDto);
+  async connectToPair(@CurrentUserId() userId: string) {
+    return this.commandBus.execute(new ConnectToPairCommand(userId));
   }
 
   @Get('my-current')

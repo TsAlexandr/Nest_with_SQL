@@ -1,6 +1,6 @@
-import { QueryDto } from '../../dto/query.dto';
+import { QueryDto } from '../../../dto/query.dto';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { QuizRepository } from '../../quiz.repository';
+import { QuizRepository } from '../../../quiz.repository';
 
 export class FindAllQuestions {
   constructor(public readonly queryDto: QueryDto) {}

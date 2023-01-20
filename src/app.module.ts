@@ -93,13 +93,6 @@ export const CommandHandlers = [
       ttl: 10,
       limit: 5,
     }),
-    // MongooseModule.forRoot(process.env.MONGO_URI),
-    // MongooseModule.forFeature([
-    //   { name: Posts.name, schema: PostsSchema },
-    //   { name: BloggersMongo.name, schema: BloggerSchema },
-    //   { name: Comments.name, schema: CommentsSchema },
-    //   { name: Device.name, schema: DeviceSchema },
-    // ]),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
@@ -131,16 +124,6 @@ export const CommandHandlers = [
         };
       },
     }),
-    // TypeOrmModule.forRoot({
-    //   type: 'postgres',
-    //   host: 'localhost',
-    //   port: 5432,
-    //   username: 'postgres',
-    //   password: 'root',
-    //   database: 'blogs-incubator',
-    //   autoLoadEntities: true,
-    //   synchronize: true,
-    // }),
     CqrsModule,
     QuizModule,
   ],
@@ -162,10 +145,6 @@ export const CommandHandlers = [
   providers: [
     BlogsService,
     BlogsRepository,
-    // {
-    //   provide: 'IBlogsRepository',
-    //   useClass: BlogsRepository,
-    // },
     PostsService,
     CommentsService,
     UsersService,
