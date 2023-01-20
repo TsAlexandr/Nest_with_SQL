@@ -1,5 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UsersRepository } from '../../../features/sa/users/users.repository';
+import { QuizRepository } from '../../quiz.repository';
+import { ForbiddenException } from '@nestjs/common';
 
 export class ConnectToPairCommand {
   constructor(public readonly userId: string) {}
@@ -9,8 +11,10 @@ export class ConnectToPairCommand {
 export class ConnectToPairHandler
   implements ICommandHandler<ConnectToPairCommand>
 {
-  constructor(private userRepo: UsersRepository) {}
-  execute(command: ConnectToPairCommand): Promise<any> {
-    return Promise.resolve(undefined);
+  constructor(private quizRepo: QuizRepository) {}
+  async execute(command: ConnectToPairCommand): Promise<any> {
+    const userInGame = await this.quizRepo.findOneInGame(command.userId);
+    if (userInGame) throw new ForbiddenException();
+    return this.quizRepo.connectToGame(command.userId);
   }
 }

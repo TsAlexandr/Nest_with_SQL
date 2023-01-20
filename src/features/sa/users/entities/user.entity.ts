@@ -7,6 +7,7 @@ import { RecoveryDataEntity } from '../../../../library/entities/recoveryData.en
 import { DeviceEntity } from '../../../public/devices/entities/device.entity';
 import { BanInfoEntity } from '../../../../library/entities/banInfo.entity';
 import { BloggersEntity } from '../../../public/blogs/entities/bloggers.entity';
+import { PlayerProgressEntity } from '../../../../quiz/entities/player-progress.entity';
 
 @Entity('users')
 export class UserEntity {
@@ -34,4 +35,6 @@ export class UserEntity {
   blackList: UserBlackListEntity[];
   @OneToMany(() => DeviceEntity, (device) => device.user)
   device: DeviceEntity[];
+  @OneToMany(() => PlayerProgressEntity, (progress) => progress)
+  progress: PlayerProgressEntity[];
 }

@@ -4,27 +4,26 @@ import {
   Entity,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
-import { QuizAnswersEntity } from './quiz.answers.entity';
 import { PlayerProgressEntity } from './player-progress.entity';
 
-@Entity('questions')
-export class QuizQuestionsEntity {
+@Entity('game')
+export class QuizGameEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-  @Column({ type: 'text', nullable: false, collation: 'C' })
-  body: string;
-  @Column({ type: 'boolean', default: false })
-  published: boolean;
+  @Column('text')
+  status: string;
   @CreateDateColumn({ type: 'timestamp with time zone', nullable: false })
-  createdAt: Date;
+  pairCreatedDate: Date;
   @Column({ type: 'timestamp with time zone', nullable: true })
-  updatedAt: Date;
-  @OneToMany(() => QuizAnswersEntity, (answers) => answers, {
-    onDelete: 'CASCADE',
-  })
-  answers: QuizAnswersEntity[];
+  startGameDate: Date;
+  @Column({ type: 'timestamp with time zone', nullable: true })
+  finishGameDate: Date;
+  @Column('uuid')
+  player1: string;
+  @Column({ type: 'uuid', nullable: true })
+  player2: string;
+
   @OneToMany(() => PlayerProgressEntity, (progress) => progress, {
     onDelete: 'CASCADE',
   })

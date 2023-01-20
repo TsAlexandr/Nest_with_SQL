@@ -6,6 +6,7 @@ import { DataSource } from 'typeorm';
 import { QuizAnswersEntity } from './entities/quiz.answers.entity';
 import { QuizQuestionsEntity } from './entities/quiz.questions.entity';
 import { UpdateQuizDto } from './dto/update-quiz.dto';
+import { QuizGameEntity } from './entities/quiz-pair.entity';
 
 @Injectable()
 export class QuizRepository {
@@ -140,5 +141,40 @@ export class QuizRepository {
       .from(QuizQuestionsEntity)
       .where('id = :id', { id })
       .execute();
+  }
+
+  async connectToGame(userId: string) {
+    let createGame = await this.dataSource
+      .createQueryBuilder()
+      .update(QuizGameEntity)
+      .set({
+        status: 'Active',
+        player2: userId,
+        startGameDate: new Date(),
+      })
+      .where('player2 IS NULL')
+      .returning('player2')
+      .execute();
+    if (createGame.affected < 1) {
+      createGame = await this.dataSource
+        .createQueryBuilder()
+        .insert()
+        .into(QuizGameEntity)
+        .values({
+          status: 'PendingSecondPlayer',
+          player1: userId,
+        })
+        .returning('*')
+        .execute();
+    }
+    return createGame.raw[0];
+  }
+
+  async findOneInGame(userId: string) {
+    return this.dataSource
+      .getRepository(QuizGameEntity)
+      .createQueryBuilder()
+      .where('player1 = :userId OR player2 = :userId', { userId })
+      .getOne();
   }
 }

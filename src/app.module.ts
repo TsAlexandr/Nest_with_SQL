@@ -67,6 +67,8 @@ import { RecoveryDataEntity } from './library/entities/recoveryData.entity';
 import { QuizModule } from './quiz/quiz.module';
 import { QuizQuestionsEntity } from './quiz/entities/quiz.questions.entity';
 import { QuizAnswersEntity } from './quiz/entities/quiz.answers.entity';
+import { PlayerProgressEntity } from './quiz/entities/player-progress.entity';
+import { QuizGameEntity } from './quiz/entities/quiz-pair.entity';
 
 export const CommandHandlers = [
   GetAllBlogsHandler,
@@ -116,6 +118,8 @@ export const CommandHandlers = [
             RecoveryDataEntity,
             QuizQuestionsEntity,
             QuizAnswersEntity,
+            PlayerProgressEntity,
+            QuizGameEntity,
           ],
           synchronize: true,
           extra: {

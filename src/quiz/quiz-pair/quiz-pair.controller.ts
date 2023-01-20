@@ -4,6 +4,7 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { JwtAuthGuards } from '../../features/public/auth/guards/jwt-auth.guards';
 import { CurrentUserId } from '../../common/custom-decorator/current.user.decorator';
 import { ConnectToPairCommand } from './usecases/connect-to-pair';
+import { MyCurrentGameAnswer } from './usecases/my-current-game-answer';
 
 @UseGuards(JwtAuthGuards)
 @Controller('pair-game-quiz/pairs')
@@ -23,8 +24,11 @@ export class QuizPairController {
   }
 
   @Get('my-current')
-  async findCurrentGame(@CurrentUserId() userId: string) {
-    return this.queryBus.execute(userId);
+  async findCurrentGame(
+    @CurrentUserId() userId: string,
+    @Body() answer: string,
+  ) {
+    return this.queryBus.execute(new MyCurrentGameAnswer(userId, answer));
   }
 
   @Get(':id')
