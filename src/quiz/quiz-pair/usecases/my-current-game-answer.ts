@@ -12,6 +12,6 @@ export class MyCurrentGameAnswerHandler
   constructor(private quizRepo: QuizRepository) {}
   async execute(command: MyCurrentGameAnswer): Promise<any> {
     const currentUserGame = await this.quizRepo.findOneInGame(command.userId);
-    return Promise.resolve(undefined);
+    return;
   }
 }

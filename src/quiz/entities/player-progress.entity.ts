@@ -7,7 +7,7 @@ import { QuizGameEntity } from './quiz-pair.entity';
 export class PlayerProgressEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-  @Column('text')
+  @Column({ type: 'text', nullable: true })
   answerStatus: string;
   @Column({ type: 'timestamp with time zone', nullable: true })
   addedAt: Date;
