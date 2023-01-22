@@ -2,10 +2,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { PlayerProgressEntity } from './player-progress.entity';
+import { QuizQuestionsEntity } from './quiz.questions.entity';
 
 @Entity('game')
 export class QuizGameEntity {

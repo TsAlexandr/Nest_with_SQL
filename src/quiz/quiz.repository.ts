@@ -144,7 +144,8 @@ export class QuizRepository {
   }
 
   async connectToGame(userId: string) {
-    let createGame = await this.dataSource
+    let createGame;
+    createGame = await this.dataSource
       .createQueryBuilder()
       .update(QuizGameEntity)
       .set({
@@ -156,25 +157,23 @@ export class QuizRepository {
       .returning('player2')
       .execute();
     if (createGame.affected < 1) {
-      createGame = await this.dataSource
-        .createQueryBuilder()
-        .insert()
-        .into(QuizGameEntity)
-        .values({
-          status: 'PendingSecondPlayer',
-          player1: userId,
-        })
-        .returning('*')
-        .execute();
+      const questions = await this.dataSource.manager.find(QuizQuestionsEntity);
+      createGame = new QuizGameEntity();
+      createGame.status = 'PendingSecondPlayer';
+      createGame.player1 = userId;
+      createGame.questions = questions;
+      await this.dataSource.manager.save(questions);
     }
-    return createGame.raw[0];
+    return createGame;
   }
 
   async findOneInGame(userId: string) {
+    const gameStatus = 'Finished';
     return this.dataSource
       .getRepository(QuizGameEntity)
       .createQueryBuilder()
       .where('player1 = :userId OR player2 = :userId', { userId })
+      .andWhere('status != :gameStatus', { gameStatus })
       .getOne();
   }
 }

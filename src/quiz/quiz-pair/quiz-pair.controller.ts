@@ -16,7 +16,9 @@ export class QuizPairController {
     @Body() createQuizPairDto: CreateQuizPairDto,
     @CurrentUserId() userId: string,
   ) {
-    return this.commandBus.execute(createQuizPairDto);
+    return this.commandBus.execute(
+      new MyCurrentGameAnswer(userId, createQuizPairDto.answer),
+    );
   }
   @Post('connection')
   async connectToPair(@CurrentUserId() userId: string) {
