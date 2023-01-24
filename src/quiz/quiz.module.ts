@@ -11,6 +11,7 @@ import { QuestionIsExist } from './guards/questionIsExist';
 import { QuizPairController } from './quiz-pair/quiz-pair.controller';
 import { ConnectToPairHandler } from './quiz-pair/usecases/connect-to-pair';
 import { MyCurrentGameAnswerHandler } from './quiz-pair/usecases/my-current-game-answer';
+import { HelperForProgress } from '../common/helpers/helpers';
 const handlers = [
   CreateQuestionHandler,
   FindAllQuestionsHandler,
@@ -23,6 +24,12 @@ const handlers = [
 @Module({
   imports: [CqrsModule],
   controllers: [QuizController, QuizPairController],
-  providers: [QuizService, QuizRepository, QuestionIsExist, ...handlers],
+  providers: [
+    QuizService,
+    QuizRepository,
+    QuestionIsExist,
+    ...handlers,
+    HelperForProgress,
+  ],
 })
 export class QuizModule {}
