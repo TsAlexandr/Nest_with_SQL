@@ -7,8 +7,6 @@ import { QuizAnswersEntity } from './entities/quiz.answers.entity';
 import { QuizQuestionsEntity } from './entities/quiz.questions.entity';
 import { UpdateQuizDto } from './dto/update-quiz.dto';
 import { QuizGameEntity } from './entities/quiz-game.entity';
-import { PlayerProgressEntity } from './entities/player-progress.entity';
-import { MyCurrentGameAnswer } from './quiz-pair/usecases/my-current-game-answer';
 
 @Injectable()
 export class QuizRepository {
@@ -211,24 +209,90 @@ export class QuizRepository {
       .getOne();
   }
 
-  async getCurrentGame(command: MyCurrentGameAnswer) {
-    const currentGame = await this.dataSource
-      .getRepository(QuizGameEntity)
-      .createQueryBuilder()
-      .where('player1 = :userId OR player2 = :userId', {
-        userId: command.userId,
-      })
-      .getOne();
-    console.log(currentGame);
-    return currentGame;
+  async addPlayerProgress(userId: string, gameId: string, answer: string) {
+    await this.queryRunner.connect();
+    await this.queryRunner.startTransaction();
+    try {
+      const isAnswerCorrect = await this.dataSource.query(
+        `
+    SELECT g.id, a.answer, p."questionsId"
+      FROM public.game g
+      LEFT JOIN public.game_questions_questions p
+      ON g.id = p."gameId"
+      LEFT JOIN public."answers" a
+      ON p."questionsId" = a."questionId"
+      WHERE (g.status = 'Active') 
+        AND (g.player1 = $1 OR g.player2 = $1)
+          AND (a.answer = $2)`,
+        [userId, answer],
+      );
+      let answerStatus = 'Correct';
+      let score = 1;
+      if (isAnswerCorrect == []) {
+        answerStatus = 'Incorrect';
+        score = 0;
+      }
+      const date = new Date();
+      const createPlayerProgress = await this.dataSource.query(
+        `
+    INSERT INTO public."playerProgress" ("userId", "gameId", "answerStatus", "addedAt", score, "questionId")
+    VALUES ($1, $2, $3, $4, $5, $6)
+    RETURNING "questionId", "answerStatus", "addedAt"`,
+        [
+          userId,
+          gameId,
+          answerStatus,
+          date,
+          score,
+          isAnswerCorrect[0].questionsId,
+        ],
+      );
+      await this.queryRunner.commitTransaction();
+      return {
+        questionId: createPlayerProgress[0].questionId,
+        answerStatus: createPlayerProgress[0].answerStatus,
+        addedAt: createPlayerProgress[0].addedAt,
+      };
+    } catch (e) {
+      console.log(e);
+      await this.queryRunner.rollbackTransaction();
+    }
+  }
+  findUserInPair(userId: string) {
+    return this.dataSource.manager.find(QuizGameEntity, {
+      where: [{ player1: userId }, { player2: userId }, { status: 'Active' }],
+    });
   }
 
-  async getPlayerProgress(userId: string, gameId: string) {
-    return this.dataSource
-      .getRepository(PlayerProgressEntity)
-      .createQueryBuilder()
-      .where('"userId" = :userId', { userId })
-      .andWhere('"gameId" = :gameId', { gameId })
-      .getOne();
+  findActivePair(userId: string) {
+    return this.dataSource.query(
+      `
+    SELECT g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate", 
+        (SELECT ROW_TO_JSON(first_progress) FROM
+            (SELECT * FROM
+                (SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(first_answers))) as "answers" 
+                    FROM
+            (SELECT p."questionId", p."answerStatus", p."addedAt" 
+               FROM public."playerProgress" p
+                WHERE p."userId" = g.player1)first_answers) as "answers",
+                 (SELECT ROW_TO_JSON(first_player) FROM
+                    (SELECT u.id, u.login FROM public.users u 
+                WHERE u.id = g.player1)first_player) as "player"
+            ) first_progress ) as "firstPlayerProgress",
+        (SELECT ROW_TO_JSON(second_progress) FROM
+            (SELECT * FROM
+                (SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(second_answers))) as "answers" 
+                    FROM
+            (SELECT p."questionId", p."answerStatus", p."addedAt" 
+               FROM public."playerProgress" p
+                WHERE p."userId" = g.player2)second_answers) as "answers",
+                 (SELECT ROW_TO_JSON(second_player) FROM
+                    (SELECT u.id, u.login FROM public.users u 
+                WHERE u.id = g.player2)second_player) as "player"
+            ) second_progress ) as "secondPlayerProgress"    
+    FROM public.game g
+    WHERE (g.player1 = $1 OR g.player2 = $1) AND (g.status = 'Active')`,
+      [userId],
+    );
   }
 }

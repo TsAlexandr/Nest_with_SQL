@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { QuizAnswersEntity } from './quiz.answers.entity';
+import { PlayerProgressEntity } from './player-progress.entity';
 
 @Entity('questions')
 export class QuizQuestionsEntity {
@@ -23,4 +24,8 @@ export class QuizQuestionsEntity {
     onDelete: 'CASCADE',
   })
   answers: QuizAnswersEntity[];
+  @OneToMany(() => PlayerProgressEntity, (progress) => progress, {
+    onDelete: 'CASCADE',
+  })
+  progress: PlayerProgressEntity[];
 }

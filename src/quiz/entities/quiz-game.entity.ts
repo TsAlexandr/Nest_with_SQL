@@ -29,7 +29,7 @@ export class QuizGameEntity {
     onDelete: 'CASCADE',
   })
   progress: PlayerProgressEntity[];
-  @ManyToMany(() => QuizQuestionsEntity)
+  @ManyToMany(() => QuizQuestionsEntity, { onDelete: 'CASCADE' })
   @JoinTable()
   questions: QuizQuestionsEntity[];
 }

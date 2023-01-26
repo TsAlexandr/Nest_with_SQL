@@ -4,20 +4,23 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { JwtAuthGuards } from '../../features/public/auth/guards/jwt-auth.guards';
 import { CurrentUserId } from '../../common/custom-decorator/current.user.decorator';
 import { ConnectToPairCommand } from './usecases/connect-to-pair';
-import { MyCurrentGameAnswer } from './usecases/my-current-game-answer';
+import { SendAnswer } from './usecases/send-answer';
+import { UserInPair } from '../../features/public/auth/guards/user-in-pair';
+import { MyCurrentGamePair } from './usecases/my-current-game-pair';
 
 @UseGuards(JwtAuthGuards)
 @Controller('pair-game-quiz/pairs')
 export class QuizPairController {
   constructor(private commandBus: CommandBus, private queryBus: QueryBus) {}
 
+  @UseGuards(UserInPair)
   @Post('my-current/answers')
   async sendAnswers(
     @Body() createQuizPairDto: CreateQuizPairDto,
     @CurrentUserId() userId: string,
   ) {
     return this.commandBus.execute(
-      new MyCurrentGameAnswer(userId, createQuizPairDto.answer),
+      new SendAnswer(userId, createQuizPairDto.answer),
     );
   }
   @Post('connection')
@@ -26,11 +29,8 @@ export class QuizPairController {
   }
 
   @Get('my-current')
-  async findCurrentGame(
-    @CurrentUserId() userId: string,
-    @Body() answer: string,
-  ) {
-    return this.queryBus.execute(new MyCurrentGameAnswer(userId, answer));
+  async findCurrentGame(@CurrentUserId() userId: string) {
+    return this.queryBus.execute(new MyCurrentGamePair(userId));
   }
 
   @Get(':id')

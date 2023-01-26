@@ -69,7 +69,6 @@ import { QuizQuestionsEntity } from './quiz/entities/quiz.questions.entity';
 import { QuizAnswersEntity } from './quiz/entities/quiz.answers.entity';
 import { PlayerProgressEntity } from './quiz/entities/player-progress.entity';
 import { QuizGameEntity } from './quiz/entities/quiz-game.entity';
-import { QuizAnswerStatusForProgressEntity } from './quiz/entities/quiz-correct-answers';
 
 export const CommandHandlers = [
   GetAllBlogsHandler,
@@ -121,7 +120,6 @@ export const CommandHandlers = [
             QuizAnswersEntity,
             PlayerProgressEntity,
             QuizGameEntity,
-            QuizAnswerStatusForProgressEntity,
           ],
           synchronize: true,
           extra: {

@@ -8,4 +8,8 @@ export class QuizService {
   async remove(id: string) {
     return this.quizRepo.removeQuestions(id);
   }
+
+  async inPair(userId: string) {
+    return this.quizRepo.findUserInPair(userId);
+  }
 }
