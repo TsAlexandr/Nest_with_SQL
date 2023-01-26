@@ -2,15 +2,10 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { QuizAnswersEntity } from './quiz.answers.entity';
-import { QuizGameEntity } from './quiz-game.entity';
-import { PlayerProgressEntity } from './player-progress.entity';
 
 @Entity('questions')
 export class QuizQuestionsEntity {
@@ -28,14 +23,4 @@ export class QuizQuestionsEntity {
     onDelete: 'CASCADE',
   })
   answers: QuizAnswersEntity[];
-  @ManyToOne(() => PlayerProgressEntity, (progress) => progress.id, {
-    onDelete: 'CASCADE',
-  })
-  progress: PlayerProgressEntity;
-  @ManyToMany(() => QuizGameEntity, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  @JoinTable()
-  questions: QuizGameEntity[];
 }

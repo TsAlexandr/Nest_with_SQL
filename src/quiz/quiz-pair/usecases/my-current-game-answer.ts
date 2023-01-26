@@ -16,6 +16,7 @@ export class MyCurrentGameAnswerHandler
       command.userId,
       currentUserGame.id,
     );
+    return playerProgress;
 
     /*const correctAnswersForCurrentGameProgress =
       await this.quizRepo.getCorrectAnswers(playerProgress.questionId);

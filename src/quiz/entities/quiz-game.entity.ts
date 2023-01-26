@@ -2,11 +2,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { PlayerProgressEntity } from './player-progress.entity';
-
+import { QuizQuestionsEntity } from './quiz.questions.entity';
 @Entity('game')
 export class QuizGameEntity {
   @PrimaryGeneratedColumn('uuid')
@@ -23,9 +25,11 @@ export class QuizGameEntity {
   player1: string;
   @Column({ type: 'uuid', nullable: true })
   player2: string;
-
   @OneToMany(() => PlayerProgressEntity, (progress) => progress, {
     onDelete: 'CASCADE',
   })
   progress: PlayerProgressEntity[];
+  @ManyToMany(() => QuizQuestionsEntity)
+  @JoinTable()
+  questions: QuizQuestionsEntity[];
 }

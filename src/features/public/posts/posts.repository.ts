@@ -2,7 +2,6 @@ import { Paginator, PostsCon } from '../../../common/types/classes/classes';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { PostEntity } from './entities/post.entity';
-import { BloggersEntity } from '../blogs/entities/bloggers.entity';
 import { ActionsEntity } from '../../../library/entities/actions.entity';
 
 export class PostsRepository {

@@ -1,8 +1,3 @@
-import { PlayerProgressEntity } from '../../quiz/entities/player-progress.entity';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { Injectable } from '@nestjs/common';
-
 export const postMapper = (id, post) => {
   const currentUserStatus = post.find((el) => el.userId === id);
   const likesCount = post.filter((el) => el.action === 'Like').length;
@@ -30,23 +25,3 @@ export const postMapper = (id, post) => {
     },
   };
 };
-
-export const mappedQuestions = (value) => {
-  const array = value.forEach((el) => {
-    delete el.body;
-  });
-  return array;
-};
-
-@Injectable()
-export class HelperForProgress {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
-
-  async saveProgress(questions: any, userId: string) {
-    const mappedQuestion = mappedQuestions(questions);
-    const playerProgress = new PlayerProgressEntity();
-    playerProgress.userId = userId;
-    playerProgress.questionId = mappedQuestion;
-    await this.dataSource.manager.save(mappedQuestion);
-  }
-}
