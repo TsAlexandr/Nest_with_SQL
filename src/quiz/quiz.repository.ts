@@ -235,9 +235,10 @@ export class QuizRepository {
       const date = new Date();
       const createPlayerProgress = await this.dataSource.query(
         `
-    INSERT INTO public."playerProgress" ("userId", "gameId", "answerStatus", "addedAt", score, "questionId")
-    VALUES ($1, $2, $3, $4, $5, $6)
-    RETURNING "questionId", "answerStatus", "addedAt"`,
+            INSERT INTO public."playerProgress" 
+            ("userId", "gameId", "answerStatus", "addedAt", score, "questionId")
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING "questionId", "answerStatus", "addedAt"`,
         [
           userId,
           gameId,
@@ -258,13 +259,13 @@ export class QuizRepository {
       await this.queryRunner.rollbackTransaction();
     }
   }
-  findUserInPair(userId: string) {
+  async findUserInPair(userId: string) {
     return this.dataSource.manager.find(QuizGameEntity, {
       where: [{ player1: userId }, { player2: userId }, { status: 'Active' }],
     });
   }
 
-  findActivePair(userId: string) {
+  async findActivePair(userId: string) {
     return this.dataSource.query(
       `
     SELECT g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate", 
@@ -275,10 +276,12 @@ export class QuizRepository {
             (SELECT p."questionId", p."answerStatus", p."addedAt" 
                FROM public."playerProgress" p
                 WHERE p."userId" = g.player1)first_answers) as "answers",
-                 (SELECT ROW_TO_JSON(first_player) FROM
+                 (SELECT ROW_TO_JSON(first_player) as "player" FROM
                     (SELECT u.id, u.login FROM public.users u 
-                WHERE u.id = g.player1)first_player) as "player"
-            ) first_progress ) as "firstPlayerProgress",
+                WHERE u.id = g.player1)first_player) as "player",
+                (SELECT p.score FROM public."playerProgress" p
+                WHERE p."userId" = g.player1) as "score"
+            ) first_progress ) as "firstPlayerProgress", 
         (SELECT ROW_TO_JSON(second_progress) FROM
             (SELECT * FROM
                 (SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(second_answers))) as "answers" 
@@ -286,13 +289,51 @@ export class QuizRepository {
             (SELECT p."questionId", p."answerStatus", p."addedAt" 
                FROM public."playerProgress" p
                 WHERE p."userId" = g.player2)second_answers) as "answers",
-                 (SELECT ROW_TO_JSON(second_player) FROM
+                 (SELECT ROW_TO_JSON(second_player) as "player" FROM
                     (SELECT u.id, u.login FROM public.users u 
-                WHERE u.id = g.player2)second_player) as "player"
-            ) second_progress ) as "secondPlayerProgress"    
+                WHERE u.id = g.player2)second_player) as "player",
+                (SELECT p.score FROM public."playerProgress" p
+                WHERE p."userId" = g.player2) as "score"
+            ) second_progress ) as "secondPlayerProgress"
     FROM public.game g
     WHERE (g.player1 = $1 OR g.player2 = $1) AND (g.status = 'Active')`,
       [userId],
+    );
+  }
+
+  async findGameById(id: string, userId: string) {
+    return this.dataSource.query(
+      `
+    SELECT g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate", 
+        (SELECT ROW_TO_JSON(first_progress) FROM
+            (SELECT * FROM
+                (SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(first_answers))) as "answers" 
+                    FROM
+            (SELECT p."questionId", p."answerStatus", p."addedAt" 
+               FROM public."playerProgress" p
+                WHERE p."userId" = g.player1)first_answers) as "answers",
+                 (SELECT ROW_TO_JSON(first_player) as "player" FROM
+                    (SELECT u.id, u.login FROM public.users u 
+                WHERE u.id = g.player1)first_player) as "player",
+                (SELECT p.score FROM public."playerProgress" p
+                WHERE p."userId" = g.player1) as "score"
+            ) first_progress ) as "firstPlayerProgress", 
+        (SELECT ROW_TO_JSON(second_progress) FROM
+            (SELECT * FROM
+                (SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(second_answers))) as "answers" 
+                    FROM
+            (SELECT p."questionId", p."answerStatus", p."addedAt" 
+               FROM public."playerProgress" p
+                WHERE p."userId" = g.player2)second_answers) as "answers",
+                 (SELECT ROW_TO_JSON(second_player) as "player" FROM
+                    (SELECT u.id, u.login FROM public.users u 
+                WHERE u.id = g.player2)second_player) as "player",
+                (SELECT p.score FROM public."playerProgress" p
+                WHERE p."userId" = g.player2) as "score"
+            ) second_progress ) as "secondPlayerProgress"
+    FROM public.game g
+    WHERE (g.player1 = $1 OR g.player2 = $1) AND (g.id = $2)`,
+      [userId, id],
     );
   }
 }

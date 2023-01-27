@@ -27,12 +27,10 @@ export class PlayerProgressEntity {
   gameId: string;
   @Column('uuid')
   questionId: string;
-  @ManyToOne(() => QuizQuestionsEntity, (question) => question.id, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => QuizQuestionsEntity, (question) => question.id)
   question: QuizQuestionsEntity;
   @ManyToOne(() => UserEntity, (user) => user.id, { onDelete: 'CASCADE' })
   user: UserEntity;
-  @ManyToOne(() => QuizGameEntity, (game) => game.id, { onDelete: 'CASCADE' })
+  @ManyToOne(() => QuizGameEntity, (game) => game.id)
   game: QuizGameEntity;
 }

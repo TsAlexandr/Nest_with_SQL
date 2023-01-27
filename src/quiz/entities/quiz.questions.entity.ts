@@ -24,8 +24,6 @@ export class QuizQuestionsEntity {
     onDelete: 'CASCADE',
   })
   answers: QuizAnswersEntity[];
-  @OneToMany(() => PlayerProgressEntity, (progress) => progress, {
-    onDelete: 'CASCADE',
-  })
+  @OneToMany(() => PlayerProgressEntity, (progress) => progress)
   progress: PlayerProgressEntity[];
 }

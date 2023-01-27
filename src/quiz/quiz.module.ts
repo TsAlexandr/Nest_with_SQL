@@ -13,6 +13,7 @@ import { ConnectToPairHandler } from './quiz-pair/usecases/connect-to-pair';
 import { SendAnswerHandler } from './quiz-pair/usecases/send-answer';
 import { UserInPair } from '../features/public/auth/guards/user-in-pair';
 import { MyCurrentPairHandler } from './quiz-pair/usecases/my-current-game-pair';
+import { FindGameHandler } from './quiz-pair/usecases/find-game-by-id';
 const handlers = [
   CreateQuestionHandler,
   FindAllQuestionsHandler,
@@ -21,6 +22,7 @@ const handlers = [
   ConnectToPairHandler,
   SendAnswerHandler,
   MyCurrentPairHandler,
+  FindGameHandler,
 ];
 
 @Module({

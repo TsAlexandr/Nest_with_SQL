@@ -25,9 +25,7 @@ export class QuizGameEntity {
   player1: string;
   @Column({ type: 'uuid', nullable: true })
   player2: string;
-  @OneToMany(() => PlayerProgressEntity, (progress) => progress, {
-    onDelete: 'CASCADE',
-  })
+  @OneToMany(() => PlayerProgressEntity, (progress) => progress)
   progress: PlayerProgressEntity[];
   @ManyToMany(() => QuizQuestionsEntity, { onDelete: 'CASCADE' })
   @JoinTable()

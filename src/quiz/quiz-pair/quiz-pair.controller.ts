@@ -7,6 +7,8 @@ import { ConnectToPairCommand } from './usecases/connect-to-pair';
 import { SendAnswer } from './usecases/send-answer';
 import { UserInPair } from '../../features/public/auth/guards/user-in-pair';
 import { MyCurrentGamePair } from './usecases/my-current-game-pair';
+import { FindGameById } from './usecases/find-game-by-id';
+import { ValidIdDto } from './dto/valid-id-dto';
 
 @UseGuards(JwtAuthGuards)
 @Controller('pair-game-quiz/pairs')
@@ -34,7 +36,10 @@ export class QuizPairController {
   }
 
   @Get(':id')
-  async findGameById(@Param('id') id: string, @CurrentUserId() userId: string) {
-    return this.queryBus.execute(id);
+  async findGameById(
+    @Param('id') validId: ValidIdDto,
+    @CurrentUserId() userId: string,
+  ) {
+    return this.queryBus.execute(new FindGameById(validId.id, userId));
   }
 }
