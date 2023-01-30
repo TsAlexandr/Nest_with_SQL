@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  UseGuards,
+  HttpStatus,
+  HttpCode,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import { CreateQuizPairDto } from './dto/create-quiz-pair.dto';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { JwtAuthGuards } from '../../features/public/auth/guards/jwt-auth.guards';
@@ -9,12 +19,14 @@ import { UserInPair } from '../../features/public/auth/guards/user-in-pair';
 import { MyCurrentGamePair } from './usecases/my-current-game-pair';
 import { FindGameById } from './usecases/find-game-by-id';
 import { ValidIdDto } from './dto/valid-id-dto';
+import { ErrorHttpStatusCode } from '@nestjs/common/utils/http-error-by-code.util';
 
 @UseGuards(JwtAuthGuards)
 @Controller('pair-game-quiz/pairs')
 export class QuizPairController {
   constructor(private commandBus: CommandBus, private queryBus: QueryBus) {}
 
+  @HttpCode(HttpStatus.OK)
   @UseGuards(UserInPair)
   @Post('my-current/answers')
   async sendAnswers(
@@ -25,6 +37,7 @@ export class QuizPairController {
       new SendAnswer(userId, createQuizPairDto.answer),
     );
   }
+  @HttpCode(HttpStatus.OK)
   @Post('connection')
   async connectToPair(@CurrentUserId() userId: string) {
     return this.commandBus.execute(new ConnectToPairCommand(userId));
@@ -37,9 +50,10 @@ export class QuizPairController {
 
   @Get(':id')
   async findGameById(
-    @Param('id') validId: ValidIdDto,
+    @Param()
+    { id }: ValidIdDto,
     @CurrentUserId() userId: string,
   ) {
-    return this.queryBus.execute(new FindGameById(validId.id, userId));
+    return this.queryBus.execute(new FindGameById(id, userId));
   }
 }

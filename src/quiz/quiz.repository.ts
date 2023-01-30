@@ -260,9 +260,12 @@ export class QuizRepository {
     }
   }
   async findUserInPair(userId: string) {
-    return this.dataSource.manager.find(QuizGameEntity, {
-      where: [{ player1: userId }, { player2: userId }, { status: 'Active' }],
-    });
+    return this.dataSource.query(
+      `
+    SELECT * FROM public.game
+    WHERE (player1 = $1 OR player2 = $1) AND (status = 'Active')`,
+      [userId],
+    );
   }
 
   async findActivePair(userId: string) {
