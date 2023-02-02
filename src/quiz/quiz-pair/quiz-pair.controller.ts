@@ -7,7 +7,6 @@ import {
   UseGuards,
   HttpStatus,
   HttpCode,
-  ParseUUIDPipe,
 } from '@nestjs/common';
 import { CreateQuizPairDto } from './dto/create-quiz-pair.dto';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
@@ -19,7 +18,6 @@ import { UserInPair } from '../../features/public/auth/guards/user-in-pair';
 import { MyCurrentGamePair } from './usecases/my-current-game-pair';
 import { FindGameById } from './usecases/find-game-by-id';
 import { ValidIdDto } from './dto/valid-id-dto';
-import { ErrorHttpStatusCode } from '@nestjs/common/utils/http-error-by-code.util';
 
 @UseGuards(JwtAuthGuards)
 @Controller('pair-game-quiz/pairs')

@@ -161,7 +161,10 @@ export class QuizRepository {
   }
 
   async connectToGame(userId: string) {
-    const questions = await this.dataSource.manager.find(QuizQuestionsEntity);
+    const questions = await this.dataSource.manager.find(QuizQuestionsEntity, {
+      take: 5,
+      where: { published: true },
+    });
     const gameExist = await this.dataSource
       .getRepository(QuizGameEntity)
       .createQueryBuilder()
@@ -221,21 +224,21 @@ export class QuizRepository {
       ON g.id = p."gameId"
       LEFT JOIN public."answers" a
       ON p."questionsId" = a."questionId"
-      WHERE (g.status = 'Active') 
+      WHERE (g.status = 'Active')
         AND (g.player1 = $1 OR g.player2 = $1)
           AND (a.answer = $2)`,
         [userId, answer],
       );
       let answerStatus = 'Correct';
       let score = 1;
-      if (isAnswerCorrect == []) {
+      if (isAnswerCorrect < 1) {
         answerStatus = 'Incorrect';
         score = 0;
       }
       const date = new Date();
       const createPlayerProgress = await this.dataSource.query(
         `
-            INSERT INTO public."playerProgress" 
+            INSERT INTO public."playerProgress"
             ("userId", "gameId", "answerStatus", "addedAt", score, "questionId")
             VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING "questionId", "answerStatus", "addedAt"`,

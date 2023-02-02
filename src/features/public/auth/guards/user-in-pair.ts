@@ -13,7 +13,7 @@ export class UserInPair implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const userId = request.user.userId;
     const user = await this.quizService.inPair(userId);
-    if (!user) throw new ForbiddenException();
+    if (user.length < 1) throw new ForbiddenException();
     return true;
   }
 }

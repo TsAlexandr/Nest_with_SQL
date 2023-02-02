@@ -11,8 +11,8 @@ export const getTestsApp = async () => {
   const app = moduleFixture.createNestApplication();
   app.useGlobalPipes(
     new ValidationPipe({
-      stopAtFirstError: false,
-      transform: false,
+      stopAtFirstError: true,
+      transform: true,
       exceptionFactory: (errors) => {
         const customErrors = errors.map((e) => {
           const firstError = JSON.stringify(e.constraints);
