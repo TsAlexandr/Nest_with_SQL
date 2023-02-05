@@ -11,7 +11,7 @@ import {
   RecoveryDataType,
   TotalActions,
   UserAccount,
-} from '../classes/classes';
+} from '../../common/classes/classes';
 
 export type BloggersDocument = BloggersMongo & Document;
 

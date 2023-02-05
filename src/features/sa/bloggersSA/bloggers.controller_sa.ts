@@ -1,5 +1,5 @@
-import { Paginator } from '../../../common/types/classes/classes';
-import { Pagination } from '../../../common/types/classes/pagination';
+import { Paginator } from '../../../common/classes/classes';
+import { Pagination } from '../../../common/classes/pagination';
 import {
   Body,
   Controller,
@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { BlogsService } from '../../public/blogs/blogs.service';
 import { BasicGuards } from '../../public/auth/guards/basic.guards';
-import { BloggersMongo } from '../../../common/types/schemas/schemas.model';
+import { BloggersMongo } from '../../../library/schemas/schemas.model';
 import { CommandBus } from '@nestjs/cqrs';
 import { BanBlogByIdCommand } from '../../usecases/commands/banBlogById.command';
 

@@ -1,5 +1,5 @@
 import { BloggersDto } from '../../features/public/blogs/dto/bloggers.dto';
-import { Blogger, Paginator } from '../types/classes/classes';
+import { Blogger, Paginator } from '../classes/classes';
 
 export interface IBlogsRepository {
   getBloggers(

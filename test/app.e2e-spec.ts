@@ -22,7 +22,7 @@ import {
   updateTestBlogger,
   wrongBlogger,
 } from './tests.data';
-import { Actions } from '../src/common/types/classes/classes';
+import { Actions } from '../src/common/classes/classes';
 import { DataSource } from 'typeorm';
 
 describe('App (e2e)', () => {

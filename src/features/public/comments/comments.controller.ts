@@ -18,7 +18,7 @@ import { AuthGuard } from '../auth/guards/auth.guard';
 import { JwtAuthGuards } from '../auth/guards/jwt-auth.guards';
 import { CommentBelongsGuard } from '../auth/guards/commentBelongsGuard';
 import { UsersService } from '../../sa/users/users.service';
-import { Actions } from '../../../common/types/classes/classes';
+import { Actions } from '../../../common/classes/classes';
 import { CurrentUserId } from '../../../common/custom-decorator/current.user.decorator';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { QueryBus } from '@nestjs/cqrs';

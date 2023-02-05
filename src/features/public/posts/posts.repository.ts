@@ -1,4 +1,4 @@
-import { Paginator, PostsCon } from '../../../common/types/classes/classes';
+import { Paginator, PostsCon } from '../../../common/classes/classes';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { PostEntity } from './entities/post.entity';

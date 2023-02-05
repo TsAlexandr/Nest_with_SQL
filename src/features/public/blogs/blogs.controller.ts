@@ -1,6 +1,6 @@
 import { PostsService } from '../posts/posts.service';
-import { Blogger, Paginator } from '../../../common/types/classes/classes';
-import { Pagination } from '../../../common/types/classes/pagination';
+import { Blogger, Paginator } from '../../../common/classes/classes';
+import { Pagination } from '../../../common/classes/pagination';
 import {
   Controller,
   Get,

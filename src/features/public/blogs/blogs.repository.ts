@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { BloggersMongo } from '../../../common/types/schemas/schemas.model';
-import { Blogger, Paginator } from '../../../common/types/classes/classes';
+import { BloggersMongo } from '../../../library/schemas/schemas.model';
+import { Blogger, Paginator } from '../../../common/classes/classes';
 import { BloggersDto } from './dto/bloggers.dto';
 import { BanBlogDto } from '../../blogger/dto/banBlog.dto';
 import { InjectDataSource } from '@nestjs/typeorm';

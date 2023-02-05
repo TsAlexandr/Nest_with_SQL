@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PostsRepository } from './posts.repository';
-import { PostsCon } from '../../../common/types/classes/classes';
+import { PostsCon } from '../../../common/classes/classes';
 import { v4 } from 'uuid';
 
 @Injectable()

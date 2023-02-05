@@ -12,11 +12,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuards } from '../public/auth/guards/jwt-auth.guards';
-import { Blogger, Paginator } from '../../common/types/classes/classes';
+import { Blogger, Paginator } from '../../common/classes/classes';
 import { BloggersDto } from '../public/blogs/dto/bloggers.dto';
 import { BlogsService } from '../public/blogs/blogs.service';
 import { PostsService } from '../public/posts/posts.service';
-import { Pagination } from '../../common/types/classes/pagination';
+import { Pagination } from '../../common/classes/pagination';
 import { CurrentUserId } from '../../common/custom-decorator/current.user.decorator';
 import { QueryBus } from '@nestjs/cqrs';
 import { GetAllBloggerCommentsCommand } from '../usecases/queryCommands/getAllBloggerComments.command';

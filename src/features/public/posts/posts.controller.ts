@@ -14,11 +14,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
-import { Actions } from '../../../common/types/classes/classes';
+import { Actions } from '../../../common/classes/classes';
 import { JwtAuthGuards } from '../auth/guards/jwt-auth.guards';
 import { ExistingPostGuard } from '../auth/guards/existingPostGuard';
 import { UsersService } from '../../sa/users/users.service';
-import { Pagination } from '../../../common/types/classes/pagination';
+import { Pagination } from '../../../common/classes/pagination';
 import { UpdateCommentDto } from '../comments/dto/update-comment.dto';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { GetPostByIdCommand } from '../../usecases/queryCommands/getPostById.command';

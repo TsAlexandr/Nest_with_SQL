@@ -1,4 +1,4 @@
-import { Device } from '../../../common/types/schemas/schemas.model';
+import { Device } from '../../../library/schemas/schemas.model';
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';

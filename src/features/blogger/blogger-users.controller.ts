@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuards } from '../public/auth/guards/jwt-auth.guards';
 import { BanBlogDto } from './dto/banBlog.dto';
-import { Pagination } from '../../common/types/classes/pagination';
+import { Pagination } from '../../common/classes/pagination';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { GetBannedUserForBloggerCommand } from '../usecases/queryCommands/getBannedUserForBlogger.command';
 import { BanUserForBlogCommand } from '../usecases/commands/banUserForBlog.command';
