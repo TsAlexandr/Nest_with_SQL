@@ -298,6 +298,7 @@ export class UsersRepository {
     DELETE FROM public.comments;
     DELETE FROM public."userBlackList";
     DELETE FROM public."questions" CASCADE;
+    DELETE FROM public.game CASCADE;
     `,
     );
   }
