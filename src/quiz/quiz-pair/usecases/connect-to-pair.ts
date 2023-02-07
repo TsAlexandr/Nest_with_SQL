@@ -11,9 +11,11 @@ export class ConnectToPairHandler
   implements ICommandHandler<ConnectToPairCommand>
 {
   constructor(private quizRepo: QuizRepository) {}
+
   async execute(command: ConnectToPairCommand): Promise<any> {
     const userInGame = await this.quizRepo.findOneInGame(command.userId);
-    if (userInGame) throw new ForbiddenException();
-    return this.quizRepo.connectToGame(command.userId);
+    if (userInGame.length > 0) throw new ForbiddenException();
+    const game = await this.quizRepo.connectToGame(command.userId);
+    return this.quizRepo.findGameById(game.id, command.userId);
   }
 }
