@@ -212,55 +212,13 @@ export class QuizRepository {
       .getOne();
   }
 
-  async addPlayerProgress(userId: string, gameId: string, answer: string) {
-    await this.queryRunner.connect();
-    await this.queryRunner.startTransaction();
-    try {
-      const isAnswerCorrect = await this.dataSource.query(
-        `
-    SELECT g.id, a.answer, p."questionsId"
-      FROM public.game g
-      LEFT JOIN public.game_questions_questions p
-      ON g.id = p."gameId"
-      LEFT JOIN public."answers" a
-      ON p."questionsId" = a."questionId"
-      WHERE (g.status = 'Active')
-        AND (g.player1 = $1 OR g.player2 = $1)
-          AND (a.answer = $2)`,
-        [userId, answer],
-      );
-      let answerStatus = 'Correct';
-      let score = 1;
-      if (isAnswerCorrect < 1) {
-        answerStatus = 'Incorrect';
-        score = 0;
-      }
-      const date = new Date();
-      const createPlayerProgress = await this.dataSource.query(
-        `
-            INSERT INTO public."playerProgress"
-            ("userId", "gameId", "answerStatus", "addedAt", score, "questionId")
-            VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING "questionId", "answerStatus", "addedAt"`,
-        [
-          userId,
-          gameId,
-          answerStatus,
-          date,
-          score,
-          isAnswerCorrect[0].questionsId,
-        ],
-      );
-      await this.queryRunner.commitTransaction();
-      return {
-        questionId: createPlayerProgress[0].questionId,
-        answerStatus: createPlayerProgress[0].answerStatus,
-        addedAt: createPlayerProgress[0].addedAt,
-      };
-    } catch (e) {
-      console.log(e);
-      await this.queryRunner.rollbackTransaction();
-    }
+  async getProgress(userId: string, gameId: string) {
+    return this.dataSource.query(
+      `
+    SELECT * FROM public."playerProgress"
+    WHERE ("userId" = $1) AND ("gameId" = $2)`,
+      [userId, gameId],
+    );
   }
   async findUserInPair(userId: string) {
     return this.dataSource.query(
@@ -285,7 +243,7 @@ export class QuizRepository {
                  (SELECT ROW_TO_JSON(first_player) as "player" FROM
                     (SELECT u.id, u.login FROM public.users u 
                 WHERE u.id = g.player1)first_player) as "player",
-                (SELECT p.score FROM public."playerProgress" p
+                (SELECT SUM(p.score) as "score" FROM public."playerProgress" p
                 WHERE p."userId" = g.player1) as "score"
             ) first_progress ) as "firstPlayerProgress", 
         (SELECT ROW_TO_JSON(second_progress) FROM
@@ -298,7 +256,7 @@ export class QuizRepository {
                  (SELECT ROW_TO_JSON(second_player) as "player" FROM
                     (SELECT u.id, u.login FROM public.users u 
                 WHERE u.id = g.player2)second_player) as "player",
-                (SELECT p.score FROM public."playerProgress" p
+                (SELECT SUM(p.score) as "score" FROM public."playerProgress" p
                 WHERE p."userId" = g.player2) as "score"
             ) second_progress ) as "secondPlayerProgress"
     FROM public.game g
@@ -321,7 +279,7 @@ export class QuizRepository {
                  (SELECT ROW_TO_JSON(first_player) as "player" FROM
                     (SELECT u.id, u.login FROM public.users u 
                 WHERE u.id = g.player1)first_player) as "player",
-                (SELECT p.score FROM public."playerProgress" p
+                (SELECT SUM(p.score) as "score" FROM public."playerProgress" p
                 WHERE p."userId" = g.player1) as "score"
             ) first_progress ) as "firstPlayerProgress", 
         (SELECT ROW_TO_JSON(second_progress) FROM
@@ -334,12 +292,77 @@ export class QuizRepository {
                  (SELECT ROW_TO_JSON(second_player) as "player" FROM
                     (SELECT u.id, u.login FROM public.users u 
                 WHERE u.id = g.player2)second_player) as "player",
-                (SELECT p.score FROM public."playerProgress" p
+                (SELECT SUM(p.score) as "score" FROM public."playerProgress" p
                 WHERE p."userId" = g.player2) as "score"
             ) second_progress ) as "secondPlayerProgress"
     FROM public.game g
     WHERE (g.player1 = $1 OR g.player2 = $1) AND (g.id = $2)`,
       [userId, id],
     );
+  }
+
+  async getQuestionsForCurrentGame(id: string) {
+    return this.dataSource.query(
+      `
+    SELECT * FROM public.game g
+    LEFT JOIN public.game_questions_questions p
+    ON p."gameId" = $1
+    LEFT JOIN public.answers a
+    ON p."questionsId" = a."questionId"
+    WHERE g.id = $1
+    `,
+      [id],
+    );
+  }
+
+  async addPlayerProgress(
+    userId: string,
+    gameId: string,
+    questionId: string,
+    answer: string,
+    score: number,
+    date: Date,
+    length: number,
+  ) {
+    const createPlayerProgress = await this.dataSource.query(
+      `
+            INSERT INTO public."playerProgress"
+            ("userId", "gameId", "answerStatus", "addedAt", score, "questionId")
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING "questionId", "answerStatus", "addedAt"`,
+      [userId, gameId, answer, date, score, questionId],
+    );
+    if (length >= 4) {
+      const checkProgress = await this.dataSource.query(
+        `
+      SELECT *,
+       (SELECT COUNT(*) FROM public."playerProgress" p
+       WHERE p."gameId" = g.id AND p."userId" = g.player1) as player1ProgressCount,
+       (SELECT COUNT(*) FROM public."playerProgress" p
+       WHERE p."gameId" = g.id AND p."userId" = g.player2) as player2ProgressCount
+       FROM public.game g
+       WHERE g.id = $1
+      `,
+        [gameId],
+      );
+      if (
+        checkProgress[0].player1ProgressCount &&
+        checkProgress[0].player2ProgressCount == 5
+      ) {
+        const finishDate = new Date();
+        await this.dataSource.query(
+          `
+        UPDATE public.game
+        SET status = 'Finished', "finishGameDate" = $1
+        WHERE id = $2`,
+          [finishDate, gameId],
+        );
+      }
+    }
+    return {
+      questionId: createPlayerProgress[0].questionId,
+      answerStatus: createPlayerProgress[0].answerStatus,
+      addedAt: createPlayerProgress[0].addedAt,
+    };
   }
 }
