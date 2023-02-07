@@ -11,7 +11,7 @@ export class MyCurrentPairHandler implements IQueryHandler<MyCurrentGamePair> {
   constructor(private quizRepo: QuizRepository) {}
   async execute(query: MyCurrentGamePair): Promise<any> {
     const pair = await this.quizRepo.findActivePair(query.userId);
-    if (!pair) throw new NotFoundException();
+    if (pair.length < 1) throw new NotFoundException();
     return pair;
   }
 }
