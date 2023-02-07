@@ -223,8 +223,12 @@ export class QuizRepository {
   async findUserInPair(userId: string) {
     return this.dataSource.query(
       `
-    SELECT * FROM public.game
-    WHERE (player1 = $1 OR player2 = $1) AND (status = 'Active')`,
+    SELECT g.*,
+        (SELECT COUNT(*) as "progress" FROM public."playerProgress" p
+          WHERE (p."userId" = $1) 
+            AND (p."gameId" = g.id)) as "progress"
+    FROM public.game g
+    WHERE (g.player1 = $1 OR g.player2 = $1) AND (g.status = 'Active')`,
       [userId],
     );
   }
@@ -235,29 +239,29 @@ export class QuizRepository {
     SELECT g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate", 
         (SELECT ROW_TO_JSON(first_progress) FROM
             (SELECT * FROM
-                (SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(first_answers))) as "answers" 
+                COALESCE((SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(first_answers))) as "answers" 
                     FROM
             (SELECT p."questionId", p."answerStatus", p."addedAt" 
                FROM public."playerProgress" p
-                WHERE p."userId" = g.player1)first_answers) as "answers",
+                WHERE p."userId" = g.player1 AND p."gameId" = g.id)first_answers), '[]') as "answers",
                  (SELECT ROW_TO_JSON(first_player) as "player" FROM
                     (SELECT u.id, u.login FROM public.users u 
                 WHERE u.id = g.player1)first_player) as "player",
-                (SELECT SUM(p.score) as "score" FROM public."playerProgress" p
-                WHERE p."userId" = g.player1) as "score"
+                COALESCE((SELECT SUM(p.score) as "score" FROM public."playerProgress" p
+                WHERE p."userId" = g.player1 AND p."gameId" = g.id), 0) as "score"
             ) first_progress ) as "firstPlayerProgress", 
         (SELECT ROW_TO_JSON(second_progress) FROM
             (SELECT * FROM
-                (SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(second_answers))) as "answers" 
+                COALESCE((SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(second_answers))) as "answers" 
                     FROM
             (SELECT p."questionId", p."answerStatus", p."addedAt" 
                FROM public."playerProgress" p
-                WHERE p."userId" = g.player2)second_answers) as "answers",
+                WHERE p."userId" = g.player2 AND p."gameId" = g.id)second_answers), '[]') as "answers",
                  (SELECT ROW_TO_JSON(second_player) as "player" FROM
                     (SELECT u.id, u.login FROM public.users u 
                 WHERE u.id = g.player2)second_player) as "player",
-                (SELECT SUM(p.score) as "score" FROM public."playerProgress" p
-                WHERE p."userId" = g.player2) as "score"
+                COALESCE((SELECT SUM(p.score) as "score" FROM public."playerProgress" p
+                WHERE p."userId" = g.player2 AND p."gameId" = g.id), 0) as "score"
             ) second_progress ) as "secondPlayerProgress"
     FROM public.game g
     WHERE (g.player1 = $1 OR g.player2 = $1) AND (g.status = 'Active')`,
@@ -271,29 +275,29 @@ export class QuizRepository {
     SELECT g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate", 
         (SELECT ROW_TO_JSON(first_progress) FROM
             (SELECT * FROM
-                (SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(first_answers))) as "answers" 
+                COALESCE((SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(first_answers))) as "answers" 
                     FROM
             (SELECT p."questionId", p."answerStatus", p."addedAt" 
                FROM public."playerProgress" p
-                WHERE p."userId" = g.player1)first_answers) as "answers",
+                WHERE p."userId" = g.player1 AND p."gameId" = g.id)first_answers), '[]') as "answers",
                  (SELECT ROW_TO_JSON(first_player) as "player" FROM
                     (SELECT u.id, u.login FROM public.users u 
                 WHERE u.id = g.player1)first_player) as "player",
-                (SELECT SUM(p.score) as "score" FROM public."playerProgress" p
-                WHERE p."userId" = g.player1) as "score"
+                COALESCE((SELECT SUM(p.score) as "score" FROM public."playerProgress" p
+                WHERE p."userId" = g.player1 AND p."gameId" = g.id), 0) as "score"
             ) first_progress ) as "firstPlayerProgress", 
         (SELECT ROW_TO_JSON(second_progress) FROM
             (SELECT * FROM
-                (SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(second_answers))) as "answers" 
+                COALESCE((SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(second_answers))) as "answers" 
                     FROM
             (SELECT p."questionId", p."answerStatus", p."addedAt" 
                FROM public."playerProgress" p
-                WHERE p."userId" = g.player2)second_answers) as "answers",
+                WHERE p."userId" = g.player2 AND p."gameId" = g.id)second_answers), '[]') as "answers",
                  (SELECT ROW_TO_JSON(second_player) as "player" FROM
                     (SELECT u.id, u.login FROM public.users u 
                 WHERE u.id = g.player2)second_player) as "player",
-                (SELECT SUM(p.score) as "score" FROM public."playerProgress" p
-                WHERE p."userId" = g.player2) as "score"
+                COALESCE((SELECT SUM(p.score) as "score" FROM public."playerProgress" p
+                WHERE p."userId" = g.player2 AND p."gameId" = g.id), 0) as "score"
             ) second_progress ) as "secondPlayerProgress"
     FROM public.game g
     WHERE (g.player1 = $1 OR g.player2 = $1) AND (g.id = $2)`,
@@ -324,9 +328,6 @@ export class QuizRepository {
     date: Date,
     length: number,
   ) {
-    if (length == 5) {
-      return 'You should be wait another player';
-    }
     const createPlayerProgress = await this.dataSource.query(
       `
             INSERT INTO public."playerProgress"
