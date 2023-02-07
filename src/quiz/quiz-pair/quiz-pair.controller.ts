@@ -25,7 +25,6 @@ export class QuizPairController {
   constructor(private commandBus: CommandBus, private queryBus: QueryBus) {}
 
   @HttpCode(HttpStatus.OK)
-  @UseGuards(UserInPair)
   @Post('my-current/answers')
   async sendAnswers(
     @Body() createQuizPairDto: CreateQuizPairDto,
