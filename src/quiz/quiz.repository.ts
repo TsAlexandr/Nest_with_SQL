@@ -203,13 +203,13 @@ export class QuizRepository {
   }
 
   async findOneInGame(userId: string) {
-    const gameStatus = 'Finished';
-    return this.dataSource
-      .getRepository(QuizGameEntity)
-      .createQueryBuilder()
-      .where('player1 = :userId OR player2 = :userId', { userId })
-      .andWhere('status != :gameStatus', { gameStatus })
-      .getOne();
+    return this.dataSource.query(
+      `
+    SELECT * FROM public.game
+    WHERE (player1 = $1 OR player2 = $1) 
+    AND (status != 'Finished')`,
+      [userId],
+    );
   }
 
   async getProgress(userId: string, gameId: string) {
@@ -324,6 +324,9 @@ export class QuizRepository {
     date: Date,
     length: number,
   ) {
+    if (length == 5) {
+      return 'You should be wait another player';
+    }
     const createPlayerProgress = await this.dataSource.query(
       `
             INSERT INTO public."playerProgress"
@@ -337,16 +340,16 @@ export class QuizRepository {
         `
       SELECT *,
        (SELECT COUNT(*) FROM public."playerProgress" p
-       WHERE p."gameId" = g.id AND p."userId" = g.player1) as player1ProgressCount,
+       WHERE p."gameId" = g.id AND p."userId" = g.player1) as "player1ProgressCount",
        (SELECT COUNT(*) FROM public."playerProgress" p
-       WHERE p."gameId" = g.id AND p."userId" = g.player2) as player2ProgressCount
+       WHERE p."gameId" = g.id AND p."userId" = g.player2) as "player2ProgressCount"
        FROM public.game g
        WHERE g.id = $1
       `,
         [gameId],
       );
       if (
-        checkProgress[0].player1ProgressCount &&
+        checkProgress[0].player1ProgressCount == 5 &&
         checkProgress[0].player2ProgressCount == 5
       ) {
         const finishDate = new Date();
@@ -364,5 +367,14 @@ export class QuizRepository {
       answerStatus: createPlayerProgress[0].answerStatus,
       addedAt: createPlayerProgress[0].addedAt,
     };
+  }
+
+  async findUser(userId: string) {
+    return this.dataSource.query(
+      `
+    SELECT * FROM public.game
+    WHERE (player1 = $1 OR player2 = $1) AND (status != 'Finished')`,
+      [userId],
+    );
   }
 }
