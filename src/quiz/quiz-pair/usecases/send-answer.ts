@@ -11,6 +11,7 @@ export class SendAnswerHandler implements ICommandHandler<SendAnswer> {
   constructor(private quizRepo: QuizRepository) {}
   async execute(command: SendAnswer): Promise<any> {
     const currentUserGame = await this.quizRepo.findUserInPair(command.userId);
+    console.log(currentUserGame);
     if (currentUserGame.length < 1) throw new ForbiddenException();
     const questions = await this.quizRepo.getQuestionsForCurrentGame(
       currentUserGame[0].id,
@@ -26,6 +27,7 @@ export class SendAnswerHandler implements ICommandHandler<SendAnswer> {
     const answer = status.answer == command.answer ? 'Correct' : 'Incorrect';
     const score = answer == 'Correct' ? 1 : 0;
     const date = new Date();
+    console.log(playerProgress.length);
     const addPlayerProgress = await this.quizRepo.addPlayerProgress(
       command.userId,
       currentUserGame[0].id,
