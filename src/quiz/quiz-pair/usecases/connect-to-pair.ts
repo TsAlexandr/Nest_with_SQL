@@ -16,6 +16,7 @@ export class ConnectToPairHandler
     const userInGame = await this.quizRepo.findOneInGame(command.userId);
     if (userInGame.length > 0) throw new ForbiddenException();
     const game = await this.quizRepo.connectToGame(command.userId);
-    return this.quizRepo.findGameById(game.id, command.userId);
+    const result = await this.quizRepo.findGameById(game.id, command.userId);
+    return result[0];
   }
 }
