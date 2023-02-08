@@ -11,8 +11,8 @@ export class FindGameHandler implements IQueryHandler<FindGameById> {
   constructor(private quizRepo: QuizRepository) {}
   async execute(query: FindGameById): Promise<any> {
     const game = await this.quizRepo.findGame(query.id);
-    const p1 = [game[0].player1, game[0].player2];
     if (game.length < 1) throw new NotFoundException();
+    const p1 = [game[0].player1, game[0].player2];
     if (!p1.includes(query.userId)) {
       throw new ForbiddenException();
     }
