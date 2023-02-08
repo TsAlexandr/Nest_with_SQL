@@ -14,6 +14,6 @@ export class FindGameHandler implements IQueryHandler<FindGameById> {
     if (findGame.length < 1) throw new ForbiddenException();
     const game = await this.quizRepo.findGameById(query.id, query.userId);
     if (game.length < 1) throw new NotFoundException();
-    return game;
+    return game[0];
   }
 }
