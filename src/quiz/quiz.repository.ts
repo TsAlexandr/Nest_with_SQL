@@ -262,7 +262,14 @@ export class QuizRepository {
                 WHERE u.id = g.player2)second_player) as "player",
                 COALESCE((SELECT SUM(p.score) as "score" FROM public."playerProgress" p
                 WHERE p."userId" = g.player2 AND p."gameId" = g.id), 0) as "score"
-            ) second_progress ) as "secondPlayerProgress"
+            ) second_progress ) as "secondPlayerProgress",
+            COALESCE((SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(questions))) as "questions" 
+                    FROM
+            (SELECT q.id, q.body
+                FROM public.questions q
+                LEFT JOIN public.game_questions_questions gq
+                ON q.id = gq."questionsId"
+                WHERE gq."gameId" = g.id)questions), 'null') as "questions"
     FROM public.game g
     WHERE (g.player1 = $1 OR g.player2 = $1) AND (g.status = 'Active')`,
       [userId],
@@ -298,7 +305,14 @@ export class QuizRepository {
                 WHERE u.id = g.player2)second_player) as "player",
                 COALESCE((SELECT SUM(p.score) as "score" FROM public."playerProgress" p
                 WHERE p."userId" = g.player2 AND p."gameId" = g.id), 0) as "score"
-            ) second_progress ) as "secondPlayerProgress"
+            ) second_progress ) as "secondPlayerProgress",
+            COALESCE((SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(questions))) as "questions" 
+                    FROM
+            (SELECT q.id, q.body
+                FROM public.questions q
+                LEFT JOIN public.game_questions_questions gq
+                ON q.id = gq."questionsId"
+                WHERE gq."gameId" = g.id)questions), 'null') as "questions"
     FROM public.game g
     WHERE (g.player1 = $1 OR g.player2 = $1) AND (g.id = $2)`,
       [userId, id],
