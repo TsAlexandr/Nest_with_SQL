@@ -10,10 +10,33 @@ export class FindGameById {
 export class FindGameHandler implements IQueryHandler<FindGameById> {
   constructor(private quizRepo: QuizRepository) {}
   async execute(query: FindGameById): Promise<any> {
-    const findGame = await this.quizRepo.findUser(query.userId);
-    if (findGame.length < 1) throw new ForbiddenException();
-    const game = await this.quizRepo.findGameById(query.id, query.userId);
+    const game = await this.quizRepo.findGame(query.id);
+    const p1 = [game[0].player1, game[0].player2];
     if (game.length < 1) throw new NotFoundException();
-    return game[0];
+    if (!p1.includes(query.userId)) {
+      throw new ForbiddenException();
+    }
+    const currentGame = await this.quizRepo.findGameById(
+      query.id,
+      query.userId,
+    );
+    if (currentGame[0].firstPlayerProgress.answers.length > 4) {
+      const answers1 = currentGame[0].firstPlayerProgress.answers;
+      const answers2 = currentGame[0].secondPlayerProgress.answers;
+      if (
+        currentGame[0].status == 'Finished' &&
+        answers1[4].addedAt < answers2[4].addedAt &&
+        answers1.map((el) => el.answer == 'Correct').length > 0
+      ) {
+        currentGame[0].firstPlayerProgress.score++;
+      } else if (
+        currentGame[0].status == 'Finished' &&
+        answers2[4].addedAt < answers1[4].addedAt &&
+        answers2.map((el) => el.answer == 'Correct').length > 0
+      ) {
+        currentGame[0].secondPlayerProgress.score++;
+      }
+    }
+    return currentGame[0];
   }
 }
