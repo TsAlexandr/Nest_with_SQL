@@ -243,7 +243,7 @@ export class QuizRepository {
                 COALESCE((SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(first_answers))) as "answers" 
                     FROM
             (SELECT p."questionId", p."answerStatus", 
-            to_char (p."addedAt" ::timestamp at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS:MS"Z"') as "addedAt"
+            to_char (p."addedAt" ::timestamp at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as "addedAt"
                FROM public."playerProgress" p
                 WHERE p."userId" = g.player1 AND p."gameId" = g.id
                 ORDER BY p."addedAt" DESC)first_answers), '[]') as "answers",
@@ -258,7 +258,7 @@ export class QuizRepository {
                 COALESCE((SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(second_answers))) as "answers" 
                     FROM
             (SELECT p."questionId", p."answerStatus", 
-            to_char (p."addedAt" ::timestamp at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS:MS"Z"') as "addedAt" 
+            to_char (p."addedAt" ::timestamp at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as "addedAt" 
                FROM public."playerProgress" p
                 WHERE p."userId" = g.player2 AND p."gameId" = g.id
                 ORDER BY p."addedAt" DESC)second_answers), '[]') as "answers",
@@ -290,7 +290,7 @@ export class QuizRepository {
                 COALESCE((SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(first_answers))) as "answers" 
                     FROM
             (SELECT p."questionId", p."answerStatus", 
-            to_char (p."addedAt" ::timestamp at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS:MS"Z"') as "addedAt"
+            to_char (p."addedAt" ::timestamp at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as "addedAt"
                FROM public."playerProgress" p
                 WHERE p."userId" = g.player1 AND p."gameId" = g.id
                 ORDER BY p."addedAt" DESC)first_answers), '[]') as "answers",
@@ -305,7 +305,7 @@ export class QuizRepository {
                 COALESCE((SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(second_answers))) as "answers" 
                     FROM
             (SELECT p."questionId", p."answerStatus", 
-            to_char (p."addedAt" ::timestamp at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS:MS"Z"') as "addedAt" 
+            to_char (p."addedAt" ::timestamp at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as "addedAt" 
                FROM public."playerProgress" p
                 WHERE p."userId" = g.player2 AND p."gameId" = g.id
                 ORDER BY p."addedAt" DESC)second_answers), '[]') as "answers",
