@@ -271,7 +271,7 @@ export class QuizRepository {
                 ON q.id = gq."questionsId"
                 WHERE gq."gameId" = g.id)questions), 'null') as "questions"
     FROM public.game g
-    WHERE (g.player1 = $1 OR g.player2 = $1)`,
+    WHERE (g.player1 = $1 OR g.player2 = $1) AND (g.status != 'Finished')`,
       [userId],
     );
   }
@@ -325,9 +325,12 @@ export class QuizRepository {
     SELECT * FROM public.game g
     LEFT JOIN public.game_questions_questions p
     ON p."gameId" = $1
+    LEFT JOIN public.questions q
+    ON p."questionsId" = q.id
     LEFT JOIN public.answers a
     ON p."questionsId" = a."questionId"
     WHERE g.id = $1
+    ORDER BY q."createdAt" DESC
     `,
       [id],
     );
@@ -388,7 +391,7 @@ export class QuizRepository {
     return this.dataSource.query(
       `
     SELECT * FROM public.game
-    WHERE (player1 = $1 OR player2 = $1) AND (status != 'Finished')`,
+    WHERE (player1 = $1 OR player2 = $1)`,
       [userId],
     );
   }
