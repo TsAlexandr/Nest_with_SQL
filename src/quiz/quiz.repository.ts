@@ -271,7 +271,7 @@ export class QuizRepository {
                 ON q.id = gq."questionsId"
                 WHERE gq."gameId" = g.id)questions), 'null') as "questions"
     FROM public.game g
-    WHERE (g.player1 = $1 OR g.player2 = $1) AND (g.status = 'Active')`,
+    WHERE (g.player1 = $1 OR g.player2 = $1)`,
       [userId],
     );
   }
