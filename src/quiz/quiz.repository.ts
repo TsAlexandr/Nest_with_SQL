@@ -241,9 +241,11 @@ export class QuizRepository {
             (SELECT * FROM
                 COALESCE((SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(first_answers))) as "answers" 
                     FROM
-            (SELECT p."questionId", p."answerStatus", p."addedAt" 
+            (SELECT p."questionId", p."answerStatus", 
+            to_char (p."addedAt" ::timestamp at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS:MS"Z"') as "addedAt"
                FROM public."playerProgress" p
-                WHERE p."userId" = g.player1 AND p."gameId" = g.id)first_answers), '[]') as "answers",
+                WHERE p."userId" = g.player1 AND p."gameId" = g.id
+                ORDER BY p."addedAt" DESC)first_answers), '[]') as "answers",
                  (SELECT ROW_TO_JSON(first_player) as "player" FROM
                     (SELECT u.id, u.login FROM public.users u 
                 WHERE u.id = g.player1)first_player) as "player",
@@ -254,9 +256,11 @@ export class QuizRepository {
             (SELECT * FROM
                 COALESCE((SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(second_answers))) as "answers" 
                     FROM
-            (SELECT p."questionId", p."answerStatus", p."addedAt" 
+            (SELECT p."questionId", p."answerStatus", 
+            to_char (p."addedAt" ::timestamp at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS:MS"Z"') as "addedAt" 
                FROM public."playerProgress" p
-                WHERE p."userId" = g.player2 AND p."gameId" = g.id)second_answers), '[]') as "answers",
+                WHERE p."userId" = g.player2 AND p."gameId" = g.id
+                ORDER BY p."addedAt" DESC)second_answers), '[]') as "answers",
                  (SELECT ROW_TO_JSON(second_player) as "player" FROM
                     (SELECT u.id, u.login FROM public.users u 
                 WHERE u.id = g.player2)second_player) as "player",
@@ -284,9 +288,11 @@ export class QuizRepository {
             (SELECT * FROM
                 COALESCE((SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(first_answers))) as "answers" 
                     FROM
-            (SELECT p."questionId", p."answerStatus", p."addedAt" 
+            (SELECT p."questionId", p."answerStatus", 
+            to_char (p."addedAt" ::timestamp at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS:MS"Z"') as "addedAt"
                FROM public."playerProgress" p
-                WHERE p."userId" = g.player1 AND p."gameId" = g.id)first_answers), '[]') as "answers",
+                WHERE p."userId" = g.player1 AND p."gameId" = g.id
+                ORDER BY p."addedAt" DESC)first_answers), '[]') as "answers",
                  (SELECT ROW_TO_JSON(first_player) as "player" FROM
                     (SELECT u.id, u.login FROM public.users u 
                 WHERE u.id = g.player1)first_player) as "player",
@@ -297,9 +303,11 @@ export class QuizRepository {
             (SELECT * FROM
                 COALESCE((SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(second_answers))) as "answers" 
                     FROM
-            (SELECT p."questionId", p."answerStatus", p."addedAt" 
+            (SELECT p."questionId", p."answerStatus", 
+            to_char (p."addedAt" ::timestamp at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS:MS"Z"') as "addedAt" 
                FROM public."playerProgress" p
-                WHERE p."userId" = g.player2 AND p."gameId" = g.id)second_answers), '[]') as "answers",
+                WHERE p."userId" = g.player2 AND p."gameId" = g.id
+                ORDER BY p."addedAt" DESC)second_answers), '[]') as "answers",
                  (SELECT ROW_TO_JSON(second_player) as "player" FROM
                     (SELECT u.id, u.login FROM public.users u 
                 WHERE u.id = g.player2)second_player) as "player",
