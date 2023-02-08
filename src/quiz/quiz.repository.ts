@@ -164,6 +164,7 @@ export class QuizRepository {
     const questions = await this.dataSource.manager.find(QuizQuestionsEntity, {
       take: 5,
       where: { published: true },
+      order: { createdAt: 'DESC' },
     });
     const gameExist = await this.dataSource
       .getRepository(QuizGameEntity)
