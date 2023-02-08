@@ -396,12 +396,12 @@ export class QuizRepository {
     };
   }
 
-  async findUser(userId: string) {
+  async findGame(id: string) {
     return this.dataSource.query(
       `
     SELECT * FROM public.game
-    WHERE (player1 = $1 OR player2 = $1)`,
-      [userId],
+    WHERE id = $1`,
+      [id],
     );
   }
 }
