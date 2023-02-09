@@ -8,7 +8,6 @@ import { QuizQuestionsEntity } from './entities/quiz.questions.entity';
 import { UpdateQuizDto } from './dto/update-quiz.dto';
 import { QuizGameEntity } from './entities/quiz-game.entity';
 import { PairQueryDto } from './quiz-pair/dto/pair-query.dto';
-//vercel error
 @Injectable()
 export class QuizRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
@@ -408,6 +407,7 @@ export class QuizRepository {
 
   async findAllGames(query: PairQueryDto, userId: string) {
     const dynamicSort = `g."${query.sortBy}"`;
+    console.log(dynamicSort);
     const games = await this.dataSource.query(
       `
     SELECT g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate", 
@@ -450,7 +450,7 @@ export class QuizRepository {
                 WHERE gq."gameId" = g.id)questions), 'null') as "questions"
     FROM public.game g
     WHERE (g.player1 = $1 OR g.player2 = $1)
-    ORDER BY ${dynamicSort} ${query.sortDirection}
+    ORDER BY ${dynamicSort}, g.pairCreatedDate ${query.sortDirection}
     OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY`,
       [userId, query.skip, query.pageSize],
     );
