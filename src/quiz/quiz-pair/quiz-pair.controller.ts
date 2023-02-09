@@ -22,12 +22,32 @@ import { PairQueryDto } from './dto/pair-query.dto';
 import { GetAllGames } from './usecases/getAllGames';
 
 @UseGuards(JwtAuthGuards)
-@Controller('pair-game-quiz')
+@Controller('pair-game-quiz/pairs')
 export class QuizPairController {
   constructor(private commandBus: CommandBus, private queryBus: QueryBus) {}
 
+  @Get('my')
+  async getAllMyGames(
+    @Query() query: PairQueryDto,
+    @CurrentUserId() userId: string,
+  ) {
+    return this.queryBus.execute(new GetAllGames(query, userId));
+  }
+  @Get('my-current')
+  async findCurrentGame(@CurrentUserId() userId: string) {
+    return this.queryBus.execute(new MyCurrentGamePair(userId));
+  }
+
+  @Get(':id')
+  async findGameById(
+    @Param()
+    { id }: ValidIdDto,
+    @CurrentUserId() userId: string,
+  ) {
+    return this.queryBus.execute(new FindGameById(id, userId));
+  }
   @HttpCode(HttpStatus.OK)
-  @Post('pairs/my-current/answers')
+  @Post('my-current/answers')
   async sendAnswers(
     @Body() createQuizPairDto: CreateQuizPairDto,
     @CurrentUserId() userId: string,
@@ -37,30 +57,8 @@ export class QuizPairController {
     );
   }
   @HttpCode(HttpStatus.OK)
-  @Post('pairs/connection')
+  @Post('connection')
   async connectToPair(@CurrentUserId() userId: string) {
     return this.commandBus.execute(new ConnectToPairCommand(userId));
-  }
-
-  @Get('pairs/my-current')
-  async findCurrentGame(@CurrentUserId() userId: string) {
-    return this.queryBus.execute(new MyCurrentGamePair(userId));
-  }
-
-  @Get('pairs/:id')
-  async findGameById(
-    @Param()
-    { id }: ValidIdDto,
-    @CurrentUserId() userId: string,
-  ) {
-    return this.queryBus.execute(new FindGameById(id, userId));
-  }
-
-  @Get('my')
-  async getAllMyGames(
-    @Query() query: PairQueryDto,
-    @CurrentUserId() userId: string,
-  ) {
-    return this.queryBus.execute(new GetAllGames(query, userId));
   }
 }
