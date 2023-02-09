@@ -8,7 +8,7 @@ import { QuizQuestionsEntity } from './entities/quiz.questions.entity';
 import { UpdateQuizDto } from './dto/update-quiz.dto';
 import { QuizGameEntity } from './entities/quiz-game.entity';
 import { PairQueryDto } from './quiz-pair/dto/pair-query.dto';
-
+//vercel error
 @Injectable()
 export class QuizRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
