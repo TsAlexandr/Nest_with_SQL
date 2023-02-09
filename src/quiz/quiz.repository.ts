@@ -450,7 +450,7 @@ export class QuizRepository {
                 WHERE gq."gameId" = g.id)questions), 'null') as "questions"
     FROM public.game g
     WHERE (g.player1 = $1 OR g.player2 = $1)
-    ORDER BY ${dynamicSort}, g."pairCreatedDate" ${query.sortDirection}
+    ORDER BY ${dynamicSort} ${query.sortDirection}, g."pairCreatedDate" desc 
     OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY`,
       [userId, query.skip, query.pageSize],
     );
