@@ -7,6 +7,7 @@ import { QuizAnswersEntity } from './entities/quiz.answers.entity';
 import { QuizQuestionsEntity } from './entities/quiz.questions.entity';
 import { UpdateQuizDto } from './dto/update-quiz.dto';
 import { QuizGameEntity } from './entities/quiz-game.entity';
+import { PairQueryDto } from './quiz-pair/dto/pair-query.dto';
 
 @Injectable()
 export class QuizRepository {
@@ -403,5 +404,70 @@ export class QuizRepository {
     WHERE id = $1`,
       [id],
     );
+  }
+
+  async findAllGames(query: PairQueryDto, userId: string) {
+    const dynamicSort = `g."${query.sortBy}"`;
+    const games = await this.dataSource.query(
+      `
+    SELECT g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate", 
+        (SELECT ROW_TO_JSON(first_progress) FROM
+            (SELECT * FROM
+                COALESCE((SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(first_answers))) as "answers" 
+                    FROM
+            (SELECT p."questionId", p."answerStatus", 
+            to_char (p."addedAt" ::timestamp at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as "addedAt"
+               FROM public."playerProgress" p
+                WHERE p."userId" = g.player1 AND p."gameId" = g.id
+                ORDER BY p."addedAt" ASC)first_answers), '[]') as "answers",
+                 (SELECT ROW_TO_JSON(first_player) as "player" FROM
+                    (SELECT u.id, u.login FROM public.users u 
+                WHERE u.id = g.player1)first_player) as "player",
+                COALESCE((SELECT SUM(p.score) as "score" FROM public."playerProgress" p
+                WHERE p."userId" = g.player1 AND p."gameId" = g.id), 0) as "score"
+            ) first_progress ) as "firstPlayerProgress", 
+        (SELECT ROW_TO_JSON(second_progress) FROM
+            (SELECT * FROM
+                COALESCE((SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(second_answers))) as "answers" 
+                    FROM
+            (SELECT p."questionId", p."answerStatus", 
+            to_char (p."addedAt" ::timestamp at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as "addedAt" 
+               FROM public."playerProgress" p
+                WHERE p."userId" = g.player2 AND p."gameId" = g.id
+                ORDER BY p."addedAt" ASC)second_answers), '[]') as "answers",
+                 (SELECT ROW_TO_JSON(second_player) as "player" FROM
+                    (SELECT u.id, u.login FROM public.users u 
+                WHERE u.id = g.player2)second_player) as "player",
+                COALESCE((SELECT SUM(p.score) as "score" FROM public."playerProgress" p
+                WHERE p."userId" = g.player2 AND p."gameId" = g.id), 0) as "score"
+            ) second_progress ) as "secondPlayerProgress",
+            COALESCE((SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(questions))) as "questions" 
+                    FROM
+            (SELECT q.id, q.body
+                FROM public.questions q
+                LEFT JOIN public.game_questions_questions gq
+                ON q.id = gq."questionsId"
+                WHERE gq."gameId" = g.id)questions), 'null') as "questions"
+    FROM public.game g
+    WHERE (g.player1 = $1 OR g.player2 = $1)
+    ORDER BY ${dynamicSort} ${query.sortDirection}
+    OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY`,
+      [userId, query.skip, query.pageSize],
+    );
+    const count = await this.dataSource.query(
+      `
+    SELECT COUNT(*) FROM public.game g
+    WHERE (g.player1 = $1 OR g.player2 = $1)
+    `,
+      [userId],
+    );
+    const total = Math.ceil(count[0].count / query.pageSize);
+    return {
+      pagesCount: total,
+      page: query.pageNumber,
+      pageSize: query.pageSize,
+      totalCount: +count[0].count,
+      items: games,
+    };
   }
 }
