@@ -6,7 +6,7 @@ enum PublishedStatus {
   notPublished = 'notPublished',
 }
 
-enum SortDirection {
+export enum SortDirection {
   asc = 'asc',
   desc = 'desc',
 }
