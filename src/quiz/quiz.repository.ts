@@ -407,7 +407,6 @@ export class QuizRepository {
 
   async findAllGames(query: PairQueryDto, userId: string) {
     const dynamicSort = `g."${query.sortBy}"`;
-    console.log(dynamicSort);
     const games = await this.dataSource.query(
       `
     SELECT g.id, g.status, g."pairCreatedDate", g."startGameDate", g."finishGameDate", 
@@ -469,5 +468,9 @@ export class QuizRepository {
       totalCount: +count[0].count,
       items: games,
     };
+  }
+
+  findGamesByUserIdForCountingScore(userId: string) {
+    return Promise.resolve(undefined);
   }
 }

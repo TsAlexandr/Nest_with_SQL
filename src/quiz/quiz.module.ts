@@ -15,6 +15,7 @@ import { UserInPair } from '../features/public/auth/guards/user-in-pair';
 import { MyCurrentPairHandler } from './quiz-pair/usecases/my-current-game-pair';
 import { FindGameHandler } from './quiz-pair/usecases/find-game-by-id';
 import { GetAllGamesHandler } from './quiz-pair/usecases/getAllGames';
+import { GetMyStatsHandler } from './quiz-users/usecases/get-my-stats';
 const handlers = [
   CreateQuestionHandler,
   FindAllQuestionsHandler,
@@ -25,6 +26,7 @@ const handlers = [
   MyCurrentPairHandler,
   FindGameHandler,
   GetAllGamesHandler,
+  GetMyStatsHandler,
 ];
 
 @Module({
