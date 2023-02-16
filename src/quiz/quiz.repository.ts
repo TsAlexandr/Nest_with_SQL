@@ -352,7 +352,6 @@ export class QuizRepository {
     answer: string,
     score: number,
     date: Date,
-    length: number,
   ) {
     const createPlayerProgress = await this.dataSource.query(
       `
@@ -362,59 +361,6 @@ export class QuizRepository {
             RETURNING "questionId", "answerStatus", "addedAt"`,
       [userId, gameId, answer, date, score, questionId],
     );
-    if (length >= 4) {
-      const checkProgress = await this.dataSource.query(
-        `
-      SELECT *,
-       (SELECT COUNT(*) FROM public."playerProgress" p
-       WHERE p."gameId" = g.id AND p."userId" = g.player1) as "player1ProgressCount",
-       (SELECT COUNT(*) FROM public."playerProgress" p
-       WHERE p."gameId" = g.id AND p."userId" = g.player2) as "player2ProgressCount"
-       FROM public.game g
-       WHERE g.id = $1
-      `,
-        [gameId],
-      );
-      if (
-        checkProgress[0].player1ProgressCount == 5 &&
-        checkProgress[0].player2ProgressCount == 5
-      ) {
-        const finishDate = new Date();
-        await this.dataSource.query(
-          `
-        UPDATE public.game
-        SET status = 'Finished', "finishGameDate" = $1
-        WHERE id = $2`,
-          [finishDate, gameId],
-        );
-
-        const currentGame = await this.findGameById(userId, gameId);
-        if (
-          currentGame[0].status == 'Finished' &&
-          currentGame[0].firstPlayerProgress.answers.length > 4
-        ) {
-          const answers1 = currentGame[0].firstPlayerProgress.answers;
-          const answers2 = currentGame[0].secondPlayerProgress.answers;
-          if (
-            answers1[4].addedAt < answers2[4].addedAt &&
-            answers1.map((el) => el.answer == 'Correct').length > 0
-          ) {
-            await this.updateScore(
-              currentGame[0].firstPlayerProgress.player.id,
-              currentGame[0].firstPlayerProgress.answers[4].questionId,
-            );
-          } else if (
-            answers2[4].addedAt < answers1[4].addedAt &&
-            answers2.map((el) => el.answer == 'Correct').length > 0
-          ) {
-            await this.updateScore(
-              currentGame[0].secondPlayerProgress.player.id,
-              currentGame[0].secondPlayerProgress.answers[4].questionId,
-            );
-          }
-        }
-      }
-    }
     return {
       questionId: createPlayerProgress[0].questionId,
       answerStatus: createPlayerProgress[0].answerStatus,
@@ -536,5 +482,32 @@ export class QuizRepository {
     `,
       [id, questionId],
     );
+  }
+
+  async checkExistingProgress(id) {
+    const checkProgress = await this.dataSource.query(
+      `
+      SELECT *,
+       (SELECT COUNT(*) FROM public."playerProgress" p
+       WHERE p."gameId" = g.id AND p."userId" = g.player1) as "player1ProgressCount",
+       (SELECT COUNT(*) FROM public."playerProgress" p
+       WHERE p."gameId" = g.id AND p."userId" = g.player2) as "player2ProgressCount"
+       FROM public.game g
+       WHERE g.id = $1
+      `,
+      [id],
+    );
+    return checkProgress;
+  }
+
+  async finishGame(id) {
+    const finishDate = new Date();
+    await this.dataSource
+      .getRepository(QuizGameEntity)
+      .createQueryBuilder()
+      .update()
+      .set({ status: 'Finished', finishGameDate: finishDate })
+      .where('id = :id', { id })
+      .execute();
   }
 }
