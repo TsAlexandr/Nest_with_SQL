@@ -387,6 +387,32 @@ export class QuizRepository {
         WHERE id = $2`,
           [finishDate, gameId],
         );
+
+        const currentGame = await this.findGameById(userId, gameId);
+        if (
+          currentGame[0].status == 'Finished' &&
+          currentGame[0].firstPlayerProgress.answers.length > 4
+        ) {
+          const answers1 = currentGame[0].firstPlayerProgress.answers;
+          const answers2 = currentGame[0].secondPlayerProgress.answers;
+          if (
+            answers1[4].addedAt < answers2[4].addedAt &&
+            answers1.map((el) => el.answer == 'Correct').length > 0
+          ) {
+            await this.updateScore(
+              currentGame[0].firstPlayerProgress.player.id,
+              currentGame[0].firstPlayerProgress.answers[4].questionId,
+            );
+          } else if (
+            answers2[4].addedAt < answers1[4].addedAt &&
+            answers2.map((el) => el.answer == 'Correct').length > 0
+          ) {
+            await this.updateScore(
+              currentGame[0].secondPlayerProgress.player.id,
+              currentGame[0].secondPlayerProgress.answers[4].questionId,
+            );
+          }
+        }
       }
     }
     return {
