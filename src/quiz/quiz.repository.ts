@@ -477,7 +477,7 @@ export class QuizRepository {
     return this.dataSource.query(
       `
     UPDATE public."playerProgress"
-    SET score = score + 1
+    SET score = 2
     WHERE ("userId" = $1) AND ("questionId" = $2)
     `,
       [id, questionId],
