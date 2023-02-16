@@ -464,7 +464,7 @@ export class QuizRepository {
                 AND (g.status = 'Finished') ) as counter) as "avgScores",
          (CASE WHEN ${current} > ${second} THEN 1 
                WHEN ${current} < ${second} THEN -1
-               WHEN ${current} < ${second} THEN 0
+               WHEN ${current} = ${second} THEN 0
           END) as result
     FROM public.game g
     WHERE g.status = 'Finished'
