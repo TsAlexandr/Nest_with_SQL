@@ -23,8 +23,8 @@ export class SendAnswerHandler implements ICommandHandler<SendAnswer> {
     const questionId =
       questions[playerProgress.length < 1 ? 0 : playerProgress.length]
         .questionId;
+    console.log(questionId);
     const status = questions.find((el) => el.questionId === questionId);
-    console.log(status.answer, command.answer);
     const answer = status.answer == command.answer ? 'Correct' : 'Incorrect';
     const score = answer == 'Correct' ? 1 : 0;
     const date = new Date();
