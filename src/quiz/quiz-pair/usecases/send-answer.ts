@@ -72,16 +72,16 @@ export class SendAnswerHandler implements ICommandHandler<SendAnswer> {
             if (answers1[4].addedAt < answers2[4].addedAt) {
               console.log('i`m here 1');
               await this.quizRepo.updateScore(
-                command.userId,
-                questionId,
-                currentUserGame[0].id,
+                currentGame[0].firstPlayerProgress.player.id,
+                currentGame[0].firstPlayerProgress.answers[4].questionId,
+                currentGame[0].id,
               );
             } else if (answers2[4].addedAt < answers1[4].addedAt) {
               console.log('i`m here 2');
               await this.quizRepo.updateScore(
-                command.userId,
-                questionId,
-                currentUserGame[0].id,
+                currentGame[0].secondPlayerProgress.player.id,
+                currentGame[0].secondPlayerProgress.answers[4].questionId,
+                currentGame[0].id,
               );
             }
           }
