@@ -473,14 +473,16 @@ export class QuizRepository {
     );
   }
 
-  async updateScore(id: string, questionId: number) {
+  async updateScore(id: string, questionId: number, gameId: string) {
     return this.dataSource.query(
       `
     UPDATE public."playerProgress"
     SET score = score + 1
-    WHERE ("userId" = $1) AND ("questionId" = $2)
+    WHERE ("userId" = $1) 
+    AND ("questionId" = $2) 
+    AND ("gameId" = $3) 
     `,
-      [id, questionId],
+      [id, questionId, gameId],
     );
   }
 

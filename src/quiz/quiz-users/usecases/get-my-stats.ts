@@ -23,7 +23,7 @@ export class GetMyStatsHandler implements IQueryHandler<GetMyStats> {
         win++;
       } else if (el.result == -1) {
         lose++;
-      } else {
+      } else if (el.result == 0) {
         draw++;
       }
     });
