@@ -470,7 +470,45 @@ export class QuizRepository {
     };
   }
 
-  findGamesByUserIdForCountingScore(userId: string) {
-    return Promise.resolve(undefined);
+  async findGamesByUserIdForCountingScore(userId: string) {
+    const current = `(SELECT sum(p.score) FROM public."playerProgress" p
+                WHERE (p."userId" = $1) AND (p."gameId" = g.id) 
+                AND (g.status = 'Finished'))`;
+    const second = `(SELECT SUM(p.score) FROM public."playerProgress" p
+                WHERE (p."userId" != $1) AND (p."gameId" = g.id)
+                AND (g.status = 'Finished'))`;
+    return this.dataSource.query(
+      `
+    SELECT g.id, 
+        (SELECT COUNT(*) as "gamesCount" FROM public.game g
+            WHERE (g.player1 = $1 OR g.player2 = $1)
+            AND (g.status = 'Finished')) as "gamesCount",
+         (SELECT SUM(p.score) as "sumScore" FROM public."playerProgress" p
+            WHERE (p."userId" = $1)
+            AND (g.status = 'Finished')) as "sumScore",
+         (SELECT AVG(CAST(counter as FLOAT)) as "avgScores" FROM 
+            (SELECT p.score as "counter" FROM public."playerProgress" p
+                WHERE (p."userId" = $1)
+                AND (g.status = 'Finished') ) as counter) as "avgScores",
+         (CASE WHEN ${current} > ${second} THEN 1 
+               WHEN ${current} < ${second} THEN -1
+               WHEN ${current} < ${second} THEN 0
+          END) as result
+    FROM public.game g
+    WHERE g.status = 'Finished'
+    `,
+      [userId],
+    );
+  }
+
+  async updateScore(id: string, questionId: number) {
+    return this.dataSource.query(
+      `
+    UPDATE public."playerProgress"
+    SET score = score + 1
+    WHERE ("userId" = $1) AND ("questionId" = $2)
+    `,
+      [id, questionId],
+    );
   }
 }

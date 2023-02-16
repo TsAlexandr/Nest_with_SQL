@@ -20,21 +20,30 @@ export class FindGameHandler implements IQueryHandler<FindGameById> {
       query.id,
       query.userId,
     );
-    if (currentGame[0].firstPlayerProgress.answers.length > 4) {
+    if (
+      currentGame[0].status == 'Finished' &&
+      currentGame[0].firstPlayerProgress.answers.length > 4
+    ) {
       const answers1 = currentGame[0].firstPlayerProgress.answers;
       const answers2 = currentGame[0].secondPlayerProgress.answers;
       if (
-        currentGame[0].status == 'Finished' &&
         answers1[4].addedAt < answers2[4].addedAt &&
         answers1.map((el) => el.answer == 'Correct').length > 0
       ) {
         currentGame[0].firstPlayerProgress.score++;
+        await this.quizRepo.updateScore(
+          currentGame[0].firstPlayerProgress.player.id,
+          currentGame[0].firstPlayerProgress.answers[4].questionId,
+        );
       } else if (
-        currentGame[0].status == 'Finished' &&
         answers2[4].addedAt < answers1[4].addedAt &&
         answers2.map((el) => el.answer == 'Correct').length > 0
       ) {
         currentGame[0].secondPlayerProgress.score++;
+        await this.quizRepo.updateScore(
+          currentGame[0].secondPlayerProgress.player.id,
+          currentGame[0].secondPlayerProgress.answers[4].questionId,
+        );
       }
     }
     return currentGame[0];

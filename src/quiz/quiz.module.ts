@@ -16,6 +16,7 @@ import { MyCurrentPairHandler } from './quiz-pair/usecases/my-current-game-pair'
 import { FindGameHandler } from './quiz-pair/usecases/find-game-by-id';
 import { GetAllGamesHandler } from './quiz-pair/usecases/getAllGames';
 import { GetMyStatsHandler } from './quiz-users/usecases/get-my-stats';
+import { QuizUsersController } from './quiz-users/quiz-users.controller';
 const handlers = [
   CreateQuestionHandler,
   FindAllQuestionsHandler,
@@ -31,7 +32,7 @@ const handlers = [
 
 @Module({
   imports: [CqrsModule],
-  controllers: [QuizController, QuizPairController],
+  controllers: [QuizController, QuizPairController, QuizUsersController],
   providers: [
     QuizService,
     QuizRepository,
