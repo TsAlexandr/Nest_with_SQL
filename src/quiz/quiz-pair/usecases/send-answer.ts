@@ -61,22 +61,23 @@ export class SendAnswerHandler implements ICommandHandler<SendAnswer> {
         ) {
           const answers1 = currentGame[0].firstPlayerProgress.answers;
           const answers2 = currentGame[0].secondPlayerProgress.answers;
-          console.log(
-            answers1.map((el) => el.answer == 'Correct').length > 0 &&
-              answers2.map((el) => el.answer == 'Correct').length > 0,
-          );
-          if (
-            answers1.map((el) => el.answer == 'Correct').length > 0 &&
-            answers2.map((el) => el.answer == 'Correct').length > 0
-          ) {
-            if (answers1[4].addedAt < answers2[4].addedAt) {
+          const length1 = answers1.map((el) => el.answer == 'Correct').length;
+          const length2 = answers2.map((el) => el.answer == 'Correct').length;
+          if (length1 > 0 && length2 > 0) {
+            if (
+              answers1[4].addedAt < answers2[4].addedAt &&
+              length1 > length2
+            ) {
               console.log('i`m here 1');
               await this.quizRepo.updateScore(
                 currentGame[0].firstPlayerProgress.player.id,
                 currentGame[0].firstPlayerProgress.answers[4].questionId,
                 currentGame[0].id,
               );
-            } else if (answers2[4].addedAt < answers1[4].addedAt) {
+            } else if (
+              answers2[4].addedAt < answers1[4].addedAt &&
+              length1 < length2
+            ) {
               console.log('i`m here 2');
               await this.quizRepo.updateScore(
                 currentGame[0].secondPlayerProgress.player.id,
