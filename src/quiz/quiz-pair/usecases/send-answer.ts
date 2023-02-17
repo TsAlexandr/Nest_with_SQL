@@ -23,13 +23,6 @@ export class SendAnswerHandler implements ICommandHandler<SendAnswer> {
     const questionId =
       questions[playerProgress.length < 1 ? 0 : playerProgress.length]
         .questionId;
-    console.log(
-      questionId,
-      'question',
-      command.userId,
-      'user',
-      playerProgress.length,
-    );
     const status = questions.find((el) => el.questionId === questionId);
     const answer = status.answer == command.answer ? 'Correct' : 'Incorrect';
     const score = answer == 'Correct' ? 1 : 0;
@@ -68,7 +61,6 @@ export class SendAnswerHandler implements ICommandHandler<SendAnswer> {
               answers1[4].addedAt < answers2[4].addedAt &&
               length1 > length2
             ) {
-              console.log('i`m here 1');
               await this.quizRepo.updateScore(
                 currentGame[0].firstPlayerProgress.player.id,
                 currentGame[0].firstPlayerProgress.answers[4].questionId,
@@ -78,7 +70,6 @@ export class SendAnswerHandler implements ICommandHandler<SendAnswer> {
               answers2[4].addedAt < answers1[4].addedAt &&
               length1 < length2
             ) {
-              console.log('i`m here 2');
               await this.quizRepo.updateScore(
                 currentGame[0].secondPlayerProgress.player.id,
                 currentGame[0].secondPlayerProgress.answers[4].questionId,
