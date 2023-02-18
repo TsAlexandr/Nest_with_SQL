@@ -107,9 +107,8 @@ export class QuizRepository {
   }
 
   async updateQuestion(id: string, updateQuizDto: UpdateQuizDto) {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+    await this.queryRunner.connect();
+    await this.queryRunner.startTransaction();
     try {
       const date = new Date();
       await this.dataSource
@@ -135,10 +134,10 @@ export class QuizRepository {
         .into(QuizAnswersEntity)
         .values(mappedQuestions)
         .execute();
-      await queryRunner.commitTransaction();
+      await this.queryRunner.commitTransaction();
     } catch (e) {
       console.log(e);
-      await queryRunner.rollbackTransaction();
+      await this.queryRunner.rollbackTransaction();
     }
   }
 
