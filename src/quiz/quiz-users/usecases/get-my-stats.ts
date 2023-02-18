@@ -29,7 +29,7 @@ export class GetMyStatsHandler implements IQueryHandler<GetMyStats> {
     });
     return {
       sumScore: +scores[0].sumScore,
-      avgScores: (+scores[0].sumScore / +scores[0].gamesCount).toFixed(2),
+      avgScores: +(+scores[0].sumScore / +scores[0].gamesCount).toFixed(2),
       gamesCount: +scores[0].gamesCount,
       winsCount: win,
       lossesCount: lose,
