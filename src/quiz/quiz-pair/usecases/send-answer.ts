@@ -11,22 +11,18 @@ export class SendAnswerHandler implements ICommandHandler<SendAnswer> {
   constructor(private quizRepo: QuizRepository) {}
   async execute(command: SendAnswer): Promise<any> {
     const currentUserGame = await this.quizRepo.findUserInPair(command.userId);
-    console.log(currentUserGame, 'current user game');
     if (currentUserGame.length < 1 || +currentUserGame[0].progress == 5)
       throw new ForbiddenException();
     const questions = await this.quizRepo.getQuestionsForCurrentGame(
       currentUserGame[0].id,
     );
-    console.log(questions, 'questions');
     const playerProgress = await this.quizRepo.getProgress(
       command.userId,
       currentUserGame[0].id,
     );
-    console.log(playerProgress, 'playerProgress');
     const questionId =
       questions[playerProgress.length < 1 ? 0 : playerProgress.length]
         .questionId;
-    console.log(questionId, 'questionId');
     const status = questions.find((el) => el.questionId === questionId);
     const answer = status.answer == command.answer ? 'Correct' : 'Incorrect';
     const score = answer == 'Correct' ? 1 : 0;
@@ -39,7 +35,6 @@ export class SendAnswerHandler implements ICommandHandler<SendAnswer> {
       score,
       date,
     );
-    console.log(addPlayerProgress, 'addPlayerProgress');
     if (playerProgress.length >= 4) {
       const checkProgress = await this.quizRepo.checkExistingProgress(
         currentUserGame[0].id,
@@ -53,7 +48,6 @@ export class SendAnswerHandler implements ICommandHandler<SendAnswer> {
           currentUserGame[0].id,
           command.userId,
         );
-        console.log(currentGame);
         if (
           currentGame[0].status == 'Finished' &&
           currentGame[0].firstPlayerProgress.answers.length > 4
