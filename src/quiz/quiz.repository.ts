@@ -11,7 +11,6 @@ import { PairQueryDto } from './quiz-pair/dto/pair-query.dto';
 @Injectable()
 export class QuizRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
-  queryRunner = this.dataSource.createQueryRunner();
 
   async findAll(query: QueryDto) {
     const dynamicSort = `q."${query.sortBy}"`;
@@ -68,8 +67,9 @@ export class QuizRepository {
   }
 
   async create(fields: CreateQuizDto) {
-    await this.queryRunner.connect();
-    await this.queryRunner.startTransaction();
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
     try {
       const question = await this.dataSource
         .createQueryBuilder()
@@ -91,7 +91,7 @@ export class QuizRepository {
         .execute();
       const mappedAnswers = [];
       answers.raw.forEach((el) => mappedAnswers.push(Object.values(el)[0]));
-      await this.queryRunner.commitTransaction();
+      await queryRunner.commitTransaction();
       return {
         id: raw.id,
         body: raw.body,
@@ -102,15 +102,16 @@ export class QuizRepository {
       };
     } catch (e) {
       console.log(e);
-      await this.queryRunner.rollbackTransaction();
+      await queryRunner.rollbackTransaction();
     } finally {
-      await this.queryRunner.release();
+      await queryRunner.release();
     }
   }
 
   async updateQuestion(id: string, updateQuizDto: UpdateQuizDto) {
-    await this.queryRunner.connect();
-    await this.queryRunner.startTransaction();
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
     try {
       const date = new Date();
       await this.dataSource
@@ -136,12 +137,12 @@ export class QuizRepository {
         .into(QuizAnswersEntity)
         .values(mappedQuestions)
         .execute();
-      await this.queryRunner.commitTransaction();
+      await queryRunner.commitTransaction();
     } catch (e) {
       console.log(e);
-      await this.queryRunner.rollbackTransaction();
+      await queryRunner.rollbackTransaction();
     } finally {
-      await this.queryRunner.release();
+      await queryRunner.release();
     }
   }
 
@@ -165,6 +166,7 @@ export class QuizRepository {
   }
 
   async connectToGame(userId: string) {
+    const queryRunner = this.dataSource.createQueryRunner();
     const questions = await this.dataSource.manager.find(QuizQuestionsEntity, {
       take: 5,
       where: { published: true },
@@ -176,37 +178,37 @@ export class QuizRepository {
       .where('player2 IS NULL')
       .getOne();
     if (gameExist) {
-      await this.queryRunner.connect();
-      await this.queryRunner.startTransaction();
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
       try {
         gameExist.status = 'Active';
         gameExist.player2 = userId;
         gameExist.startGameDate = new Date();
         gameExist.questions = questions;
         await this.dataSource.manager.save(gameExist);
-        await this.queryRunner.commitTransaction();
+        await queryRunner.commitTransaction();
         return gameExist;
       } catch (e) {
         console.log(e);
-        await this.queryRunner.rollbackTransaction();
+        await queryRunner.rollbackTransaction();
       } finally {
-        await this.queryRunner.release();
+        await queryRunner.release();
       }
     } else {
-      await this.queryRunner.connect();
-      await this.queryRunner.startTransaction();
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
       try {
         const createGame = new QuizGameEntity();
         createGame.status = 'PendingSecondPlayer';
         createGame.player1 = userId;
         await this.dataSource.manager.save(createGame);
-        await this.queryRunner.commitTransaction();
+        await queryRunner.commitTransaction();
         return createGame;
       } catch (e) {
         console.log(e);
-        await this.queryRunner.rollbackTransaction();
+        await queryRunner.rollbackTransaction();
       } finally {
-        await this.queryRunner.release();
+        await queryRunner.release();
       }
     }
   }
