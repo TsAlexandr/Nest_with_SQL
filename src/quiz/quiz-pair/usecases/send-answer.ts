@@ -16,13 +16,17 @@ export class SendAnswerHandler implements ICommandHandler<SendAnswer> {
     const questions = await this.quizRepo.getQuestionsForCurrentGame(
       currentUserGame[0].id,
     );
+    console.log(questions, 'questions');
+    console.log(currentUserGame, 'currentUserGame');
     const playerProgress = await this.quizRepo.getProgress(
       command.userId,
       currentUserGame[0].id,
     );
+    console.log(playerProgress, 'playerProgress');
     const questionId =
       questions[playerProgress.length < 1 ? 0 : playerProgress.length]
         .questionId;
+    console.log(questionId, 'questionId');
     const status = questions.find((el) => el.questionId === questionId);
     const answer = status.answer == command.answer ? 'Correct' : 'Incorrect';
     const score = answer == 'Correct' ? 1 : 0;
