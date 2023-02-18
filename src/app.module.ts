@@ -122,9 +122,9 @@ export const CommandHandlers = [
             QuizGameEntity,
           ],
           synchronize: true,
-          extra: {
+          /*extra: {
             poolSize: 4,
-          },
+          },*/
         };
       },
     }),
