@@ -103,8 +103,6 @@ export class QuizRepository {
     } catch (e) {
       console.log(e);
       await queryRunner.rollbackTransaction();
-    } finally {
-      await queryRunner.release();
     }
   }
 
@@ -141,8 +139,6 @@ export class QuizRepository {
     } catch (e) {
       console.log(e);
       await queryRunner.rollbackTransaction();
-    } finally {
-      await queryRunner.release();
     }
   }
 
@@ -191,8 +187,6 @@ export class QuizRepository {
       } catch (e) {
         console.log(e);
         await queryRunner.rollbackTransaction();
-      } finally {
-        await queryRunner.release();
       }
     } else {
       await queryRunner.connect();
@@ -207,8 +201,6 @@ export class QuizRepository {
       } catch (e) {
         console.log(e);
         await queryRunner.rollbackTransaction();
-      } finally {
-        await queryRunner.release();
       }
     }
   }
