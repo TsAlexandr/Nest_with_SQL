@@ -323,7 +323,7 @@ export class QuizRepository {
     LEFT JOIN public.answers a
     ON p."questionsId" = a."questionId"
     WHERE g.id = $1
-    ORDER BY q."createdAt" DESC
+    ORDER BY q."createdAt" ASC
     `,
       [id],
     );
