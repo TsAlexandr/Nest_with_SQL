@@ -185,6 +185,8 @@ export class QuizRepository {
       } catch (e) {
         console.log(e);
         await this.queryRunner.rollbackTransaction();
+      } finally {
+        await this.queryRunner.release();
       }
     } else {
       await this.queryRunner.connect();
