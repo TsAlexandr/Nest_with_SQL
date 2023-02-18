@@ -68,8 +68,6 @@ export class QuizRepository {
   }
 
   async create(fields: CreateQuizDto) {
-    await this.queryRunner.connect();
-    await this.queryRunner.startTransaction();
     try {
       const question = await this.dataSource
         .createQueryBuilder()
@@ -91,7 +89,6 @@ export class QuizRepository {
         .execute();
       const mappedAnswers = [];
       answers.raw.forEach((el) => mappedAnswers.push(Object.values(el)[0]));
-      await this.queryRunner.commitTransaction();
       return {
         id: raw.id,
         body: raw.body,
@@ -102,13 +99,10 @@ export class QuizRepository {
       };
     } catch (e) {
       console.log(e);
-      await this.queryRunner.rollbackTransaction();
     }
   }
 
   async updateQuestion(id: string, updateQuizDto: UpdateQuizDto) {
-    await this.queryRunner.connect();
-    await this.queryRunner.startTransaction();
     try {
       const date = new Date();
       await this.dataSource
@@ -134,10 +128,8 @@ export class QuizRepository {
         .into(QuizAnswersEntity)
         .values(mappedQuestions)
         .execute();
-      await this.queryRunner.commitTransaction();
     } catch (e) {
       console.log(e);
-      await this.queryRunner.rollbackTransaction();
     }
   }
 
@@ -172,33 +164,25 @@ export class QuizRepository {
       .where('player2 IS NULL')
       .getOne();
     if (gameExist) {
-      await this.queryRunner.connect();
-      await this.queryRunner.startTransaction();
       try {
         gameExist.status = 'Active';
         gameExist.player2 = userId;
         gameExist.startGameDate = new Date();
         gameExist.questions = questions;
         await this.dataSource.manager.save(gameExist);
-        await this.queryRunner.commitTransaction();
         return gameExist;
       } catch (e) {
         console.log(e);
-        await this.queryRunner.rollbackTransaction();
       }
     } else {
-      await this.queryRunner.connect();
-      await this.queryRunner.startTransaction();
       try {
         const createGame = new QuizGameEntity();
         createGame.status = 'PendingSecondPlayer';
         createGame.player1 = userId;
         await this.dataSource.manager.save(createGame);
-        await this.queryRunner.commitTransaction();
         return createGame;
       } catch (e) {
         console.log(e);
-        await this.queryRunner.rollbackTransaction();
       }
     }
   }
