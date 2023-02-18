@@ -13,7 +13,9 @@ export class ConnectToPairHandler
   constructor(private quizRepo: QuizRepository) {}
 
   async execute(command: ConnectToPairCommand): Promise<any> {
+    console.log(command.userId, 'connect to the game');
     const userInGame = await this.quizRepo.findOneInGame(command.userId);
+    console.log(userInGame, 'user is busy');
     if (userInGame.length > 0) throw new ForbiddenException();
     const game = await this.quizRepo.connectToGame(command.userId);
     const result = await this.quizRepo.findGameById(game.id, command.userId);
