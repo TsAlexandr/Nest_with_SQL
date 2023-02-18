@@ -48,6 +48,7 @@ export class SendAnswerHandler implements ICommandHandler<SendAnswer> {
           currentUserGame[0].id,
           command.userId,
         );
+        console.log(currentGame);
         if (
           currentGame[0].status == 'Finished' &&
           currentGame[0].firstPlayerProgress.answers.length > 4
