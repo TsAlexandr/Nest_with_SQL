@@ -14,7 +14,7 @@ export class GetMyStatsHandler implements IQueryHandler<GetMyStats> {
     const scores = await this.quizRepo.findGamesByUserIdForCountingScore(
       query.userId,
     );
-    if (!scores) throw new NotFoundException();
+    if (scores.length < 1) throw new NotFoundException();
     let win = 0;
     let lose = 0;
     let draw = 0;

@@ -455,7 +455,7 @@ export class QuizRepository {
         (SELECT COUNT(*) as "gamesCount" FROM public.game g
             WHERE (g.player1 = $1 OR g.player2 = $1)
             AND (g.status = 'Finished')) as "gamesCount",
-         (SELECT SUM(p.score) as "sumScore" FROM public."playerProgress" p
+         (SELECT COALESCE(SUM(p.score), 0) as "sumScore" FROM public."playerProgress" p
             WHERE (p."userId" = $1)
             AND (g.status = 'Finished')) as "sumScore",
          (SELECT AVG(CAST(counter as FLOAT)) as "avgScores" FROM 
