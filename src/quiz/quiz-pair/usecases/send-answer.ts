@@ -54,25 +54,29 @@ export class SendAnswerHandler implements ICommandHandler<SendAnswer> {
         ) {
           const answers1 = currentGame[0].firstPlayerProgress.answers;
           const answers2 = currentGame[0].secondPlayerProgress.answers;
-          if (answers1[4].addedAt.getTime() < answers2[4].addedAt.getTime()) {
-            await this.quizRepo.updateScore(
-              currentGame[0].firstPlayerProgress.player.id,
-              currentGame[0].firstPlayerProgress.answers[4].questionId,
-              currentGame[0].id,
-            );
-          } else if (
-            answers2[4].addedAt.getTime() < answers1[4].addedAt.getTime()
-          ) {
-            await this.quizRepo.updateScore(
-              currentGame[0].secondPlayerProgress.player.id,
-              currentGame[0].secondPlayerProgress.answers[4].questionId,
-              currentGame[0].id,
-            );
+          const length1 = answers1.map((el) => el.answer == 'Correct').length;
+          const length2 = answers2.map((el) => el.answer == 'Correct').length;
+          if (length1 > 0 && length2 > 0) {
+            if (answers1[4].addedAt < answers2[4].addedAt && length1 >= 1) {
+              await this.quizRepo.updateScore(
+                currentGame[0].firstPlayerProgress.player.id,
+                currentGame[0].firstPlayerProgress.answers[4].questionId,
+                currentGame[0].id,
+              );
+            } else if (
+              answers2[4].addedAt < answers1[4].addedAt &&
+              length2 >= 1
+            ) {
+              await this.quizRepo.updateScore(
+                currentGame[0].secondPlayerProgress.player.id,
+                currentGame[0].secondPlayerProgress.answers[4].questionId,
+                currentGame[0].id,
+              );
+            }
           }
         }
       }
     }
-
     return addPlayerProgress;
   }
 }
