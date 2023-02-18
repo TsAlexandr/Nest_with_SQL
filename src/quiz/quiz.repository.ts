@@ -68,9 +68,8 @@ export class QuizRepository {
   }
 
   async create(fields: CreateQuizDto) {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+    await this.queryRunner.connect();
+    await this.queryRunner.startTransaction();
     try {
       const question = await this.dataSource
         .createQueryBuilder()
@@ -92,7 +91,7 @@ export class QuizRepository {
         .execute();
       const mappedAnswers = [];
       answers.raw.forEach((el) => mappedAnswers.push(Object.values(el)[0]));
-      await queryRunner.commitTransaction();
+      await this.queryRunner.commitTransaction();
       return {
         id: raw.id,
         body: raw.body,
@@ -103,7 +102,7 @@ export class QuizRepository {
       };
     } catch (e) {
       console.log(e);
-      await queryRunner.rollbackTransaction();
+      await this.queryRunner.rollbackTransaction();
     }
   }
 
