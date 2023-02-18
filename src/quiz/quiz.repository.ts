@@ -11,7 +11,6 @@ import { PairQueryDto } from './quiz-pair/dto/pair-query.dto';
 @Injectable()
 export class QuizRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
-  queryRunner = this.dataSource.createQueryRunner();
 
   async findAll(query: QueryDto) {
     const dynamicSort = `q."${query.sortBy}"`;
@@ -163,6 +162,7 @@ export class QuizRepository {
   }
 
   async connectToGame(userId: string) {
+    const queryRunner = this.dataSource.createQueryRunner();
     const questions = await this.dataSource.manager.find(QuizQuestionsEntity, {
       take: 5,
       where: { published: true },
@@ -174,33 +174,33 @@ export class QuizRepository {
       .where('player2 IS NULL')
       .getOne();
     if (gameExist) {
-      await this.queryRunner.connect();
-      await this.queryRunner.startTransaction();
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
       try {
         gameExist.status = 'Active';
         gameExist.player2 = userId;
         gameExist.startGameDate = new Date();
         gameExist.questions = questions;
         await this.dataSource.manager.save(gameExist);
-        await this.queryRunner.commitTransaction();
+        await queryRunner.commitTransaction();
         return gameExist;
       } catch (e) {
         console.log(e);
-        await this.queryRunner.rollbackTransaction();
+        await queryRunner.rollbackTransaction();
       }
     } else {
-      await this.queryRunner.connect();
-      await this.queryRunner.startTransaction();
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
       try {
         const createGame = new QuizGameEntity();
         createGame.status = 'PendingSecondPlayer';
         createGame.player1 = userId;
         await this.dataSource.manager.save(createGame);
-        await this.queryRunner.commitTransaction();
+        await queryRunner.commitTransaction();
         return createGame;
       } catch (e) {
         console.log(e);
-        await this.queryRunner.rollbackTransaction();
+        await queryRunner.rollbackTransaction();
       }
     }
   }
