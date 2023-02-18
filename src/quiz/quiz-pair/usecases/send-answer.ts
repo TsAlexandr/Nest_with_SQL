@@ -54,8 +54,8 @@ export class SendAnswerHandler implements ICommandHandler<SendAnswer> {
         ) {
           const answers1 = currentGame[0].firstPlayerProgress.answers;
           const answers2 = currentGame[0].secondPlayerProgress.answers;
-          const length1 = answers1.map((el) => el.answer == 'Correct').length;
-          const length2 = answers2.map((el) => el.answer == 'Correct').length;
+          const length1 = answers1.map((el) => el.answer === 'Correct').length;
+          const length2 = answers2.map((el) => el.answer === 'Correct').length;
           if (length1 > 0 && length2 > 0) {
             if (answers1[4].addedAt < answers2[4].addedAt && length1 >= 1) {
               await this.quizRepo.updateScore(
