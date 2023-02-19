@@ -11,7 +11,6 @@ import { PairQueryDto } from './quiz-pair/dto/pair-query.dto';
 @Injectable()
 export class QuizRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
-  queryRunner = this.dataSource.createQueryRunner();
 
   async findAll(query: QueryDto) {
     const dynamicSort = `q."${query.sortBy}"`;
@@ -467,7 +466,7 @@ export class QuizRepository {
   }
 
   async checkExistingProgress(id) {
-    const checkProgress = await this.dataSource.query(
+    return this.dataSource.query(
       `
       SELECT *,
        (SELECT COUNT(*) FROM public."playerProgress" p
@@ -479,7 +478,6 @@ export class QuizRepository {
       `,
       [id],
     );
-    return checkProgress;
   }
 
   async finishGame(id) {
